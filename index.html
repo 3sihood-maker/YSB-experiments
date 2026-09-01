@@ -202,9 +202,7 @@
      own copy of the sheet, and they are laid out along a curve in 3D */
   .strip{position:absolute;top:0;bottom:0;overflow:hidden;
     transform-origin:0 50%;will-change:transform}
-  .strip>.sheet{position:absolute;top:0}
-  /* the copies inside the strips lose #stage's id styling, so they carry it by class */
-  .stageCopy{position:absolute;inset:0;overflow:hidden;background:#04060e}
+  .strip>.sheetC{position:absolute;left:0;top:0;display:block}
   .shade{position:absolute;inset:0;z-index:8;pointer-events:none;opacity:0;background:#04060c}
   .paperBack{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;
     background:
@@ -583,6 +581,7 @@ function kick(id,x,y){
 }
 function ret(id){
   var b=BALLS[id],e=document.getElementById(id);
+  if(b.gone)return;                 /* thrown clear ahead of the tear; it stays gone */
   S.whoosh();
   var f=b.from;
   e.animate([
@@ -872,12 +871,13 @@ function poly(list){
 }
 /* A band running alongside the frontier, between two ragged offsets: the pale core a
    torn sheet shows along its edge, and a thinner grubby one right at the tip. */
-function edgeBand(pts,seed,dir,w0,w1){
+function bandPts(pts,seed,dir,w0,w1){
   var n=fbm(seed+91,NTEAR,3),a=[],b=[],i;
   for(i=0;i<NTEAR;i++)a.push({x:pts[i].x+dir*w0*(.3+.7*Math.abs(n[i])),y:pts[i].y});
   for(i=NTEAR-1;i>=0;i--)b.push({x:pts[i].x+dir*w1*(.3+.7*Math.abs(n[i])),y:pts[i].y});
-  return poly(a.concat(b));
+  return a.concat(b);
 }
+function edgeBand(pts,seed,dir,w0,w1){return poly(bandPts(pts,seed,dir,w0,w1));}
 /* loose fibres, thrown off the frontier as it opens */
 function ripFibres(pts,n){
   var r=mulberry32(4711),i;
@@ -947,6 +947,96 @@ function stampFlyPast(){
   ],{duration:760,easing:'cubic-bezier(.36,0,.66,1)',fill:'forwards'});
 }
 
+/* the frontier, as pixels on a canvas */
+function pxPath(g,list){
+  g.beginPath();
+  for(var i=0;i<list.length;i++){
+    var x=list[i].x/100*VPW,y=list[i].y/100*VPH;
+    if(i)g.lineTo(x,y);else g.moveTo(x,y);
+  }
+  g.closePath();
+}
+/* One picture of the right-hand half, taken once and then sliced up. The strips used to
+   hold a live copy of the artwork each: twelve of those is a few hundred megabytes of
+   decoded image on a phone, and iOS answers that by quietly reloading the tab — which is
+   what "it starts again" was. */
+function snapRight(pts){
+  var dpr=Math.min(1.25,devicePixelRatio||1);
+  var c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(VPW*dpr));
+  c.height=Math.max(1,Math.round(VPH*dpr));
+  var g=c.getContext&&c.getContext('2d');
+  if(!g)return null;
+  g.setTransform(dpr,0,0,dpr,0,0);
+
+  g.save();
+  pxPath(g,[{x:103,y:-3}].concat(pts).concat([{x:103,y:103}]));
+  g.clip();
+  g.fillStyle='#04060e';g.fillRect(0,0,VPW,VPH);
+  var imgs=stage.getElementsByTagName('img'),i,im,r,p,op;
+  for(i=0;i<imgs.length;i++){
+    im=imgs[i];
+    if(!im.complete||!im.naturalWidth)continue;
+    r=im.getBoundingClientRect();
+    if(r.width<1||r.height<1)continue;
+    /* a layer part way through a kick is part way through its fade, too */
+    op=1;p=im.parentNode;
+    while(p&&p!==stage){
+      var o=parseFloat(getComputedStyle(p).opacity);
+      if(!isNaN(o))op*=o;
+      p=p.parentNode;
+    }
+    if(op<=0.01)continue;
+    g.globalAlpha=op;
+    g.drawImage(im,r.left,r.top,r.width,r.height);
+  }
+  g.globalAlpha=1;
+  g.restore();
+
+  /* the pale torn core, its fibres, and the grime right at the tip */
+  g.save();
+  pxPath(g,bandPts(pts,11,1,0,.95));
+  g.fillStyle='rgba(243,236,221,.93)';g.fill();
+  g.clip();
+  var rnd=mulberry32(5150);
+  g.lineWidth=1;
+  for(i=0;i<180;i++){
+    var fy=rnd()*VPH,fx=(pts[Math.floor(rnd()*NTEAR)].x/100)*VPW;
+    g.strokeStyle='rgba('+(rnd()<.5?'120,110,92':'255,252,244')+','+(.10+rnd()*.22).toFixed(2)+')';
+    g.beginPath();g.moveTo(fx,fy);g.lineTo(fx+(rnd()-.5)*3,fy+6+rnd()*22);g.stroke();
+  }
+  g.restore();
+  g.save();
+  pxPath(g,bandPts(pts,11,1,0,.28));
+  g.fillStyle='rgba(58,50,40,.5)';g.fill();
+  g.restore();
+  return {c:c,dpr:dpr};
+}
+
+/* The three balls are thrown clear before the sheet is torn — they leave along the same
+   painted trails the intro brought them in on, only faster, further and without the
+   return trip. By the time the sheet is photographed they are gone from it. */
+function ballsAway(){
+  ['basket','soccer','tennis'].forEach(function(id,k){
+    setTimeout(function(){
+      var b=BALLS[id],e=document.getElementById(id);
+      if(!b||!e)return;
+      b.gone=true;b.busy=true;
+      S.kick();
+      var r=e.getBoundingClientRect();
+      burst(r.left+r.width*.5,r.top+r.height*.5,18);
+      e.animate([
+        {transform:smear(b,0,1),filter:'blur(0px)',opacity:1,offset:0,
+         easing:'cubic-bezier(.3,0,.5,1)'},
+        {transform:smear(b,-54,.72),filter:'blur(0px)',opacity:1,offset:.2,
+         easing:'cubic-bezier(.4,0,.85,.4)'},
+        {transform:smear(b,FLY*.18,2.2),filter:'blur(6px)',opacity:1,offset:.46},
+        {transform:smear(b,FLY*1.2,3.7),filter:'blur(22px)',opacity:0,offset:1}
+      ],{duration:380,fill:'forwards'});
+    },k*95);
+  });
+}
+
 function tearAway(){
   if(torn)return; torn=true;
   audio(); if(AC&&AC.resume)AC.resume();
@@ -959,16 +1049,44 @@ function tearAway(){
   setTimeout(function(){document.body.classList.add('torn');},260);
   startBalls();
 
-  stampFlyPast();
-
-  if(reduce){
-    stage.style.transition='opacity .6s ease';stage.style.opacity=0;
-    setTimeout(function(){brief.classList.add('lit');briefGo.focus({preventScroll:true});},520);
-    return;
+  /* Whatever happens to the tear, the visitor has to arrive at the brief. */
+  function reveal(ms){
+    setTimeout(function(){
+      brief.classList.add('lit');
+      try{briefGo.focus({preventScroll:true});}catch(e){}
+    },ms);
   }
+  function fadeInstead(){
+    if(stage&&stage.parentNode){
+      stage.style.transition='opacity .55s ease';
+      stage.style.opacity=0;
+      setTimeout(function(){stage.style.display='none';},600);
+    }
+    reveal(520);
+  }
+  if(reduce){stampFlyPast();fadeInstead();return;}
+  /* balls out first, then the paper */
+  ballsAway();
+  setTimeout(function(){
+    stampFlyPast();
+    try{
+      if(!buildTear(reveal))fadeInstead();
+    }catch(e){
+      fadeInstead();
+    }
+  },600);
+}
 
+function buildTear(reveal){
   var pts=tearProfile((Date.now()&0xffff)||1337),i;
   var meanX=0;for(i=0;i<pts.length;i++)meanX+=pts[i].x;meanX/=pts.length;
+
+  var clipL=poly([{x:-3,y:-3}].concat(pts).concat([{x:-3,y:103}]));
+
+  /* everything risky happens before a single node is attached, so a failure leaves the
+     page exactly as it was and the plain fade can take over */
+  var snap=snapRight(pts);
+  if(!snap)return false;
 
   var wrap=document.createElement('div');wrap.id='tearWrap';
   var L=document.createElement('div'),R=document.createElement('div');
@@ -980,73 +1098,59 @@ function tearAway(){
      or an animated opacity on it would flatten the whole thing back into a picture */
   R.style.transformStyle='preserve-3d';
 
-  var clipL=poly([{x:-3,y:-3}].concat(pts).concat([{x:-3,y:103}])),
-      clipR=poly([{x:103,y:-3}].concat(pts).concat([{x:103,y:103}]));
+  /* ---------- the right half: slices of the photograph, laid along a curve ---------- */
+  var minX=100;for(i=0;i<pts.length;i++)minX=Math.min(minX,pts[i].x);
+  var CX0=Math.max(0,Math.floor(minX/100*VPW)-2),
+      CW=VPW-CX0, CN=VPW<560?8:12, CS=CW/CN, D=snap.dpr;
+  var strips=[];
+  for(i=0;i<CN;i++){
+    var st=document.createElement('div');st.className='strip';
+    var sl=CX0+i*CS, sw=Math.ceil(CS+1);
+    st.style.left=sl+'px';st.style.width=sw+'px';
+    var cv=document.createElement('canvas');cv.className='sheetC';
+    cv.width=Math.max(1,Math.round(sw*D));cv.height=Math.max(1,Math.round(VPH*D));
+    cv.style.width=sw+'px';cv.style.height=VPH+'px';
+    cv.getContext('2d').drawImage(snap.c,Math.round(sl*D),0,cv.width,cv.height,
+                                  0,0,cv.width,cv.height);
+    var pbk=document.createElement('div');pbk.className='paperBack';
+    var shd=document.createElement('div');shd.className='shade';
+    st.appendChild(cv);st.appendChild(pbk);st.appendChild(shd);
+    R.appendChild(st);
+    strips.push({el:st,pb:pbk,sh:shd,i:i});
+  }
+  snap.c.width=snap.c.height=1;          /* the source is spent; let it go */
 
-  /* the right-hand side is a copy of the sheet frozen where it stands: the parallax
-     loop is stopped in the same breath, so the two halves cannot drift apart */
-  var clone=stage.cloneNode(true);
-  clone.id='';clone.className='stageCopy';
-
-  /* ---------- the left half: one clipped sheet that tips and drops ---------- */
+  /* ---------- the left half: the live sheet, clipped, tipping over ---------- */
   L.style.clipPath=L.style.webkitClipPath=clipL;
   /* the ragged edge casts its own shadow — static, so the half is rasterised once and
      then only moved; animating a filter under a clip-path re-rasterises it every frame */
   L.style.filter='drop-shadow(-9px 7px 20px rgba(0,0,0,.78))';
-  L.appendChild(stage);
-  (function(){
-    var core=document.createElement('div'),grime=document.createElement('div');
-    core.className=grime.className='ripEdge';
-    core.style.clipPath=core.style.webkitClipPath=edgeBand(pts,3,-1,0,.95);
-    grime.style.clipPath=grime.style.webkitClipPath=edgeBand(pts,3,-1,0,.28);
-    grime.style.background='rgba(58,50,40,.5)';
-    L.appendChild(core);L.appendChild(grime);
-  })();
+  var lcore=document.createElement('div'),lgrime=document.createElement('div');
+  lcore.className=lgrime.className='ripEdge';
+  lcore.style.clipPath=lcore.style.webkitClipPath=edgeBand(pts,3,-1,0,.95);
+  lgrime.style.clipPath=lgrime.style.webkitClipPath=edgeBand(pts,3,-1,0,.28);
+  lgrime.style.background='rgba(58,50,40,.5)';
 
-  /* ---------- the right half: cut into strips so it can actually curl ---------- */
-  /* CSS cannot bend one element, so the sheet is sliced into vertical strips laid out
-     along a cylinder. Each strip is a window onto its own copy of the artwork, offset so
-     the picture still lines up across the seams, and each carries the same ragged clip —
-     which is why the torn edge survives the slicing. The strip nearest the rip stays flat
-     and the roll tightens toward the free edge, the way a page lifts off a book. */
-  var minX=100;for(i=0;i<pts.length;i++)minX=Math.min(minX,pts[i].x);
-  var CX0=Math.max(0,Math.floor(minX/100*VPW)-2),
-      CW=VPW-CX0, CN=VPW<560?9:12, CS=CW/CN;
-  var strips=[];
-  for(i=0;i<CN;i++){
-    var st=document.createElement('div');st.className='strip';
-    st.style.left=(CX0+i*CS)+'px';st.style.width=(CS+0.7)+'px';
-    var sheet=document.createElement('div');sheet.className='sheet';
-    sheet.style.left=(-(CX0+i*CS))+'px';
-    sheet.style.width=VPW+'px';sheet.style.height=VPH+'px';
-    sheet.style.clipPath=sheet.style.webkitClipPath=clipR;
-    sheet.appendChild(i?clone.cloneNode(true):clone);
-    var rc=document.createElement('div'),rg=document.createElement('div');
-    rc.className=rg.className='ripEdge';
-    rc.style.clipPath=rc.style.webkitClipPath=edgeBand(pts,11,1,0,.95);
-    rg.style.clipPath=rg.style.webkitClipPath=edgeBand(pts,11,1,0,.28);
-    rg.style.background='rgba(58,50,40,.5)';
-    sheet.appendChild(rc);sheet.appendChild(rg);
-    var pbk=document.createElement('div');pbk.className='paperBack';
-    var shd=document.createElement('div');shd.className='shade';
-    st.appendChild(sheet);st.appendChild(pbk);st.appendChild(shd);
-    R.appendChild(st);
-    strips.push({el:st,pb:pbk,sh:shd,i:i});
-  }
-
+  L.appendChild(stage);L.appendChild(lcore);L.appendChild(lgrime);
   wrap.appendChild(R);wrap.appendChild(L);
   vpEl.appendChild(wrap);
+
+  S.rip(); ripFibres(pts,16);
+  setTimeout(function(){ripFibres(pts,22);},220);
+  setTimeout(function(){ripFibres(pts,40);bigShake(380,7);},480);
+  setTimeout(function(){ripFibres(pts,34);},720);
+  setTimeout(function(){S.flap();},860);
 
   /* Where strip i sits when the sheet is curled by c. Walk the strips end to end,
      turning a little more at each seam, and the chain traces the roll. The bend is kept
      under a right angle: past that the strips fold back over each other and the browser's
      depth sorting picks the wrong one to paint on top. The turning-over is done by the
      half as a whole instead, and the two angles add up. */
-  function curlAt(c,i){
+  function curlAt(c,k0){
     var pmax=96*c*Math.PI/180,x=0,z=0,phi=0,k;
-    for(k=0;k<=i;k++){
+    for(k=0;k<=k0;k++){
       phi=pmax*Math.pow(k/CN,1.4);
-      if(k===i)break;
+      if(k===k0)break;
       x+=CS*Math.cos(phi);z+=CS*Math.sin(phi);
     }
     return {x:x,z:z,phi:phi};
@@ -1074,13 +1178,12 @@ function tearAway(){
       var q=curlAt(row[1],sp.i),deg=q.phi*180/Math.PI;
       /* how far this facet has actually turned away from us: its own bend plus the
          swing of the whole half */
-      var A=(row[2]+deg)*Math.PI/180,cs=Math.cos(A);
+      var Adeg=row[2]+deg,cs=Math.cos(Adeg*Math.PI/180);
       kf.push({transform:'translate3d('+(q.x-sp.i*CS).toFixed(2)+'px,0,'+
                 q.z.toFixed(2)+'px) rotateY('+(-deg).toFixed(2)+'deg)',
                offset:row[0],easing:EASE[n]});
       /* the paper turns its blank side to us as each seam passes edge-on */
-      kpb.push({opacity:Math.max(0,Math.min(1,(A*180/Math.PI-86)/8)),
-                offset:row[0],easing:EASE[n]});
+      kpb.push({opacity:Math.max(0,Math.min(1,(Adeg-86)/8)),offset:row[0],easing:EASE[n]});
       /* and a facet takes less light the further it has turned */
       ksh.push({opacity:(.80*(1-Math.pow(Math.abs(cs),.7))+(cs<0?.14:0)).toFixed(3),
                 offset:row[0],easing:EASE[n]});
@@ -1105,11 +1208,23 @@ function tearAway(){
      offset:1}
   ],{duration:1980,easing:'linear',fill:'forwards'});
 
-  setTimeout(function(){brief.classList.add('lit');},820);
+  reveal(820);
   setTimeout(function(){
     if(wrap.parentNode)wrap.parentNode.removeChild(wrap);
-    briefGo.focus({preventScroll:true});
-  },2260);
+    /* The title artwork is the heaviest thing on the page — the splatter alone is a
+       2637px square, about 27 MB once decoded. Nothing shows it again after the tear, so
+       let go of the pixels rather than carry them through the brief. */
+    var im=wrap.getElementsByTagName('img'),k;
+    for(k=im.length-1;k>=0;k--)im[k].removeAttribute('src');
+    var sc=stampWrap.getElementsByTagName('img');
+    for(k=sc.length-1;k>=0;k--)sc[k].removeAttribute('src');
+    if(stampWrap.parentNode)stampWrap.parentNode.removeChild(stampWrap);
+    for(k=0;k<strips.length;k++){
+      var cvs=strips[k].el.getElementsByTagName('canvas');
+      if(cvs[0]){cvs[0].width=1;cvs[0].height=1;}
+    }
+  },TEAR_MS+120);
+  return true;
 }
 
 /* ============ the balls on the gym floor ============ */
@@ -1182,6 +1297,7 @@ var B_FS=B_H+B_ENV+[
 'in vec3 vN,vW;in vec2 vUv;in float vY;out vec4 frag;',
 'uniform sampler2D uBase,uNrm,uRough;',
 'uniform vec3 uEye;uniform float uA,uRefl,uFloor,uFade,uNrmScale;',
+'uniform float uRMul,uRAdd,uF0;',
 'void main(){',
 '  vec3 Ng=normalize(vN);',
 '  vec3 Vv=normalize(vec3(uEye.xy-vW.xy,uEye.z));',
@@ -1197,9 +1313,9 @@ var B_FS=B_H+B_ENV+[
 '  vec2 nxy=(texture(uNrm,vUv).xy*2.0-1.0)*uNrmScale;',
 '  vec3 N=normalize(TBN*vec3(nxy,sqrt(max(1.0-dot(nxy,nxy),1e-4))));',
 '  vec3 alb=pow(texture(uBase,vUv).rgb,vec3(2.2));',
-'  float rough=clamp(texture(uRough,vUv).r,0.055,1.0);',
+'  float rough=clamp(texture(uRough,vUv).r*uRMul+uRAdd,0.055,1.0);',
 '  float NoV=max(dot(N,Vv),1e-4);',
-'  vec3 f0=vec3(0.04);',
+'  vec3 f0=vec3(uF0);',
 '  vec3 dirs[3];dirs[0]=KEY;dirs[1]=FILL;dirs[2]=BNC;',
 '  vec3 cols[3];',
 '  cols[0]=vec3(1.00,0.93,0.80)*4.60;',
@@ -1352,17 +1468,22 @@ function initBalls(){
     B.forEach(function(b,i){
       b.rPx=RAD*b.rel;
       b.r=b.rPx/PPM;                                  /* metres */
+      b.tx=(W/2+(i-1)*gap)/PPM;                       /* where it comes to rest */
       /* The drawn sizes are compressed, so density x drawn volume would make the
          tennis ball as heavy as the football. Scale the real mass by the size change
          instead, gently, and the order of weight stays the one you expect. */
       b.m=b.rm*Math.pow(b.r/b.rReal,1.2);
-      if(!b.placed){b.x=(W/2+(i-1)*gap)/PPM;b.y=b.r;b.placed=1;}
-      b.x=Math.max(b.r+4/PPM,Math.min((W-4)/PPM-b.r,b.x));
+      if(!b.placed){b.x=b.tx;b.y=b.r;b.placed=1;}
+      /* a ball still waiting in the wings is parked far off stage: keeping it inside the
+         walls would drag all three back into view on top of each other, and the moment
+         they overlap they shove each other into the air */
+      if(!b.parked)b.x=Math.max(b.r+4/PPM,Math.min((W-4)/PPM-b.r,b.x));
     });
   }
 
   /* ---------- the sound of one landing ---------- */
   var VOICE={basket:[92,.55,1200],soccer:[150,.34,1900],tennis:[300,.16,3200]};
+  S.rollon=function(){ nz(1.5,.05,150,60,.7); };
   function thud(b,imp){
     if(!AC||!soundOn)return;
     var v=VOICE[b.k],g=Math.min(1,imp/2.6);
@@ -1379,6 +1500,19 @@ function initBalls(){
     var i,j,b;
     for(i=0;i<B.length;i++){
       b=B[i];
+      /* still in the wings: no gravity, no walls, and above all no neighbours — three
+         balls parked on the same spot count as overlapping and shove each other out */
+      if(b.parked)continue;
+      if(b.roll){
+        var rl=b.roll;rl.t+=dt;
+        var v0=2*rl.d/rl.T,ac=v0/rl.T,u=Math.min(1,rl.t/rl.T);
+        b.x=rl.x0+v0*rl.t-ac*rl.t*rl.t/2;
+        b.vx=v0*(1-u);b.y=b.r;b.vy=0;
+        b.wz=-b.vx/b.r;
+        b.R=rot(b.R,0,0,1,b.wz*dt);
+        if(u>=1){b.x=rl.x0+rl.d;b.vx=0;b.roll=null;}
+        continue;
+      }
       b.vy+=GRAV*dt;
       var drag=1-0.02*dt;b.vx*=drag;b.vy*=drag;
       b.x+=b.vx*dt;b.y+=b.vy*dt;
@@ -1394,6 +1528,9 @@ function initBalls(){
       if(grounded){
         var sp=Math.abs(b.vx);
         if(sp>1e-5){
+          /* A ball rolling the length of a dusty gym floor loses speed faster than the
+             clean figure; the entrance uses that, and drops back to the real one once it
+             has settled — otherwise it would take a ball five seconds to stop. */
           var dec=Math.min(sp,b.crr*9.81*dt);
           b.vx-=(b.vx/sp)*dec;
         }
@@ -1409,7 +1546,9 @@ function initBalls(){
       if(Math.abs(b.wx)>1e-4){b.R=rot(b.R,1,0,0,b.wx*dt);b.wx*=(1-1.6*dt);}
     }
     for(i=0;i<B.length;i++)for(j=i+1;j<B.length;j++){
-      var a=B[i],c=B[j],dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy),mn=a.r+c.r;
+      var a=B[i],c=B[j];
+      if(a.parked||c.parked||a.roll||c.roll)continue;   /* not yet on, or still entering */
+      var dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy),mn=a.r+c.r;
       if(d>=mn||d<1e-9)continue;
       var nx=dx/d,ny=dy/d,pen=mn-d,iv=1/a.m+1/c.m;
       a.x-=nx*pen*(1/a.m)/iv;a.y-=ny*pen*(1/a.m)/iv;
@@ -1420,6 +1559,30 @@ function initBalls(){
       a.vx-=nx*jj/a.m;a.vy-=ny*jj/a.m;
       c.vx+=nx*jj/c.m;c.vy+=ny*jj/c.m;
       if(-rel>0.5)thud(a.m>c.m?a:c,-rel);
+    }
+  }
+
+  /* ---------- rolling them on ---------- */
+  /* The entrance is choreographed rather than solved. It is the same shape a rolling
+     ball makes — constant deceleration, x = x0 + v0*t - at^2/2 — but integrated in
+     closed form, so it lands exactly on its mark whatever the frame rate is doing, and
+     three balls entering from the same wing can never end up on the same spot and shove
+     each other into the air. The moment one stops it is handed back to the solver. */
+  var QUEUE=[],QOPEN=0,ENT_T=0;
+  function rollOn(b,side){
+    /* side -1 comes on from the left wing, +1 from the right; d carries the sign, so the
+       closed form below rolls and spins the right way either way */
+    var sx=side<0?-(b.r+.06):(W/PPM)+(b.r+.06),d=b.tx-sx;
+    b.x=sx;b.y=b.r;b.vx=0;b.vy=0;b.parked=0;
+    b.roll={t:0,T:1.35+0.35*Math.min(1,Math.abs(d)/2.2),x0:sx,d:d};
+    S.rollon();
+  }
+  function releaseDue(dt){
+    if(!QOPEN)return;
+    ENT_T+=dt;
+    for(var q=0;q<QUEUE.length;q++){
+      var e=QUEUE[q];
+      if(!e.done&&ENT_T>=e.at){e.done=1;rollOn(e.b,e.side);}
     }
   }
 
@@ -1480,6 +1643,7 @@ function initBalls(){
     gl.bindVertexArray(quadVao);
     gl.uniform2f(SU.uRes,W,H);
     B.forEach(function(b){
+      if(b.parked)return;
       var lift=Math.max(0,(b.y*PPM-b.rPx)/(b.rPx*5));
       gl.uniform2f(SU.uC,b.x*PPM,FLOOR+2);
       gl.uniform2f(SU.uS,b.rPx*(1.42+lift*1.5),b.rPx*(.38+lift*.35));
@@ -1495,13 +1659,14 @@ function initBalls(){
 
     gl.depthMask(false);
     B.forEach(function(b){
+      if(b.parked)return;
       drawBall(b,-1,.46,0,.97);
       drawBall(b,-1,.28,-b.rPx*.10,.97);
       drawBall(b,-1,.15,-b.rPx*.22,.97);
     });
     gl.depthMask(true);
     gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
-    B.forEach(function(b){drawBall(b,1,1,0,1);});
+    B.forEach(function(b){if(!b.parked)drawBall(b,1,1,0,1);});
     gl.bindVertexArray(null);
   }
 
@@ -1511,6 +1676,7 @@ function initBalls(){
     var dt=Math.min(.05,(now-last)/1000);last=now;
     /* fixed sub-steps: a bounce resolved once per frame is a bounce that depends on
        the frame rate */
+    releaseDue(dt);
     acc+=dt;
     var n=0;
     while(acc>1/180&&n<30){integrate(1/180);acc-=1/180;n++;}
@@ -1538,17 +1704,34 @@ function initBalls(){
     gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
     gl.bindVertexArray(null);quadVao=q;
-    B.forEach(function(b,i){
-      b.y=b.r+(CEIL/PPM-b.r*2)*(0.34+i*0.12);
-      b.vy=0;b.vx=(i-1)*0.10;
+    /* Parked off the floor until the words are up, then rolled on from the wings. The
+       speed is solved from the distance so each one comes to rest where it belongs:
+       v = sqrt(2*a*d), with a nudge for the air it pushes on the way. */
+    B.forEach(function(b){b.x=-99;b.y=b.r;b.vx=0;b.vy=0;b.roll=null;b.parked=1;});
+      /* They come on once the words are up, not under them — and the one with furthest to
+       travel goes first, so nobody catches anybody up on the way.
+       The next one is released when the one ahead has actually cleared the wing, not
+       after a fixed delay: on a slow frame the clock runs on while the simulation does
+       not, and three balls spawned on the same spot shove each other into the air, where
+       there is no floor to slow them down and they sail off the far side. */
+    /* Basketball and tennis come on from the right, the football from the left. Of the
+       two on the right the basketball goes first, because it travels furthest and ends up
+       beyond the tennis ball — so neither has to pass the other. The football's whole run
+       lies to the left of where the basketball stops, so it never meets either. */
+    [['basket',0,1],['soccer',.28,-1],['tennis',.56,1]].forEach(function(o){
+      for(var j=0;j<B.length;j++)
+        if(B[j].k===o[0])QUEUE.push({b:B[j],at:o[1],side:o[2],done:0});
     });
+    setTimeout(function(){
+      if(brief.classList.contains('on'))QOPEN=1;
+    },Math.max(300,1900-(performance.now()-BALLT)));
     last=performance.now();
     requestAnimationFrame(step);
   }
   return {resize:resize,bodies:B};
 }
 
-var BH=150;
+var BH=150,BALLT=0;
 function ballVars(){
   BH=Math.max(88,Math.min(186,Math.round(VPH*(VPH<700?.165:.19))));
   var bz=Math.max(Math.round(BH*2.6),Math.min(Math.round(VPH*.55),430));
@@ -1559,6 +1742,7 @@ function ballVars(){
 ballVars();
 function startBalls(){
   if(BL)return;
+  BALLT=performance.now();
   ballVars();
   BL=initBalls();
   fitBrief();
