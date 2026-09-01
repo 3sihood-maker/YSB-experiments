@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Pause &amp; Pray</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#181732;
+    --ink-2:#232149;
+    --paper:#FFF8ED;
+    --paper-dim:#F3E9D6;
+    --gold:#FFB627;
+    --cat:#FF6B5B; /* current category accent, overridden inline */
+    --cat-soft: rgba(255,107,91,0.18);
+    --line: rgba(255,255,255,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(120% 90% at 50% -10%, var(--cat-soft), transparent 60%),
+      linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 55%, #14132b 100%);
+    background-attachment:fixed;
+    color:var(--paper);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    transition: background 0.8s ease;
+    padding: 28px 16px 60px;
+  }
+  .shell{ max-width:520px; margin:0 auto; }
+
+  /* ---------- Header ---------- */
+  .app-header{ text-align:center; margin-bottom:26px; }
+  .app-header .kicker{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color: var(--cat); font-weight:600; opacity:.9;
+    transition: color .8s ease;
+  }
+  .app-header h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:clamp(30px,7vw,40px);
+    margin:6px 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .app-header p{
+    margin:0; font-size:14px; color:rgba(255,248,237,0.55); font-weight:500;
+  }
+  .header-actions{ margin-top:14px; display:flex; justify-content:center; }
+  .dl{
+    display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:.1em;
+    text-transform:uppercase; color:rgba(255,248,237,0.7);
+    border:1px solid rgba(255,255,255,0.22); border-radius:100px; padding:9px 15px;
+    transition: border-color .2s, color .2s;
+  }
+  .dl:hover{ border-color:var(--cat); color:var(--paper); }
+  .dl b{ font-weight:600; opacity:.55; }
+
+  /* ---------- Stepper ---------- */
+  .stepper{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin: 28px 0 22px; position:relative; padding: 0 4px;
+  }
+  .stepper::before{
+    content:""; position:absolute; top:11px; left:22px; right:22px; height:2px;
+    background: var(--line); z-index:0;
+  }
+  .step-dot{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; }
+  .step-dot .dot{
+    width:22px; height:22px; border-radius:50%;
+    background:var(--ink-2); border:2px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:600;
+    color:rgba(255,248,237,0.4);
+    transition: all .35s ease;
+  }
+  .step-dot.done .dot{ background:var(--cat); border-color:var(--cat); color:var(--ink); transition:.35s; }
+  .step-dot.active .dot{
+    background:var(--ink); border-color:var(--cat); color:var(--cat);
+    box-shadow:0 0 0 5px var(--cat-soft);
+    transform:scale(1.12);
+  }
+  .step-dot .lbl{
+    font-size:10.5px; font-weight:600; color:rgba(255,248,237,0.4);
+    text-align:center; letter-spacing:.02em;
+  }
+  .step-dot.active .lbl{ color:var(--paper); }
+  .step-dot.done .lbl{ color:rgba(255,248,237,0.65); }
+
+  /* ---------- Card ---------- */
+  .card{
+    background: var(--paper);
+    color:#20182c;
+    border-radius:22px;
+    padding: 26px 24px 24px;
+    box-shadow: 0 20px 50px -18px rgba(0,0,0,0.55);
+    position:relative;
+    overflow:hidden;
+    animation: rise .5s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes rise{ from{ opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  .card::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:6px;
+    background: var(--cat); transition: background .8s ease;
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:600;
+    letter-spacing:.1em; text-transform:uppercase; color: var(--cat);
+    margin: 6px 0 2px; transition:color .8s ease;
+  }
+  .card h2{
+    font-family:'Fraunces', serif; font-size:23px; font-weight:700; margin:2px 0 12px;
+    color:#1c1430;
+  }
+  .card p.copy{ font-size:14.5px; line-height:1.55; color:#4a3f57; margin:0 0 14px;}
+
+  /* ---------- Verse block ---------- */
+  .tag-row{ display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .tag{
+    display:inline-flex; align-items:center; gap:6px;
+    background: var(--cat-soft); color: var(--cat-dark, #a83f2f);
+    padding:5px 11px; border-radius:100px; font-size:12px; font-weight:700;
+    font-family:'Inter',sans-serif;
+    transition: all .8s ease;
+  }
+  .tag.theme{ background:#F0EAE0; color:#5b4f68; }
+
+  .verse-box{
+    background: linear-gradient(160deg, var(--cat) 0%, color-mix(in srgb, var(--cat) 70%, #1c1430) 100%);
+    border-radius:16px; padding:22px 20px 20px; margin-bottom:16px;
+    color:#fff; position:relative; min-height:118px;
+    transition: background .5s ease;
+  }
+  .verse-ref{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:600;
+    letter-spacing:.05em; opacity:.85; margin-bottom:8px; display:block;
+  }
+  .verse-text{
+    font-family:'Fraunces', serif; font-size:19px; line-height:1.5; font-weight:500;
+    font-style:italic;
+  }
+  .verse-box.shuffling .verse-text, .verse-box.shuffling .verse-ref{
+    animation: blur-cycle .09s linear infinite;
+  }
+  @keyframes blur-cycle{ 0%{filter:blur(2px); opacity:.5;} 100%{filter:blur(0); opacity:1;} }
+
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
+  button{ font-family:'Inter',sans-serif; cursor:pointer; border:none; }
+  .btn{
+    padding:13px 18px; border-radius:100px; font-weight:700; font-size:14.5px;
+    display:inline-flex; align-items:center; gap:8px; justify-content:center;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-primary{ background: var(--cat); color:#1c1430; box-shadow: 0 8px 18px -8px var(--cat); }
+  .btn-primary:hover{ opacity:.92; }
+  .btn-ghost{ background:#F0EAE0; color:#3a3145; }
+  .btn-ghost:hover{ background:#e9e1d2; }
+  .btn-block{ width:100%; }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .link-btn{
+    background:none; color:#6d5f7d; font-size:13px; font-weight:600;
+    text-decoration:underline; text-underline-offset:3px; padding:6px 2px;
+  }
+
+  /* browse list */
+  .browse-list{ max-height:280px; overflow-y:auto; margin-top:8px; border-top:1px solid #ece4d6; padding-top:8px; }
+  .browse-cat{ font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#8a7d99; margin:12px 0 6px; text-transform:uppercase; letter-spacing:.06em; }
+  .browse-item{
+    display:flex; justify-content:space-between; gap:10px; align-items:center;
+    padding:9px 10px; border-radius:10px; cursor:pointer; font-size:13.5px;
+  }
+  .browse-item:hover{ background:#F5F0E6; }
+  .browse-item b{ font-weight:700; color:#2a2136; }
+  .browse-item span{ color:#7c6f8a; font-size:12px; }
+
+  /* ---------- Prompt / prayer step ---------- */
+  .prayer-block{
+    background:#F5F0E6; border-radius:14px; padding:16px 18px; margin-bottom:14px;
+    border-left:4px solid var(--cat);
+  }
+  .prayer-block .lbl{ font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:700; color:var(--cat); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; display:block;}
+  .prayer-block p{ margin:0; font-size:14px; line-height:1.55; color:#3a3145; }
+
+  /* ---------- Reflect step ---------- */
+  .q-item{ margin-bottom:16px; }
+  .q-num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; border-radius:50%; background:var(--cat); color:#1c1430;
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:700;
+    margin-right:8px; flex-shrink:0;
+  }
+  .q-text{ font-weight:700; font-size:14.5px; color:#241a33; display:flex; align-items:flex-start; margin-bottom:8px;}
+  textarea{
+    width:100%; border:1.5px solid #e6ddca; border-radius:12px; padding:11px 13px;
+    font-family:'Inter',sans-serif; font-size:14px; color:#241a33; resize:vertical;
+    min-height:56px; background:#fffdf8;
+  }
+  textarea:focus{ outline:none; border-color:var(--cat); }
+  textarea::placeholder{ color:#b4a9c0; }
+
+  /* ---------- Activity box ---------- */
+  .activity-box{
+    background: linear-gradient(160deg, var(--cat) 0%, color-mix(in srgb, var(--cat) 65%, #1c1430) 100%);
+    border-radius:16px; padding:24px 20px; margin-bottom:16px; color:#fff; text-align:center;
+    min-height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .activity-title{ font-family:'Fraunces',serif; font-size:20px; font-weight:700; margin-bottom:6px;}
+  .activity-desc{ font-size:13.5px; line-height:1.5; opacity:.95; max-width:340px; }
+  .activity-box.shuffling .activity-title, .activity-box.shuffling .activity-desc{ animation: blur-cycle .09s linear infinite; }
+
+  /* footer nav */
+  .foot-nav{ display:flex; justify-content:space-between; margin-top:18px; padding:0 2px; }
+  .foot-nav button{ background:none; color:rgba(255,248,237,0.55); font-weight:600; font-size:13.5px; padding:8px; display:flex; align-items:center; gap:6px;}
+  .foot-nav button:hover{ color:var(--paper); }
+  .foot-nav button:disabled{ opacity:0.25; cursor:default; }
+
+  /* done screen */
+  .done-emoji{ font-size:44px; text-align:center; margin-bottom:6px;}
+  .summary-line{ display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid #ece4d6; }
+  .summary-line:last-child{ border-bottom:none; }
+  .summary-line .k{ font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:700; color:#8a7d99; text-transform:uppercase; width:70px; flex-shrink:0; padding-top:2px; letter-spacing:.05em;}
+  .summary-line .v{ font-size:14px; color:#241a33; line-height:1.5; }
+
+  @media (max-width:380px){
+    .step-dot .lbl{ font-size:9.5px; }
+    .verse-text{ font-size:17px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="app-header">
+    <div class="kicker" id="kicker">Quiet time</div>
+    <h1>Pause &amp; Pray</h1>
+    <p>Read a verse. Sit with it. Do something about it.</p>
+    <div class="header-actions">
+      <a class="dl" href="random-response-generator.docx" download>&darr; The 50 responses <b>Word</b></a>
+    </div>
+  </div>
+
+  <div class="stepper" id="stepper"></div>
+
+  <div id="cardHost"></div>
+
+  <div class="foot-nav">
+    <button id="backBtn">← Back</button>
+    <button id="nextBtn">Next →</button>
+  </div>
+
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const CATEGORIES = {
+  "Knowing Jesus":      {emoji:"🧡", color:"#FF6B5B", dark:"#a83f2f"},
+  "Following Jesus":    {emoji:"🔥", color:"#FF8C42", dark:"#a35217"},
+  "Prayer & Trust":     {emoji:"💬", color:"#2EC4B6", dark:"#177b70"},
+  "Strength & Courage": {emoji:"💪", color:"#E4B62F", dark:"#8a6f10"},
+  "Love & Identity":    {emoji:"❤️", color:"#FF5D8F", dark:"#a12a56"},
+  "Growth & Character": {emoji:"🌱", color:"#4CAF7D", dark:"#276b46"},
+  "Mission & Purpose":  {emoji:"🌍", color:"#3E92CC", dark:"#1e5a82"},
+  "Protection & Peace": {emoji:"🛡️", color:"#6C5CE7", dark:"#3f2fa3"}
+};
+
+const VERSES = [
+  {c:"Knowing Jesus", ref:"John 3:16", theme:"Gospel", text:"God loves you more than you realise."},
+  {c:"Knowing Jesus", ref:"John 14:6", theme:"Identity of Jesus", text:"Jesus is the way to real life."},
+  {c:"Knowing Jesus", ref:"John 10:10", theme:"Purpose", text:"Jesus brings life to the full."},
+  {c:"Knowing Jesus", ref:"John 1:12", theme:"Belonging", text:"You're invited into God's family."},
+  {c:"Knowing Jesus", ref:"Matthew 11:28", theme:"Peace", text:"Jesus gives rest to the stressed."},
+  {c:"Knowing Jesus", ref:"Revelation 3:20", theme:"Relationship", text:"Jesus knocks — you can open."},
+
+  {c:"Following Jesus", ref:"Luke 9:23", theme:"Discipleship", text:"Following Jesus is a daily choice."},
+  {c:"Following Jesus", ref:"Matthew 5:16", theme:"Influence", text:"Shine your light where you are."},
+  {c:"Following Jesus", ref:"Micah 6:8", theme:"Lifestyle", text:"Do justice. Love mercy. Walk humbly."},
+  {c:"Following Jesus", ref:"Psalm 119:105", theme:"Scripture", text:"God's word guides your steps."},
+  {c:"Following Jesus", ref:"Colossians 3:17", theme:"Everyday faith", text:"Do everything with Jesus in mind."},
+  {c:"Following Jesus", ref:"Galatians 2:20", theme:"Identity", text:"Christ lives in you."},
+
+  {c:"Prayer & Trust", ref:"Philippians 4:6–7", theme:"Anxiety", text:"Don't panic; pray. God brings peace."},
+  {c:"Prayer & Trust", ref:"Jeremiah 29:11", theme:"Future", text:"God has a hopeful plan for you."},
+  {c:"Prayer & Trust", ref:"Proverbs 3:5–6", theme:"Guidance", text:"Trust God with your whole heart."},
+  {c:"Prayer & Trust", ref:"Psalm 37:4", theme:"Devotion", text:"Delight in God; He shapes your desires."},
+  {c:"Prayer & Trust", ref:"James 4:8", theme:"Relationship", text:"Come close to God; He comes close to you."},
+  {c:"Prayer & Trust", ref:"1 Peter 5:7", theme:"Comfort", text:"Give God your worries — He cares."},
+
+  {c:"Strength & Courage", ref:"Isaiah 40:31", theme:"Endurance", text:"God renews your strength."},
+  {c:"Strength & Courage", ref:"Joshua 1:9", theme:"Courage", text:"Be strong — God is with you."},
+  {c:"Strength & Courage", ref:"Romans 8:28", theme:"Hope", text:"God works things for good."},
+  {c:"Strength & Courage", ref:"Romans 8:38–39", theme:"Security", text:"Nothing can separate you from God's love."},
+  {c:"Strength & Courage", ref:"Psalm 23:1", theme:"Guidance", text:"God leads and provides."},
+  {c:"Strength & Courage", ref:"Psalm 46:1", theme:"Protection", text:"God is your safe place."},
+
+  {c:"Love & Identity", ref:"1 John 4:19", theme:"Love", text:"We love because God loved first."},
+  {c:"Love & Identity", ref:"1 Corinthians 13:4–7", theme:"Relationships", text:"Real love looks like patience and kindness."},
+  {c:"Love & Identity", ref:"Ephesians 2:10", theme:"Identity", text:"You're God's masterpiece."},
+  {c:"Love & Identity", ref:"Genesis 1:27", theme:"Worth", text:"You're made in God's image."},
+  {c:"Love & Identity", ref:"Psalm 139:14", theme:"Self-esteem", text:"You're wonderfully made."},
+
+  {c:"Growth & Character", ref:"Romans 12:2", theme:"Growth", text:"Let God transform your mind."},
+  {c:"Growth & Character", ref:"Galatians 5:22–23", theme:"Character", text:"The Spirit grows good fruit in you."},
+  {c:"Growth & Character", ref:"James 1:5", theme:"Decisions", text:"Ask God for wisdom — He gives generously."},
+  {c:"Growth & Character", ref:"James 1:22", theme:"Action", text:"Don't just hear — do."},
+  {c:"Growth & Character", ref:"Colossians 3:12", theme:"Compassion", text:"Wear kindness like clothing."},
+  {c:"Growth & Character", ref:"Philippians 2:3–4", theme:"Humility", text:"Put others first."},
+
+  {c:"Mission & Purpose", ref:"Matthew 28:19–20", theme:"Mission", text:"Go share Jesus everywhere."},
+  {c:"Mission & Purpose", ref:"Acts 1:8", theme:"Holy Spirit", text:"The Spirit gives you power to witness."},
+  {c:"Mission & Purpose", ref:"Romans 1:16", theme:"Boldness", text:"Don't be ashamed of the gospel."},
+  {c:"Mission & Purpose", ref:"2 Corinthians 5:17", theme:"Transformation", text:"In Christ, you're a new creation."},
+  {c:"Mission & Purpose", ref:"Matthew 5:9", theme:"Conflict", text:"Be a peacemaker."},
+  {c:"Mission & Purpose", ref:"Matthew 22:37–39", theme:"Core command", text:"Love God. Love people."},
+
+  {c:"Protection & Peace", ref:"Psalm 91:1–2", theme:"Safety", text:"God is your shelter."},
+  {c:"Protection & Peace", ref:"Isaiah 41:10", theme:"Presence", text:"Don't fear — God holds you."},
+  {c:"Protection & Peace", ref:"John 16:33", theme:"Victory", text:"Jesus has overcome the world."},
+  {c:"Protection & Peace", ref:"Psalm 34:18", theme:"Comfort", text:"God is close to the brokenhearted."},
+  {c:"Protection & Peace", ref:"Philippians 4:13", theme:"Strength", text:"You can do all things through Christ."}
+];
+
+const ACTIVITIES_RAW = [
+["Snap & send","Take a quick photo of something around you and send it to a friend with a fun or encouraging comment."],
+["Write a quick prayer","Jot down a short prayer based on what you just read and send it to someone who'd appreciate it."],
+["Voice prayer","Record a 10–20 second prayer on your phone and send it to someone who needs a lift."],
+["Gratitude shoutout","Message someone who's made a difference in your life and tell them why you're grateful."],
+["Three-word vibe","Write three words that capture the vibe or main idea of the passage."],
+["Prayer walk","Go for a walk and talk to God about the people and places you see."],
+["Verse loop run","Go for a run or walk and let the verse repeat in your mind like a loop."],
+["Shoes prayer","When you put on your shoes, ask God to guide your steps and help you bump into someone you can bless today."],
+["Hands check","Look at your hands and ask God to help you use them for good today."],
+["Worship moment","Find a worship song, close your eyes, and let it sink in."],
+["Secret kindness","Do something kind for someone today without telling anyone. God sees it."],
+["Breath prayer","Breathe in and ask God to fill your world. Breathe out and give Him whatever's stressing you."],
+["Mindmap your day","Make a quick mindmap of ways you could live out the verse. Circle one to focus on today."],
+["Ask for backup","Ask a friend to pray for you and give them two things you need help with."],
+["Flip your complaints","Pick something you usually complain about. Thank God for it and ask Him to help you grow through it."],
+["Open palms moment","Sit quietly with your palms open and give God your whole self — your hopes, fears, mistakes, everything."],
+["Appreciation text","Send someone you love a message telling them what you appreciate about them."],
+["Share your discovery","Tell someone (even someone you don't know well) one thing you're learning from the Bible."],
+["Household prayer","Think of each person in your house and pray for how God could use you to bless them today."],
+["Verse sketch","Draw a simple sketch that represents the verse's main idea."],
+["One-sentence prayer","Write a single-sentence prayer that captures your response."],
+["Rewrite the verse","Paraphrase the verse in your own words as if explaining it to a child."],
+["Character empathy","Choose a character in the passage and write what they might have felt."],
+["Verse-to-life connection","Write one way this verse intersects with something happening in your life today."],
+["Blessing declaration","Speak a blessing aloud over your day based on the passage."],
+["Create a symbol","Choose an object around you that symbolizes the verse and keep it nearby today."],
+["Silent minute","Sit in silence for one minute letting the verse settle into your heart."],
+["Verse doodle","Doodle shapes or patterns while thinking about the verse."],
+["Prayer for strangers","Pray for someone you saw today but didn't speak to."],
+["Verse challenge","Create a small challenge for yourself based on the verse (e.g., encourage one person, give one gift, forgive one hurt)."],
+["Rewrite as a text message","Rewrite the verse as if Jesus were texting you personally."],
+["Create a question","Write one question the verse makes you ask God."],
+["Verse soundtrack","Choose a song that matches the mood of the passage."],
+["Bless your future self","Write a note to your future self about how you want to live this verse."],
+["Verse emoji summary","Summarize the verse using only emojis."],
+["Prayer for enemies","Pray for someone who frustrates you or opposes you."],
+["Create a metaphor","Turn the verse into a metaphor from nature, sport, or daily life."],
+["Verse declaration","Speak the verse aloud three times with conviction."],
+["Gratitude list","Write five things you're grateful for that connect to the passage."],
+["Verse-to-action","Identify one action you can take in the next hour that reflects the verse."],
+["Prayer for your city","Pray for one part of your city that comes to mind as you read."],
+["Verse journaling","Write a short journal entry beginning with \"God, today I noticed…\""],
+["Create a blessing card","Write a small blessing on a piece of paper and leave it somewhere for someone to find."],
+["Verse conversation","Ask someone, \"What stands out to you in this verse?\""],
+["Verse posture","Choose a physical posture (kneeling, standing, hands open) that matches the verse and pray in that posture."],
+["Verse timeline","Imagine how this verse has shaped believers across history."],
+["Create a micro-goal","Set a tiny goal for the next 24 hours inspired by the passage."],
+["Verse blessing for others","Turn the verse into a blessing and send it to someone."],
+["Verse confession","Write one area where you fall short of the verse and confess it to God."],
+["Verse celebration","Celebrate one truth in the passage with a small act of joy (a smile, a song, a stretch, a dance)."]
+];
+const ACTIVITIES = ACTIVITIES_RAW.map(a => ({title:a[0], desc:a[1]}));
+
+const QUESTIONS = [
+  "What is interesting or curious about these verses?",
+  "What does it say about God?",
+  "What does it say about humans? And me?",
+  "How does it point to Jesus?",
+  "What can I learn — and what will I do about it?"
+];
+
+const STEP_LABELS = ["Verse","Pray & read","Reflect","Respond","Go"];
+
+/* ---------------- STATE ---------------- */
+let state = {
+  step: 0,
+  verse: null,
+  activity: null,
+  answers: ["","","","",""]
+};
+
+const kicker = document.getElementById('kicker');
+
+function setAccent(catName){
+  const cat = CATEGORIES[catName] || CATEGORIES["Knowing Jesus"];
+  document.documentElement.style.setProperty('--cat', cat.color);
+  document.documentElement.style.setProperty('--cat-dark', cat.dark);
+  document.documentElement.style.setProperty('--cat-soft', cat.color + '2e');
+}
+
+function pickRandomVerse(excludeRef){
+  let pool = VERSES;
+  if(excludeRef && VERSES.length > 1){ pool = VERSES.filter(v => v.ref !== excludeRef); }
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function pickRandomActivity(excludeTitle){
+  let pool = ACTIVITIES;
+  if(excludeTitle && ACTIVITIES.length > 1){ pool = ACTIVITIES.filter(a => a.title !== excludeTitle); }
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+/* ---------------- RENDER STEPPER ---------------- */
+function renderStepper(){
+  const el = document.getElementById('stepper');
+  el.innerHTML = STEP_LABELS.map((lbl,i)=>{
+    let cls = 'step-dot';
+    if(i < state.step) cls += ' done';
+    if(i === state.step) cls += ' active';
+    return `<div class="${cls}"><div class="dot">${i < state.step ? '✓' : i+1}</div><div class="lbl">${lbl}</div></div>`;
+  }).join('');
+}
+
+/* ---------------- SHUFFLE ANIMATION HELPER ---------------- */
+function shuffleAnimate(boxEl, refEl, textEl, getRandom, applyFn, duration=700){
+  boxEl.classList.add('shuffling');
+  let ticks = 0;
+  const maxTicks = Math.floor(duration/70);
+  const interval = setInterval(()=>{
+    const r = getRandom();
+    if(refEl) refEl.textContent = r._display1;
+    textEl.textContent = r._display2;
+    ticks++;
+    if(ticks >= maxTicks){
+      clearInterval(interval);
+      boxEl.classList.remove('shuffling');
+      applyFn();
+    }
+  }, 70);
+}
+
+/* ---------------- STEP RENDERERS ---------------- */
+function renderStep(){
+  renderStepper();
+  const host = document.getElementById('cardHost');
+  const backBtn = document.getElementById('backBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  backBtn.style.visibility = state.step === 0 ? 'hidden' : 'visible';
+  nextBtn.style.display = state.step === 4 ? 'none' : 'inline-flex';
+
+  if(state.step === 0) renderVerseStep(host, nextBtn);
+  else if(state.step === 1) renderPrayReadStep(host, nextBtn);
+  else if(state.step === 2) renderReflectStep(host, nextBtn);
+  else if(state.step === 3) renderRespondStep(host, nextBtn);
+  else if(state.step === 4) renderDoneStep(host);
+}
+
+function renderVerseStep(host, nextBtn){
+  if(!state.verse){ state.verse = pickRandomVerse(); }
+  const cat = CATEGORIES[state.verse.c];
+  setAccent(state.verse.c);
+  kicker.textContent = "Step 1 · Choose a verse";
+
+  host.innerHTML = `
+    <div class="card">
+      <div class="eyebrow">Step 1 of 5</div>
+      <h2>Get your verse</h2>
+      <p class="copy">Shuffle for a random verse from the 50&nbsp;Verses set, or pick your own below. Then read it slowly, quietly, to yourself.</p>
+
+      <div class="tag-row">
+        <span class="tag">${cat.emoji} ${state.verse.c}</span>
+        <span class="tag theme">${state.verse.theme}</span>
+      </div>
+
+      <div class="verse-box" id="verseBox">
+        <span class="verse-ref" id="verseRef">${state.verse.ref}</span>
+        <span class="verse-text" id="verseText">${state.verse.text}</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="shuffleBtn">🎲 Shuffle a verse</button>
+        <button class="link-btn" id="browseBtn">Browse all 46 →</button>
+      </div>
+
+      <div id="browseHost"></div>
+    </div>
+  `;
+
+  document.getElementById('shuffleBtn').onclick = () => {
+    const box = document.getElementById('verseBox');
+    const refEl = document.getElementById('verseRef');
+    const textEl = document.getElementById('verseText');
+    shuffleAnimate(box, refEl, textEl,
+      () => { const r = pickRandomVerse(); return {_display1:r.ref, _display2:r.text, full:r}; },
+      () => {
+        const final = pickRandomVerse(state.verse.ref);
+        state.verse = final;
+        renderStep();
+      }
+    );
+  };
+
+  document.getElementById('browseBtn').onclick = () => {
+    const bh = document.getElementById('browseHost');
+    if(bh.dataset.open === '1'){ bh.innerHTML = ''; bh.dataset.open = '0'; return; }
+    bh.dataset.open = '1';
+    let html = '<div class="browse-list">';
+    Object.keys(CATEGORIES).forEach(catName=>{
+      html += `<div class="browse-cat">${CATEGORIES[catName].emoji} ${catName}</div>`;
+      VERSES.filter(v=>v.c===catName).forEach(v=>{
+        html += `<div class="browse-item" data-ref="${v.ref}"><b>${v.ref}</b><span>${v.theme}</span></div>`;
+      });
+    });
+    html += '</div>';
+    bh.innerHTML = html;
+    bh.querySelectorAll('.browse-item').forEach(item=>{
+      item.onclick = () => {
+        const ref = item.dataset.ref;
+        state.verse = VERSES.find(v=>v.ref===ref);
+        renderStep();
+      };
+    });
+  };
+
+  nextBtn.onclick = () => { state.step = 1; renderStep(); };
+}
+
+function renderPrayReadStep(host, nextBtn){
+  setAccent(state.verse.c);
+  kicker.textContent = "Step 2 · Pray & read aloud";
+  host.innerHTML = `
+    <div class="card">
+      <div class="eyebrow">Step 2 of 5</div>
+      <h2>Pray, then read aloud</h2>
+
+      <div class="prayer-block">
+        <span class="lbl">Pray</span>
+        <p>Ask God to show you something today through these words. Just a sentence or two is enough.</p>
+      </div>
+
+      <p class="copy">Now read the verse again — this time <b>out loud</b>.</p>
+
+      <div class="verse-box">
+        <span class="verse-ref">${state.verse.ref}</span>
+        <span class="verse-text">${state.verse.text}</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary btn-block" id="doneReading">I've read it aloud →</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('doneReading').onclick = () => { state.step = 2; renderStep(); };
+  nextBtn.onclick = () => { state.step = 2; renderStep(); };
+}
+
+function renderReflectStep(host, nextBtn){
+  setAccent(state.verse.c);
+  kicker.textContent = "Step 3 · Reflect";
+  const qHtml = QUESTIONS.map((q,i)=>`
+    <div class="q-item">
+      <div class="q-text"><span class="q-num">${i+1}</span>${q}</div>
+      <textarea data-idx="${i}" placeholder="Type a thought — or just think it through.">${state.answers[i]}</textarea>
+    </div>
+  `).join('');
+
+  host.innerHTML = `
+    <div class="card">
+      <div class="eyebrow">Step 3 of 5</div>
+      <h2>Ask yourself</h2>
+      <p class="copy">Sit with these one at a time. You don't need long answers — a phrase is plenty.</p>
+      ${qHtml}
+    </div>
+  `;
+
+  host.querySelectorAll('textarea').forEach(t=>{
+    t.addEventListener('input', e => {
+      state.answers[+e.target.dataset.idx] = e.target.value;
+    });
+  });
+
+  nextBtn.onclick = () => { state.step = 3; renderStep(); };
+}
+
+function renderRespondStep(host, nextBtn){
+  setAccent(state.verse.c);
+  kicker.textContent = "Step 4 · Respond";
+  if(!state.activity){ state.activity = pickRandomActivity(); }
+
+  host.innerHTML = `
+    <div class="card">
+      <div class="eyebrow">Step 4 of 5</div>
+      <h2>Pray, then respond</h2>
+
+      <div class="prayer-block">
+        <span class="lbl">Pray</span>
+        <p>Ask God for the strength to obey what He's shown you.</p>
+      </div>
+
+      <p class="copy">Now shuffle for a small way to live it out today.</p>
+
+      <div class="activity-box" id="activityBox">
+        <div class="activity-title" id="activityTitle">${state.activity.title}</div>
+        <div class="activity-desc" id="activityDesc">${state.activity.desc}</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="shuffleActivityBtn">🎲 Shuffle an activity</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('shuffleActivityBtn').onclick = () => {
+    const box = document.getElementById('activityBox');
+    const titleEl = document.getElementById('activityTitle');
+    const descEl = document.getElementById('activityDesc');
+    shuffleAnimate(box, titleEl, descEl,
+      () => { const r = pickRandomActivity(); return {_display1:r.title, _display2:r.desc}; },
+      () => {
+        state.activity = pickRandomActivity(state.activity.title);
+        renderStep();
+      }
+    );
+  };
+
+  nextBtn.onclick = () => { state.step = 4; renderStep(); };
+}
+
+function renderDoneStep(host){
+  setAccent(state.verse.c);
+  kicker.textContent = "You're set";
+  const answered = state.answers.filter(a=>a.trim().length>0).length;
+
+  host.innerHTML = `
+    <div class="card">
+      <div class="done-emoji">✅</div>
+      <h2 style="text-align:center;">Go live it out</h2>
+      <p class="copy" style="text-align:center;">Here's today's quiet time, in one place.</p>
+
+      <div class="summary-line"><div class="k">Verse</div><div class="v"><b>${state.verse.ref}</b> — ${state.verse.text}</div></div>
+      <div class="summary-line"><div class="k">Theme</div><div class="v">${state.verse.theme} (${CATEGORIES[state.verse.c].emoji} ${state.verse.c})</div></div>
+      <div class="summary-line"><div class="k">Reflected</div><div class="v">${answered} of 5 questions jotted down</div></div>
+      <div class="summary-line"><div class="k">Respond</div><div class="v"><b>${state.activity.title}</b> — ${state.activity.desc}</div></div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn btn-primary btn-block" id="restartBtn">🔁 Start a new quiet time</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('restartBtn').onclick = () => {
+    state = { step:0, verse:null, activity:null, answers:["","","","",""] };
+    renderStep();
+  };
+}
+
+/* ---------------- NAV ---------------- */
+document.getElementById('backBtn').onclick = () => {
+  if(state.step > 0){ state.step -= 1; renderStep(); }
+};
+document.getElementById('nextBtn').onclick = () => {
+  if(state.step < 4){ state.step += 1; renderStep(); }
+};
+
+renderStep();
+</script>
+</body>
+</html>

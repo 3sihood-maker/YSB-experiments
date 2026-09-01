@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Simple Bible Study Discussion Questions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F1E4;
+    --card:#FFFDF7;
+    --ink:#211C16;
+    --dim:#6A6052;
+    --faint:#9A8F7E;
+    --line:rgba(33,28,22,.12);
+    --warm:#E0A21C;
+    --drill:#D2542A;
+    --refine:#2E6FB7;
+    --cool:#3E8E5A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    padding:0 0 60px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 20px}
+
+  header{padding:36px 20px 26px;border-bottom:2px solid var(--ink)}
+  header .inner{max-width:720px;margin:0 auto}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--drill)}
+  h1{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+    font-size:clamp(30px,7.4vw,46px);line-height:1.02;letter-spacing:.01em;margin:8px 0 10px}
+  .lede{color:var(--dim);font-size:15.5px;max-width:56ch}
+
+  .flow{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+  .flow span{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;padding:5px 11px;border-radius:999px;
+    border:1.5px solid currentColor;background:rgba(255,255,255,.5)}
+
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .act{display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+    font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+    letter-spacing:.04em;font-size:13px;padding:11px 18px;border-radius:999px;
+    border:1.5px solid var(--ink);color:var(--ink);background:transparent;
+    transition:background .15s,color .15s,border-color .15s}
+  .act.primary{background:var(--ink);color:#fff}
+  .act:hover{background:var(--drill);border-color:var(--drill);color:#fff}
+  .act .ext{font-family:'JetBrains Mono',monospace;font-size:10px;opacity:.65;
+    letter-spacing:.1em}
+
+  .steps-art{margin:26px 0 0;border-radius:16px;overflow:hidden;background:#B571B5;
+    box-shadow:0 4px 18px rgba(33,28,22,.10)}
+  .steps-art img{display:block;width:100%;height:auto}
+  .steps-art figcaption{font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    padding:9px 2px 0;background:var(--paper)}
+
+  section.step{margin-top:26px;background:var(--card);border:1px solid var(--line);
+    border-left:5px solid var(--c);border-radius:14px;padding:20px 22px 22px;
+    box-shadow:0 3px 14px rgba(33,28,22,.06)}
+  section.step h2{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+    font-size:22px;letter-spacing:.02em;color:var(--c);display:flex;align-items:baseline;gap:10px}
+  section.step h2 .num{font-family:'JetBrains Mono',monospace;font-size:12px;
+    letter-spacing:.1em;color:var(--faint)}
+
+  ul{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:11px}
+  li{position:relative;padding-left:20px;font-size:15.5px;line-height:1.55}
+  li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:8px;
+    border-radius:50%;background:var(--c)}
+  li b.verb{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.04em;
+    color:var(--c);margin-right:5px}
+  li .sub{display:block;color:var(--dim);font-size:14.5px;margin-top:5px;padding-left:2px}
+
+  .note{margin-top:26px;padding:16px 18px;border-radius:12px;
+    border:1px dashed var(--line);background:rgba(255,255,255,.55);
+    color:var(--dim);font-size:13.5px;line-height:1.6}
+  .note b{color:var(--ink)}
+
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;
+    color:var(--faint);text-transform:uppercase}
+
+  @media print{
+    @page{ size:A4; margin:14mm; }
+    body{background:#fff;padding:0}
+    header{padding:0 0 16px}
+    .wrap,header .inner{max-width:none;padding:0}
+    section.step{break-inside:avoid;box-shadow:none;margin-top:14px;padding:14px 16px 16px}
+    .flow{margin-top:14px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <div class="eyebrow">Youth Sports Bible</div>
+    <h1>Simple Bible Study<br>Discussion Questions</h1>
+    <p class="lede">Four moves for reading any passage — on your own, with a mate, or with a group. Same shape every time, so the questions get out of the way and the passage does the work.</p>
+    <div class="flow">
+      <span style="color:var(--warm)">1 · Warm Up</span>
+      <span style="color:var(--drill)">2 · Training Drills</span>
+      <span style="color:var(--refine)">3 · Refining My Technique</span>
+      <span style="color:var(--cool)">4 · Cool Down</span>
+    </div>
+    <div class="actions">
+      <a class="act primary" href="bible-study-questions.pdf" download>↓ Download <span class="ext">PDF</span></a>
+      <a class="act" href="bible-study-questions.docx" download>↓ Download <span class="ext">WORD</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <figure class="steps-art">
+    <img src="study-steps.jpg" width="1920" height="1080"
+         alt="Four torn-paper collage figures, one for each step: an overhead kick labelled Training Drills, a figure with arms flung wide labelled Refining my technique, a press-up labelled Warm Up, and a figure sitting cross-legged labelled Cool Down.">
+    <figcaption>The four moves, in torn paper</figcaption>
+  </figure>
+
+  <section class="step" style="--c:var(--warm)">
+    <h2><span class="num">01</span> Warm Up</h2>
+    <ul>
+      <li><b class="verb">Pray</b> to God to ask for help reading his word.</li>
+      <li><b class="verb">Ask</b> What do I remember from the last passage? What did I learn?</li>
+      <li><b class="verb">Read</b> the passage.</li>
+      <li><b class="verb">Ask</b> What do I notice?
+        <span class="sub">What surprises or confuses me?</span></li>
+    </ul>
+  </section>
+
+  <section class="step" style="--c:var(--drill)">
+    <h2><span class="num">02</span> Training Drills</h2>
+    <ul>
+      <li>What does the passage say about God? About Jesus? About people?</li>
+      <li>Is there anything that’s hard to hear? Why?</li>
+      <li>Where do I see this in me? Where do I see it in the world?</li>
+      <li>What does this mean for me?</li>
+    </ul>
+  </section>
+
+  <section class="step" style="--c:var(--refine)">
+    <h2><span class="num">03</span> Refining My Technique</h2>
+    <ul>
+      <li>What have I learnt?</li>
+      <li>How am I going to live this out — on and off the field?</li>
+    </ul>
+  </section>
+
+  <section class="step" style="--c:var(--cool)">
+    <h2><span class="num">04</span> Cool Down</h2>
+    <ul>
+      <li><b class="verb">Pray</b> to God about it. You might want to:</li>
+      <li>Thank him for something you read.</li>
+      <li>Say sorry for anything the passage has reminded you of.</li>
+      <li>Ask for his help living his way.</li>
+    </ul>
+    <div class="note">
+      <b>On the cool-down prayer:</b> other ways to remember it are <b>TSP</b> —
+      Thanks, Sorry, Please — or <b>ACTS</b> — Adoration, Confession, Thanksgiving,
+      Supplication. ACTS is more traditional, but the language may be a stretch for
+      younger readers.
+    </div>
+  </section>
+
+  <footer>Deep Till · YSB Experiments · Simple Bible Study Discussion Questions</footer>
+</div>
+
+</body>
+</html>

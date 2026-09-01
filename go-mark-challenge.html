@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GO. — Mark 16-Day Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10142A;
+    --ink2:#171D3B;
+    --card:#1D2448;
+    --card2:#242C58;
+    --line: rgba(255,255,255,0.08);
+    --coral:#FF5A5F;
+    --coral-dim: rgba(255,90,95,0.16);
+    --teal:#19C9A8;
+    --teal-dim: rgba(25,201,168,0.16);
+    --yellow:#FFC93C;
+    --off:#F6F4EE;
+    --off-dim: rgba(246,244,238,0.6);
+    --off-faint: rgba(246,244,238,0.38);
+    --display: 'Anton', sans-serif;
+    --mono: 'Space Mono', monospace;
+    --body: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: radial-gradient(120% 90% at 20% -10%, #232B57 0%, var(--ink) 55%);
+    font-family: var(--body);
+    color: var(--off);
+    display:flex;
+    justify-content:center;
+    padding: 24px 12px 60px;
+    min-height:100vh;
+  }
+  .phone{
+    width:100%;
+    max-width:412px;
+    background: var(--ink2);
+    border-radius: 34px;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,0.7), 0 0 0 8px #05070f;
+    overflow:hidden;
+    position:relative;
+  }
+  .screen{ padding: 22px 18px 28px; }
+  /* ---- Header ---- */
+  .wordmark{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom: 18px;
+  }
+  .wordmark .logo{
+    font-family: var(--display);
+    font-size: 30px;
+    letter-spacing: 1px;
+    color: var(--off);
+  }
+  .wordmark .logo span{ color: var(--coral); }
+  .wordmark .book{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--off-faint);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    padding: 5px 9px;
+    border-radius: 100px;
+  }
+  /* ---- Track progress ---- */
+  .track-wrap{ margin-bottom: 20px; }
+  .track-label{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family: var(--mono); font-size:10.5px; color: var(--off-faint);
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;
+  }
+  .track-label b{ color: var(--yellow); font-weight:700; }
+  .track{
+    display:flex; gap:4px;
+  }
+  .lane{
+    flex:1; height:8px; border-radius:4px;
+    background: rgba(255,255,255,0.08);
+    position:relative; cursor:pointer;
+    transition: transform .15s ease;
+  }
+  .lane:hover{ transform: scaleY(1.3); }
+  .lane.done{ background: var(--teal); }
+  .lane.active{ background: var(--coral); box-shadow: 0 0 0 3px var(--coral-dim); }
+  /* ---- Mode selector ---- */
+  .modes{
+    display:flex; gap:6px; background: rgba(255,255,255,0.05);
+    padding: 4px; border-radius: 14px; margin-bottom: 18px;
+  }
+  .mode-btn{
+    flex:1; border:none; background:transparent; color: var(--off-dim);
+    font-family: var(--body); font-weight:600; font-size: 12.5px;
+    padding: 9px 4px; border-radius: 10px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    transition: all .15s ease;
+  }
+  .mode-btn .ic{ font-size:15px; }
+  .mode-btn.active{ background: var(--off); color: var(--ink); }
+  .mode-banner{
+    font-size: 12px; color: var(--off-dim); background: var(--card);
+    border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+    margin-bottom: 18px; line-height:1.45;
+    display:flex; gap:9px; align-items:flex-start;
+  }
+  .mode-banner .dot{ width:7px;height:7px;border-radius:50%; background:var(--coral); margin-top:5px; flex-shrink:0;}
+  .mode-banner b{ color: var(--off); }
+  .bd-btn{
+    margin-top:8px; display:inline-flex; align-items:center; gap:6px;
+    background: var(--teal-dim); color: var(--teal); border:1px solid rgba(25,201,168,0.4);
+    font-family: var(--mono); font-size: 10.5px; padding:6px 10px; border-radius: 8px;
+    cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;
+  }
+  /* ---- Day card ---- */
+  .day-card{
+    background: linear-gradient(160deg, var(--card2), var(--card));
+    border-radius: 22px; padding: 20px; margin-bottom: 16px;
+    border: 1px solid var(--line); position:relative; overflow:hidden;
+  }
+  .day-card::after{
+    content:""; position:absolute; right:-40px; top:-40px; width:140px; height:140px;
+    background: radial-gradient(circle, rgba(255,90,95,0.18), transparent 70%);
+  }
+  .day-num-row{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .day-num{ font-family: var(--display); font-size: 46px; line-height:0.9; color: var(--off); }
+  .day-num .of{ font-family: var(--mono); font-size:12px; color: var(--off-faint); display:block; margin-top:4px; }
+  .chapter-pill{
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink);
+    background: var(--yellow); padding: 5px 10px; border-radius: 100px; font-weight:700;
+  }
+  .theme{ font-size:11.5px; text-transform:uppercase; letter-spacing:1px; color: var(--off-faint); margin-top:14px; }
+  .verse-ref{ font-family: var(--mono); font-size:12px; color: var(--coral); margin-top:2px; font-weight:700;}
+  .verse-quote{
+    font-family: var(--display); font-size: 26px; line-height:1.15; color: var(--off);
+    margin-top: 8px;
+  }
+  /* ---- Fork ---- */
+  .fork-label{
+    font-family: var(--mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
+    color: var(--off-faint); margin: 4px 2px 10px; text-align:center;
+  }
+  .fork{
+    display:flex; gap:10px; margin-bottom:18px;
+  }
+  .fork-btn{
+    flex:1; border-radius: 18px; padding: 14px 12px; cursor:pointer;
+    border: 1.5px solid var(--line); background: var(--card);
+    text-align:left; transition: all .15s ease;
+  }
+  .fork-btn .fk-ic{ font-size:20px; }
+  .fork-btn .fk-title{ font-family: var(--display); font-size:16px; margin-top:6px; letter-spacing:0.5px;}
+  .fork-btn .fk-sub{ font-size: 10.5px; color: var(--off-faint); margin-top:3px; line-height:1.35;}
+  .fork-btn.light.selected{ background: var(--teal-dim); border-color: var(--teal); }
+  .fork-btn.light.selected .fk-title{ color: var(--teal); }
+  .fork-btn.deep.selected{ background: var(--coral-dim); border-color: var(--coral); }
+  .fork-btn.deep.selected .fk-title{ color: var(--coral); }
+  /* ---- Section blocks ---- */
+  .block{
+    background: var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:16px; margin-bottom:12px;
+  }
+  .block-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .block-tag{
+    font-family: var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:1px;
+    color: var(--ink); background: var(--off); padding:3px 8px; border-radius:100px; font-weight:700;
+  }
+  .block-title{ font-weight:700; font-size:14.5px; color: var(--off); }
+  .block ul{ margin:0; padding-left:18px; font-size:13px; color: var(--off-dim); line-height:1.7;}
+  .block p{ margin:0; font-size:13px; color: var(--off-dim); line-height:1.6; }
+  .wod-time{ font-family:var(--mono); font-size:11px; color:var(--yellow); margin-left:auto; }
+  .squad-note{
+    margin-top:10px; padding:9px 10px; border-radius:10px; font-size:12px;
+    background: rgba(255,255,255,0.04); border-left:3px solid var(--coral); color: var(--off-dim);
+  }
+  .reflect{
+    background: linear-gradient(160deg, rgba(255,201,60,0.14), rgba(255,201,60,0.04));
+    border:1px solid rgba(255,201,60,0.3);
+  }
+  .reflect .block-title{ font-family: var(--display); font-size:16px; font-weight:400; letter-spacing:0.3px; color: var(--yellow); }
+  .study-item{ margin-bottom:10px; }
+  .study-item .q-tag{ font-family:var(--mono); font-size:10px; color:var(--teal); text-transform:uppercase; letter-spacing:0.5px; }
+  .study-item p{ margin-top:2px; }
+  .walk-block{ background: linear-gradient(160deg, var(--card2), var(--card)); }
+  .walk-verse{ font-family: var(--display); font-size:15px; color:var(--off); margin-bottom:8px; }
+  .partner-line{
+    margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+    font-size:12px; color: var(--off-dim);
+  }
+  .partner-line b{ color: var(--off); }
+  .done-btn{
+    width:100%; padding:14px; border-radius:16px; border:none; cursor:pointer;
+    font-family: var(--display); font-size:15px; letter-spacing:0.5px;
+    background: var(--off); color: var(--ink); margin-top:6px;
+  }
+  .done-btn.done{ background: var(--teal); color: var(--ink); }
+  .nav-hint{ text-align:center; font-family:var(--mono); font-size:9.5px; color:var(--off-faint); margin-top:14px; letter-spacing:0.5px;}
+  .reset-row{ text-align:center; margin-top:10px; }
+  .reset-btn{
+    background:none; border:none; cursor:pointer;
+    font-family:var(--mono); font-size:9.5px; letter-spacing:0.5px;
+    color:var(--off-faint); text-transform:uppercase; padding:6px 8px;
+  }
+  .reset-btn:hover{ color:var(--coral); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="screen">
+    <div class="wordmark">
+      <div class="logo">GO<span>.</span></div>
+      <div class="book">MARK · 16 DAYS</div>
+    </div>
+    <div class="track-wrap">
+      <div class="track-label"><span>Day <b id="trackDay">1</b> of 16</span><span id="trackDone">0 done</span></div>
+      <div class="track" id="track"></div>
+    </div>
+    <div class="modes" id="modes">
+      <button class="mode-btn active" data-mode="solo"><span class="ic">🧍</span>Solo</button>
+      <button class="mode-btn" data-mode="body"><span class="ic">🎥</span>Body Double</button>
+      <button class="mode-btn" data-mode="squad"><span class="ic">👥</span>Squad</button>
+    </div>
+    <div class="mode-banner" id="modeBanner"></div>
+    <div class="day-card">
+      <div class="day-num-row">
+        <div class="day-num" id="dayNum">01<span class="of">DAY OF 16</span></div>
+        <div class="chapter-pill" id="chapterPill">MARK 1</div>
+      </div>
+      <div class="theme" id="dayTheme">Theme</div>
+      <div class="verse-ref" id="verseRef">Mark 1:17</div>
+      <div class="verse-quote" id="verseQuote">“Follow me.”</div>
+    </div>
+    <div id="routine"></div>
+    <div class="fork-label">AFTER THE WORKOUT</div>
+    <div class="fork">
+      <div class="fork-btn light selected" id="btnLight">
+        <div class="fk-ic">📖</div>
+        <div class="fk-title">GO LIGHT</div>
+        <div class="fk-sub">Read the chapter + pray. ~5 min.</div>
+      </div>
+      <div class="fork-btn deep" id="btnDeep">
+        <div class="fk-ic">🔎</div>
+        <div class="fk-title">GO DEEPER</div>
+        <div class="fk-sub">Study the chapter + pray. ~10 min.</div>
+      </div>
+    </div>
+    <div id="content"></div>
+    <button class="done-btn" id="doneBtn">MARK DAY COMPLETE</button>
+    <div class="nav-hint">TAP THE TRACK ABOVE TO JUMP DAYS</div>
+    <div class="reset-row"><button class="reset-btn" id="resetBtn">Clear my progress</button></div>
+  </div>
+</div>
+<script>
+const DAYS = [
+{ref:"Mark 1:17", verse:"“Follow me.”", chapter:1, theme:"Responding to an invitation",
+ context:"Jesus is just beginning His public life. He's gathering ordinary people, not religious experts — His invitation is simple: come with me and see.",
+ warmup:["Breathe: notice anything weighing on your mind, then exhale and release it","30 sec high knees","30 sec butt kicks","30 sec fast feet","30 sec walk","30 sec fast feet again"],
+ wod:{title:"Follow the Leader", time:"8 min", desc:"Leader calls a new move every 10 seconds — squat, jump, lunge, plank, shuffle, sprint. Partner reacts instantly.", squad:"Rotate the leader role every 20 seconds."},
+ reflect:"If Jesus really is inviting me into something good, what might it be?",
+ stretch:["Quad stretch","Hamstring reach","Shoulder circles"],
+ study:[["What I notice","What surprised or confused me in Mark 1?"],["What God is like","What does this chapter show about God's character, priorities, or power?"],["What people are like","What does this reveal about people — including me?"],["What this means for me","What action, attitude, or shift might Jesus be inviting me into?"]],
+ walkAsk:"Where are You calling me to follow today?"},
+{ref:"Mark 2:5", verse:"“Your sins are forgiven.”", chapter:2, theme:"Being lifted, not judged",
+ context:"A paralysed man is lowered through a roof by friends. Before healing his body, Jesus speaks to his heart.",
+ warmup:["Breathe: notice any guilt, regret, or heaviness, then release it","Slow squats","Arm swings","Hip circles"],
+ wod:{title:"Lift Each Other Up", time:"10 min", desc:"Alternate: 10 assisted squats (hold hands), 10 partner push high-fives, 10 partner-supported sit-ups, 20 sec encouragement plank.", squad:"Rotate partners each round. Every switch, say “I'm lifting you up.”"},
+ reflect:"If forgiveness is real, what part of my life would I want lifted?",
+ stretch:["Back stretch","Chest opener"],
+ study:[["What I notice","What surprised or confused me?"],["What God is like","What does Jesus' forgiveness and authority show about God?"],["What people are like","Who do I relate to — the friends, the crowd, the critics?"],["What this means for me","Where do I need forgiveness, or to carry someone to Jesus?"]],
+ walkAsk:"What forgiveness do I need to receive?"},
+{ref:"Mark 3:35", verse:"“Whoever does God's will is my family.”", chapter:3, theme:"Belonging",
+ context:"Jesus is surrounded by crowds and critics. He redefines family — not by blood, but by openness to God's way.",
+ warmup:["Breathe: notice any loneliness or disconnection, then release it","March together","Side steps","Arm circles"],
+ wod:{title:"Family Sync", time:"8 min", desc:"Stay in sync: 20 synced squats, 20 synced lunges, 20 synced jumping jacks, 20 synced toe touches.", squad:"Everyone moves in sync — one person counts. Fall out of sync? Pause, smile, reset."},
+ reflect:"If God's family is open to anyone, what would it mean for me to belong?",
+ stretch:["Slow breathing","Side bends"],
+ study:[["What I notice","What stood out or confused me?"],["What God is like","What does Jesus value in His true family?"],["What people are like","Where do I see myself — inside or outside His will?"],["What this means for me","How can I live more like part of Jesus' family?"]],
+ walkAsk:"How can I live like part of Your family today?"},
+{ref:"Mark 4:39", verse:"“Peace, be still.”", chapter:4, theme:"Anxiety → Calm",
+ context:"A violent storm hits. The disciples panic. Jesus speaks a simple command, and the chaos stops.",
+ warmup:["Breathe: name your biggest worry, hand it over ×5","Gentle shoulder rolls","Slow marching","Light side steps"],
+ wod:{title:"Storm / Still", time:"10 min", desc:"Caller shouts “STORM!” (20s fast feet, mountain climbers, or high knees) or “STILL!” (freeze, breathe, hands over heart) — at any moment, unpredictably.", squad:"Caller rotates around the circle every 2 minutes."},
+ reflect:"If peace is possible, what part of my life needs calming?",
+ stretch:["Child's pose","Neck rolls"],
+ study:[["What I notice","What parable or moment surprised me?"],["What God is like","What does Jesus' authority over storms show?"],["What people are like","Where do I see fear, doubt, or misunderstanding?"],["What this means for me","Where do I need Jesus to speak peace?"]],
+ walkAsk:"Where do I need Your peace?"},
+{ref:"Mark 5:34", verse:"“Your faith has made you well.”", chapter:5, theme:"Reaching out for help",
+ context:"A woman who suffered for 12 years reaches out to Jesus in a crowd. She doesn't know everything about Him — she just reaches. He responds with kindness.",
+ warmup:["Breathe: notice anything you wish could change, release the fear","Reach up","Reach sideways","Reach forward"],
+ wod:{title:"Reach & Rise", time:"8 min", desc:"Alternate: 10 reach-and-squat, 10 reach-and-lunge, 10 reach-and-jump, 20s reach-and-hold plank.", squad:"Everyone reaches together — rotate counting."},
+ reflect:"If reaching out could help me, what would I reach for?",
+ stretch:["Overhead reach","Forward fold"],
+ study:[["What I notice","Which healing story grabbed me?"],["What God is like","What does Jesus' compassion and power reveal?"],["What people are like","Where do I see desperation, faith, or fear?"],["What this means for me","What am I reaching out to Jesus for?"]],
+ walkAsk:"What am I reaching out to You for?"},
+{ref:"Mark 6:50", verse:"“Take courage; it is I.”", chapter:6, theme:"Courage in fear",
+ context:"The disciples see Jesus walking on water and panic. Jesus doesn't scold them — He reassures them.",
+ warmup:["Breathe: name something that scares you, hand it over","Power stance","Light jog","Deep breaths"],
+ wod:{title:"Courage Drills", time:"8 min", desc:"10 jump squats, 10 push-ups, 10 burpees, 20s courage plank.", squad:"Encouragement must be spoken out loud: “You're stronger than you think.”"},
+ reflect:"If courage is possible, where do I need it most?",
+ stretch:["Chest opener","Hip flexor stretch"],
+ study:[["What I notice","What moment surprised me?"],["What God is like","How does Jesus show courage and compassion?"],["What people are like","Where do I see fear, doubt, or boldness?"],["What this means for me","Where do I need courage?"]],
+ walkAsk:"Help me face this fear."},
+{ref:"Mark 7:15", verse:"“Nothing outside can defile you.”", chapter:7, theme:"Inside > outside",
+ context:"People argued about religious rules. Jesus says the real issue is the heart — not appearances.",
+ warmup:["Breathe: notice any pressure to “look good,” release it","Slow breathing","Torso twists","Marching"],
+ wod:{title:"Inside Strength", time:"8 min", desc:"20 sit-ups, 20 Russian twists, 20 leg raises, 20s hollow hold.", squad:"Core work = “inside strength.” Talk through it as you go."},
+ reflect:"What's happening inside me that I wish could change?",
+ stretch:["Cat-cow","Side stretch"],
+ study:[["What I notice","What teaching challenged me?"],["What God is like","What does Jesus care about most?"],["What people are like","Where do I see hypocrisy or honesty?"],["What this means for me","What inside area needs Jesus' cleansing?"]],
+ walkAsk:"What's happening inside me?"},
+{ref:"Mark 8:34", verse:"“Take up your cross and follow me.”", chapter:8, theme:"Commitment",
+ context:"Jesus invites people to follow Him — honestly. It's not easy, but it's meaningful.",
+ warmup:["Breathe: notice anything heavy, release fear of responsibility","Shoulder rolls","Light jog","Deep breaths"],
+ wod:{title:"Carry the Weight", time:"8 min", desc:"20 slow lunges, 20 slow squats, 20 slow push-ups, 20s “carry hold” (arms out).", squad:"Slow, deliberate movements — commitment isn't rushed."},
+ reflect:"What commitment in my life feels heavy?",
+ stretch:["Shoulder stretch","Hamstring reach"],
+ study:[["What I notice","What moment felt heavy or bold?"],["What God is like","What does Jesus expect from His followers?"],["What people are like","Where do I see confusion or clarity?"],["What this means for me","What commitment is Jesus asking me to carry?"]],
+ walkAsk:"Show me what commitment means."},
+{ref:"Mark 9:23", verse:"“All things are possible for one who believes.”", chapter:9, theme:"Hope",
+ context:"A father asks Jesus to help his son. He's unsure. Jesus invites him to hope.",
+ warmup:["Breathe: notice something that feels impossible, release hopelessness","High knees","Butt kicks","Arm swings"],
+ wod:{title:"Possibility Push", time:"8 min", desc:"20 squats, 20 push-ups, 20 jumping jacks, 20s sprint on the spot.", squad:"Say out loud: “You can do more than you think.”"},
+ reflect:"What feels impossible but I wish could change?",
+ stretch:["Quad stretch","Forward fold"],
+ study:[["What I notice","What amazed or confused me?"],["What God is like","What does Jesus' power reveal?"],["What people are like","Where do I see doubt or belief?"],["What this means for me","What feels impossible but Jesus can do?"]],
+ walkAsk:"Help me hope again."},
+{ref:"Mark 10:27", verse:"“With God all things are possible.”", chapter:10, theme:"Trust",
+ context:"People wondered who could be “good enough.” Jesus says God makes the impossible possible.",
+ warmup:["Breathe: notice what you can't control, release the pressure","Slow jog","Deep breaths","Shoulder rolls"],
+ wod:{title:"Trust Drills", time:"8 min", desc:"10 assisted squats, 10 assisted lunges, 10 assisted push-ups, 20s trust lean (back-to-back).", squad:"The trust lean means relying on something beyond yourself."},
+ reflect:"Where do I struggle to trust?",
+ stretch:["Back stretch","Chest opener"],
+ study:[["What I notice","What challenged me?"],["What God is like","What does Jesus value?"],["What people are like","Where do I see struggle or surrender?"],["What this means for me","Where do I need to trust God more?"]],
+ walkAsk:"Help me trust You, even a little."},
+{ref:"Mark 11:24", verse:"“Believe when you pray.”", chapter:11, theme:"Asking + believing",
+ context:"Jesus teaches that prayer isn't empty — it's relational.",
+ warmup:["Breathe: notice something you want, release fear of asking","Deep breathing","Arm circles","Marching"],
+ wod:{title:"Prayer Pulse", time:"8 min", desc:"20 prayer-hands squats, 20 prayer-hands lunges, 20 prayer-hands jacks, 20s prayer-hands plank.", squad:"Hands together — a symbol of asking, together."},
+ reflect:"If I could ask for anything, what would it be?",
+ stretch:["Wrist stretch","Side bends"],
+ study:[["What I notice","What stood out?"],["What God is like","What does Jesus teach about prayer?"],["What people are like","Where do I see belief or doubt?"],["What this means for me","What am I believing God for?"]],
+ walkAsk:"What am I believing You for today?"},
+{ref:"Mark 12:30", verse:"“Love the Lord your God with all your heart.”", chapter:12, theme:"Whole-life love",
+ context:"Jesus explains the greatest command — wholehearted love.",
+ warmup:["Breathe: notice what you care about deeply, release distractions","Reach up","Reach out","Reach down"],
+ wod:{title:"All Your Strength", time:"8 min", desc:"20 full-effort squats, 20 full-effort push-ups, 20 full-effort jacks, 20s full-effort plank.", squad:"“Full effort” symbolises whole-life love."},
+ reflect:"Where do I struggle to give my full effort in life?",
+ stretch:["Full-body stretch","Deep breathing"],
+ study:[["What I notice","What teaching grabbed me?"],["What God is like","What does Jesus say matters most?"],["What people are like","Where do I see sincerity or pretense?"],["What this means for me","What part of me struggles to love God fully?"]],
+ walkAsk:"What part of me struggles to love You fully?"},
+{ref:"Mark 13:33", verse:"“Be alert; stay awake.”", chapter:13, theme:"Awareness",
+ context:"Jesus encourages alertness — not fear, but awareness.",
+ warmup:["Breathe: notice what you've been ignoring, wake up to it","Fast feet","Arm swings","Torso twists"],
+ wod:{title:"Awake Drills", time:"8 min", desc:"React to unpredictable commands: “Down!” plank · “Up!” jump · “Left/Right!” shuffle · “Still!” freeze.", squad:"Commands come from a rotating caller — unpredictably."},
+ reflect:"Where in my life do I need to wake up?",
+ stretch:["Neck rolls","Shoulder stretch"],
+ study:[["What I notice","What confused or challenged me?"],["What God is like","What does Jesus warn or promise?"],["What people are like","Where do I see fear or faithfulness?"],["What this means for me","Where am I spiritually sleepy?"]],
+ walkAsk:"Where am I spiritually sleepy?"},
+{ref:"Mark 14:38", verse:"“The spirit is willing, but the flesh is weak.”", chapter:14, theme:"Weakness + desire",
+ context:"Jesus sees His friends struggling — He understands human weakness.",
+ warmup:["Breathe: notice something you want to do, and what makes it hard","Slow jog","Deep breaths","Shoulder rolls"],
+ wod:{title:"Willing Spirit, Weak Flesh", time:"8 min", desc:"10 burpees (flesh is weak), 10 slow squats (spirit is willing), 10 push-ups, 20s plank.", squad:"Call the pattern out loud together as you switch."},
+ reflect:"Where do I feel weak but still want to grow?",
+ stretch:["Hamstring reach","Chest opener"],
+ study:[["What I notice","What moment hit me hardest?"],["What God is like","What does Jesus' suffering reveal?"],["What people are like","Where do I see weakness or loyalty?"],["What this means for me","Where do I feel weak but want to be willing?"]],
+ walkAsk:"Help me grow even when I feel weak."},
+{ref:"Mark 15:39", verse:"“Truly this man was the Son of God.”", chapter:15, theme:"Recognition",
+ context:"A Roman soldier — not a religious person — sees Jesus die and recognises something divine.",
+ warmup:["Breathe: notice anything unclear, imagine clarity","March","Arm swings","Deep breaths"],
+ wod:{title:"Eyes Open", time:"8 min", desc:"10 eyes-closed squats, 10 eyes-closed toe touches, 10 eyes-closed jacks (slow), 20s eyes-closed breathing — then repeat eyes open, full effort.", squad:"Eyes closed = confusion. Eyes open = clarity."},
+ reflect:"Where do I need clarity in my life?",
+ stretch:["Slow breathing","Side stretch"],
+ study:[["What I notice","What struck me about the crucifixion?"],["What God is like","What does Jesus' sacrifice reveal?"],["What people are like","Where do I see denial, cruelty, or recognition?"],["What this means for me","Where do I need to see Jesus more clearly?"]],
+ walkAsk:"Help me see what's true."},
+{ref:"Mark 16:15", verse:"“Go into all the world.”", chapter:16, theme:"Purpose",
+ context:"After rising from the dead, Jesus sends His followers out with purpose.",
+ warmup:["Breathe: notice any desire for purpose, release confusion","Jog","High knees","Arm swings"],
+ wod:{title:"Go!", time:"8 min", desc:"20 running-on-the-spot, 20 jumping jacks, 20 lunges, 20s sprint burst.", squad:"Movement = mission. Finish loud."},
+ reflect:"Where do I want to make a difference?",
+ stretch:["Quad stretch","Forward fold"],
+ study:[["What I notice","What surprised me about the resurrection?"],["What God is like","What does Jesus' victory reveal?"],["What people are like","Where do I see fear, joy, or mission?"],["What this means for me","Where is Jesus sending me?"]],
+ walkAsk:"Show me where to go today."}
+];
+const MODE_BANNERS = {
+  solo: {icon:"🧍", html:"<b>Solo mode.</b> Every step works alone — private reflections, your own pace, no pressure to share."},
+  body: {icon:"🎥", html:"<b>Body Double mode.</b> Jump on a video call with a friend and move through the day together, same time, different places.<div class='bd-btn'>🔗 Copy body double link</div>"},
+  squad: {icon:"👥", html:"<b>Squad mode.</b> Face-to-face, pairs or 3–5. Every drill has a squad variation and ends with a team huddle."}
+};
+
+/* ---------------------------------------------------------------
+   Saved on this device. A 16-day plan that forgets where you were
+   every time you close the tab isn't a 16-day plan — so the ticked
+   days, the mode, the light/deeper choice and the day you were on
+   all persist. Reads and writes are wrapped: a browser in private
+   mode, or one with site data blocked, throws on access.
+   --------------------------------------------------------------- */
+const STORE_KEY = 'go-mark-16-v1';
+
+function loadState(){
+  const blank = { progress:new Array(16).fill(false), mode:'solo', path:'light', day:0 };
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return blank;
+    const s = JSON.parse(raw);
+    return {
+      progress: Array.isArray(s.progress) && s.progress.length === 16
+        ? s.progress.map(Boolean) : blank.progress,
+      mode: ['solo','body','squad'].includes(s.mode) ? s.mode : 'solo',
+      path: ['light','deep'].includes(s.path) ? s.path : 'light',
+      day: Number.isInteger(s.day) && s.day >= 0 && s.day < 16 ? s.day : 0
+    };
+  }catch(e){ return blank; }
+}
+function saveState(){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify({ progress, mode, path, day:dayIndex }));
+  }catch(e){ /* storage unavailable — the session still works, it just won't be remembered */ }
+}
+
+const saved = loadState();
+let mode = saved.mode;
+let dayIndex = saved.day;
+let path = saved.path;            // light | deep
+let progress = saved.progress;
+
+const trackEl = document.getElementById('track');
+const trackDayEl = document.getElementById('trackDay');
+const trackDoneEl = document.getElementById('trackDone');
+const modeBannerEl = document.getElementById('modeBanner');
+const dayNumEl = document.getElementById('dayNum');
+const chapterPillEl = document.getElementById('chapterPill');
+const dayThemeEl = document.getElementById('dayTheme');
+const verseRefEl = document.getElementById('verseRef');
+const verseQuoteEl = document.getElementById('verseQuote');
+const routineEl = document.getElementById('routine');
+const contentEl = document.getElementById('content');
+const doneBtn = document.getElementById('doneBtn');
+const btnLight = document.getElementById('btnLight');
+const btnDeep = document.getElementById('btnDeep');
+function buildTrack(){
+  trackEl.innerHTML = "";
+  for(let i=0;i<16;i++){
+    const lane = document.createElement('div');
+    lane.className = 'lane' + (progress[i] ? ' done' : '') + (i===dayIndex ? ' active' : '');
+    lane.title = 'Day ' + (i+1);
+    lane.addEventListener('click', ()=>{ dayIndex = i; saveState(); render(); });
+    trackEl.appendChild(lane);
+  }
+  trackDoneEl.textContent = progress.filter(Boolean).length + " done";
+}
+function renderModeBanner(){
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
+  const m = MODE_BANNERS[mode];
+  modeBannerEl.innerHTML = `<div class="dot"></div><div>${m.html}</div>`;
+}
+function partnerLine(d){
+  if(mode==='solo') return "";
+  const label = mode==='body' ? "Body double" : "Squad";
+  return `<div class="partner-line"><b>${label}:</b> ${d.wod.squad}</div>`;
+}
+function walkPartnerLine(){
+  if(mode==='solo') return "";
+  const label = mode==='body' ? "On your call" : "Squad";
+  return `<div class="partner-line"><b>${label}:</b> take turns saying the verse out loud. Each person shares one sentence — “Here's what stood out to me” and “Here's what I think God is saying to me.”</div>`;
+}
+function render(){
+  const d = DAYS[dayIndex];
+  dayNumEl.innerHTML = String(dayIndex+1).padStart(2,'0') + '<span class="of">DAY OF 16</span>';
+  trackDayEl.textContent = dayIndex+1;
+  chapterPillEl.textContent = 'MARK ' + d.chapter;
+  dayThemeEl.textContent = d.theme;
+  verseRefEl.textContent = d.ref;
+  verseQuoteEl.textContent = d.verse;
+  doneBtn.textContent = progress[dayIndex] ? "✓ DAY COMPLETE" : "MARK DAY COMPLETE";
+  doneBtn.classList.toggle('done', progress[dayIndex]);
+  btnLight.classList.toggle('selected', path==='light');
+  btnDeep.classList.toggle('selected', path==='deep');
+  buildTrack();
+  renderModeBanner();
+  // The fitness routine is always the main event — warm-up, key verse moment, WOD, reflection, stretch.
+  routineEl.innerHTML = `
+    <div class="block">
+      <div class="block-head"><span class="block-tag">Warm-up</span><span class="block-title">3 minutes</span></div>
+      <ul>${d.warmup.map(w=>`<li>${w}</li>`).join('')}</ul>
+    </div>
+    <div class="block">
+      <div class="block-head"><span class="block-tag">Key verse moment</span><span class="block-title">${d.ref}</span></div>
+      <p>${d.context}</p>
+    </div>
+    <div class="block">
+      <div class="block-head"><span class="block-tag">WOD</span><span class="block-title">${d.wod.title}</span><span class="wod-time">${d.wod.time}</span></div>
+      <p>${d.wod.desc}</p>
+      ${partnerLine(d)}
+    </div>
+    <div class="block reflect">
+      <div class="block-head"><span class="block-title">“${d.reflect}”</span></div>
+    </div>
+    <div class="block">
+      <div class="block-head"><span class="block-tag">Stretch</span><span class="block-title">2 minutes</span></div>
+      <ul>${d.stretch.map(s=>`<li>${s}</li>`).join('')}</ul>
+    </div>
+  `;
+  // The fork only changes what happens after the workout: a light read + pray, or a deeper study + pray.
+  if(path==='light'){
+    contentEl.innerHTML = `
+      <div class="block">
+        <div class="block-head"><span class="block-tag">Read</span><span class="block-title">Mark ${d.chapter} — full chapter</span></div>
+        <p>${d.context}</p>
+      </div>
+      <div class="block walk-block">
+        <div class="block-head"><span class="block-tag">Pray</span><span class="block-title">Walk &amp; Talk with God · 3–5 min</span></div>
+        <div class="walk-verse">Repeat as you walk: ${d.verse}</div>
+        <p>Ask God: “${d.walkAsk}”</p>
+        <p style="margin-top:6px; font-family:var(--mono); font-size:10.5px; color:var(--off-faint);">MEMORY TRICK — say the verse every time your left foot hits the ground.</p>
+        ${walkPartnerLine()}
+      </div>
+    `;
+  } else {
+    contentEl.innerHTML = `
+      <div class="block">
+        <div class="block-head"><span class="block-tag">Study</span><span class="block-title">Mark ${d.chapter} — chapter study</span></div>
+        ${d.study.map(s=>`<div class="study-item"><div class="q-tag">${s[0]}</div><p>${s[1]}</p></div>`).join('')}
+      </div>
+      <div class="block walk-block">
+        <div class="block-head"><span class="block-tag">Pray</span><span class="block-title">Walk &amp; Talk with God · 3–5 min</span></div>
+        <div class="walk-verse">Repeat as you walk: ${d.verse}</div>
+        <p>Ask God: “${d.walkAsk}”</p>
+        ${walkPartnerLine()}
+      </div>
+    `;
+  }
+}
+document.querySelectorAll('.mode-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{ mode = b.dataset.mode; saveState(); render(); });
+});
+btnLight.addEventListener('click', ()=>{ path='light'; saveState(); render(); });
+btnDeep.addEventListener('click', ()=>{ path='deep'; saveState(); render(); });
+doneBtn.addEventListener('click', ()=>{
+  progress[dayIndex] = !progress[dayIndex];
+  saveState();
+  render();
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(!confirm('Clear all 16 days and start again?')) return;
+  progress = new Array(16).fill(false);
+  dayIndex = 0;
+  saveState();
+  render();
+});
+render();
+</script>
+</body>
+</html>

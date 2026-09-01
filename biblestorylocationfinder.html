@@ -1,0 +1,3459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Story Locations">
+<meta name="theme-color" content="#1E4B7A">
+<title>Bible Story Location Finder</title>
+<!--HEADSTART-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap">
+<style>
+:root{
+  --ground:#EDF0E9;
+  --surface:#FBFCF9;
+  --raised:#FFFFFF;
+  --ink:#17231E;
+  --ink-soft:#4A574F;
+  --ink-faint:#7A857D;
+  --line:#D3DACB;
+  --line-soft:#E3E8DC;
+  --accent:#1E4B7A;
+  --accent-soft:#E4EBF3;
+  --established:#2C6A4F;
+  --established-bg:#E2EDE6;
+  --debated:#8C6209;
+  --debated-bg:#F3EAD6;
+  --unknown:#5F6A62;
+  --unknown-bg:#E5E9E2;
+  --contour:rgba(23,35,30,0.10);
+  --focus:#1E4B7A;
+  --shadow:0 1px 2px rgba(23,35,30,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#12160F;
+    --surface:#181D16;
+    --raised:#1E241C;
+    --ink:#E7EBE0;
+    --ink-soft:#AFB8A9;
+    --ink-faint:#828C7E;
+    --line:#2E3629;
+    --line-soft:#242B21;
+    --accent:#8DB4DE;
+    --accent-soft:#1B2735;
+    --established:#79C79C;
+    --established-bg:#16281F;
+    --debated:#DDAE4A;
+    --debated-bg:#2B2314;
+    --unknown:#96A08F;
+    --unknown-bg:#22271F;
+    --contour:rgba(231,235,224,0.09);
+    --focus:#8DB4DE;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12160F;
+  --surface:#181D16;
+  --raised:#1E241C;
+  --ink:#E7EBE0;
+  --ink-soft:#AFB8A9;
+  --ink-faint:#828C7E;
+  --line:#2E3629;
+  --line-soft:#242B21;
+  --accent:#8DB4DE;
+  --accent-soft:#1B2735;
+  --established:#79C79C;
+  --established-bg:#16281F;
+  --debated:#DDAE4A;
+  --debated-bg:#2B2314;
+  --unknown:#96A08F;
+  --unknown-bg:#22271F;
+  --contour:rgba(231,235,224,0.09);
+  --focus:#8DB4DE;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:2px}
+
+.shell{max-width:52rem;margin:0 auto;padding:0 1.15rem 4rem}
+
+/* ---------- masthead ---------- */
+.masthead{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.masthead canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.masthead-inner{position:relative;max-width:52rem;margin:0 auto;padding:2.4rem 1.15rem 1.9rem}
+.eyebrow{
+  margin:0 0 .75rem;font-size:.6875rem;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-faint);
+}
+h1{
+  margin:0;font-size:clamp(1.85rem,7vw,2.85rem);line-height:1.04;font-weight:700;
+  letter-spacing:-.025em;text-wrap:balance;
+}
+.lede{
+  margin:.85rem 0 0;max-width:34rem;color:var(--ink-soft);
+  font-family:"Newsreader",Georgia,serif;font-size:1.0625rem;line-height:1.55;
+}
+
+/* ---------- controls ---------- */
+.controls{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb,var(--ground) 92%,transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.controls-inner{max-width:52rem;margin:0 auto;padding:.85rem 1.15rem .7rem;display:flex;flex-direction:column;gap:.65rem}
+.searchwrap{position:relative;display:flex;align-items:center}
+.searchwrap svg{position:absolute;left:.85rem;width:1.05rem;height:1.05rem;color:var(--ink-faint);pointer-events:none}
+#q{
+  width:100%;font:inherit;font-size:1rem;color:var(--ink);
+  background:var(--raised);border:1px solid var(--line);border-radius:.6rem;
+  padding:.7rem .7rem .7rem 2.5rem;box-shadow:var(--shadow);
+  appearance:none;-webkit-appearance:none;
+}
+#q::placeholder{color:var(--ink-faint)}
+#q::-webkit-search-cancel-button{display:none}
+#clear{
+  position:absolute;right:.4rem;border:0;background:transparent;cursor:pointer;
+  color:var(--ink-faint);font:inherit;font-size:1.25rem;line-height:1;padding:.35rem .5rem;border-radius:.4rem;
+}
+#clear[hidden]{display:none}
+#clear:hover{color:var(--ink)}
+
+.chips{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;padding-bottom:.15rem;margin:0 -1.15rem;padding-left:1.15rem;padding-right:1.15rem}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;font:inherit;font-size:.8125rem;font-weight:500;
+  color:var(--ink-soft);background:var(--raised);
+  border:1px solid var(--line);border-radius:999px;
+  padding:.32rem .75rem;cursor:pointer;white-space:nowrap;
+  transition:background .12s ease,color .12s ease,border-color .12s ease;
+}
+.chip:hover{border-color:var(--ink-faint)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.chip .swatch{display:inline-block;width:.5rem;height:.5rem;border-radius:50%;margin-right:.4rem;vertical-align:.02em}
+.chip[data-f="established"] .swatch{background:var(--established)}
+.chip[data-f="debated"] .swatch{background:var(--debated)}
+.chip[data-f="unknown"] .swatch{background:var(--unknown)}
+.chip[aria-pressed="true"] .swatch{box-shadow:0 0 0 1.5px var(--ground)}
+
+.count{
+  margin:0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.75rem;
+  color:var(--ink-faint);letter-spacing:.01em;font-variant-numeric:tabular-nums;
+}
+
+/* ---------- results ---------- */
+#results{margin:0;padding:0;list-style:none}
+.entry{
+  border-top:1px solid var(--line-soft);
+  border-left:2px solid var(--conf);
+  padding:1.35rem 0 1.5rem 1rem;
+  display:grid;grid-template-columns:1fr;gap:.55rem;
+}
+.entry:first-child{border-top:0}
+.entry[data-conf="established"]{--conf:var(--established);--conf-bg:var(--established-bg)}
+.entry[data-conf="debated"]{--conf:var(--debated);--conf-bg:var(--debated-bg)}
+.entry[data-conf="unknown"]{--conf:var(--unknown);--conf-bg:var(--unknown-bg)}
+
+.entry-ref{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.75rem;font-weight:500;
+  letter-spacing:.02em;color:var(--ink-faint);margin:0;
+}
+.entry-title{margin:0;font-size:1.1875rem;font-weight:600;letter-spacing:-.015em;line-height:1.25;text-wrap:balance}
+.entry-place{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:.15rem .55rem}
+.place-name{
+  font-size:.75rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--ink);
+}
+.place-modern{
+  font-family:"Newsreader",Georgia,serif;font-style:italic;font-size:.9375rem;color:var(--ink-soft);
+}
+.entry-note{
+  margin:.15rem 0 0;max-width:36rem;
+  font-family:"Newsreader",Georgia,serif;font-size:1rem;line-height:1.48;color:var(--ink-soft);
+}
+.badge{
+  justify-self:start;display:inline-flex;align-items:center;gap:.4rem;
+  font-size:.6875rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--conf);background:var(--conf-bg);
+  border-radius:999px;padding:.24rem .6rem;
+}
+.badge .glyph{width:.5rem;height:.5rem;border-radius:50%;background:var(--conf)}
+.entry[data-conf="debated"] .badge .glyph{background:linear-gradient(90deg,var(--conf) 50%,transparent 50%);box-shadow:inset 0 0 0 1.5px var(--conf)}
+.entry[data-conf="unknown"] .badge .glyph{background:transparent;border-radius:0;height:1.5px;width:.7rem;background:var(--conf)}
+
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem .85rem;margin-top:.3rem}
+.btn-map{
+  display:inline-flex;align-items:center;gap:.45rem;
+  font-size:.875rem;font-weight:600;text-decoration:none;
+  color:var(--raised);background:var(--accent);
+  border-radius:.5rem;padding:.5rem .85rem;
+  transition:filter .12s ease;
+}
+.btn-map:hover{filter:brightness(1.12)}
+.btn-map svg{width:.95rem;height:.95rem}
+.coords{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.75rem;
+  color:var(--ink-faint);font-variant-numeric:tabular-nums;
+}
+.notsure{
+  margin-top:.3rem;background:var(--unknown-bg);border-radius:.55rem;
+  padding:.7rem .85rem;font-size:.9375rem;font-weight:500;color:var(--ink);
+  display:flex;align-items:center;gap:.55rem;
+}
+.notsure .glyph{flex:0 0 auto;width:.85rem;height:2px;background:var(--unknown)}
+
+details.cands{margin-top:.55rem}
+details.cands summary{
+  cursor:pointer;font-size:.8125rem;font-weight:500;color:var(--accent);
+  list-style:none;display:inline-flex;align-items:center;gap:.35rem;
+}
+details.cands summary::-webkit-details-marker{display:none}
+details.cands summary::before{content:"▸";font-size:.7rem;transition:transform .15s ease}
+details.cands[open] summary::before{transform:rotate(90deg)}
+.cand-note{
+  margin:.5rem 0 .5rem;font-family:"Newsreader",Georgia,serif;font-style:italic;
+  font-size:.9375rem;color:var(--ink-faint);max-width:36rem;
+}
+.cand-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.3rem}
+.cand-list a{
+  display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;
+  font-size:.875rem;color:var(--ink);border-bottom:1px solid transparent;
+}
+.cand-list a:hover{border-bottom-color:var(--ink-faint)}
+.cand-list a::before{content:"";width:.35rem;height:.35rem;border-radius:50%;background:var(--ink-faint);flex:0 0 auto}
+
+.empty{list-style:none;padding:3rem 0;text-align:left;max-width:34rem}
+.empty h2{margin:0 0 .5rem;font-size:1.125rem;font-weight:600}
+.empty p{margin:0;font-family:"Newsreader",Georgia,serif;font-size:1rem;color:var(--ink-soft)}
+.empty code{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.85em;
+  background:var(--raised);border:1px solid var(--line);border-radius:.3rem;padding:.05rem .3rem;
+}
+
+@media (max-width:43.99rem){
+  .masthead-inner{padding:1.7rem 1.15rem 1.35rem}
+  .lede{font-size:.9688rem;line-height:1.5}
+}
+@media (min-width:44rem){
+  .entry{grid-template-columns:9.5rem 1fr;gap:.55rem 2rem;padding-left:1.25rem}
+  .entry-ref{grid-column:1;grid-row:1 / span 2;padding-top:.3rem}
+  .entry-title{grid-column:2;grid-row:1}
+  .entry > :not(.entry-ref):not(.entry-title){grid-column:2}
+}
+
+/* ---------- footer ---------- */
+.colophon{margin-top:3rem;padding-top:1.75rem;border-top:1px solid var(--line)}
+.colophon h2{
+  margin:0 0 .85rem;font-size:.6875rem;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-faint);
+}
+.colophon p{margin:0 0 .8rem;max-width:36rem;font-family:"Newsreader",Georgia,serif;font-size:.9375rem;line-height:1.6;color:var(--ink-soft)}
+.colophon p:last-child{margin-bottom:0}
+.colophon a{color:var(--accent)}
+.key{display:flex;flex-direction:column;gap:.5rem;margin:0 0 1.4rem;padding:0;list-style:none}
+.key li{display:flex;align-items:flex-start;gap:.6rem;font-size:.9375rem;color:var(--ink-soft)}
+.key b{color:var(--ink);font-weight:600}
+.key .glyph{flex:0 0 auto;margin-top:.42rem;width:.55rem;height:.55rem;border-radius:50%}
+.key .k-est .glyph{background:var(--established)}
+.key .k-deb .glyph{background:linear-gradient(90deg,var(--debated) 50%,transparent 50%);box-shadow:inset 0 0 0 1.5px var(--debated)}
+.key .k-unk .glyph{border-radius:0;height:2px;width:.75rem;background:var(--unknown);margin-top:.62rem}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+</style>
+<!--HEADEND-->
+</head>
+<body>
+<!--BODYSTART-->
+<header class="masthead">
+  <canvas id="contours" aria-hidden="true"></canvas>
+  <div class="masthead-inner">
+    <p class="eyebrow">Where it happened</p>
+    <h1>Bible Story Location&nbsp;Finder</h1>
+    <p class="lede">Type a passage or a name. If the place is well established, it opens on Google Maps. If it isn't, this says so rather than guessing.</p>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="searchwrap">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.8 12.8L17 17" stroke-linecap="round"/></svg>
+      <input id="q" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+             placeholder="Mark 5, John 4:6, Jericho, Goliath…" aria-label="Search by passage, place or person">
+      <button id="clear" type="button" hidden aria-label="Clear search">&times;</button>
+    </div>
+    <div class="chips" role="group" aria-label="Filter stories">
+      <button class="chip" type="button" data-f="all" aria-pressed="true">Everything</button>
+      <button class="chip" type="button" data-f="OT" aria-pressed="false">Old Testament</button>
+      <button class="chip" type="button" data-f="NT" aria-pressed="false">New Testament</button>
+      <button class="chip" type="button" data-f="established" aria-pressed="false"><span class="swatch"></span>Established</button>
+      <button class="chip" type="button" data-f="debated" aria-pressed="false"><span class="swatch"></span>Debated</button>
+      <button class="chip" type="button" data-f="unknown" aria-pressed="false"><span class="swatch"></span>Not sure</button>
+    </div>
+    <p class="count" id="count" role="status" aria-live="polite"></p>
+  </div>
+</div>
+
+<div class="shell">
+  <ul id="results"></ul>
+
+  <footer class="colophon">
+    <h2>How to read the ratings</h2>
+    <ul class="key">
+      <li class="k-est"><span class="glyph"></span><span><b>Established.</b> The site is identified and not seriously disputed. The pin is where the story happened, as far as anyone can tell.</span></li>
+      <li class="k-deb"><span class="glyph"></span><span><b>Debated.</b> There is a leading candidate — usually a long tradition, sometimes hard evidence — but it is contested. The pin shows it, and the note says what the argument is.</span></li>
+      <li class="k-unk"><span class="glyph"></span><span><b>We are not sure.</b> No accepted location. No pin. Where sites have been proposed, they are listed as proposals and labelled as such.</span></li>
+    </ul>
+
+    <h2>About</h2>
+    <p>Every location is stored inside this page. There is no server, no account, no API key and nothing to renew — it will work in ten years exactly as it works today, and it works offline apart from Google Maps itself, which needs a connection to draw the map.</p>
+    <p>Coordinates were checked against published gazetteers and site reports, including <a href="https://www.openbible.info/geo/" target="_blank" rel="noopener">OpenBible.info's Bible geocoding data</a>, the Pleiades gazetteer and excavation reports. Where sources disagreed, the entry was downgraded rather than tidied up.</p>
+    <p><b>On your phone:</b> open this page in Safari or Chrome, then use Share → Add to Home Screen. It behaves like an app after that.</p>
+    <p class="count" id="stamp"></p>
+  </footer>
+</div>
+<!--BODYEND-->
+<script>
+/* ============================================================================
+   DATA — one row per story. Self-contained: edit or extend this array and the
+   app follows. `confidence` is one of "established" | "debated" | "unknown".
+   ========================================================================= */
+const STORY_LOCATIONS = [
+ {
+  "id": "eden",
+  "title": "The garden of Eden",
+  "display": "Genesis 2",
+  "refs": [
+   [
+    "Genesis",
+    2,
+    3
+   ]
+  ],
+  "era": "OT",
+  "place": "Eden",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "Genesis names four rivers, and two of them — the Tigris and Euphrates — are real and known. The other two, Pishon and Gihon, cannot be identified with any confidence, and no site has ever been agreed on.",
+  "people": "Adam, Eve"
+ },
+ {
+  "id": "ararat",
+  "title": "The ark comes to rest",
+  "display": "Genesis 8",
+  "refs": [
+   [
+    "Genesis",
+    8,
+    8
+   ]
+  ],
+  "era": "OT",
+  "place": "The mountains of Ararat",
+  "modern": "Mount Ararat, eastern Turkey",
+  "lat": 39.7025,
+  "lng": 44.2989,
+  "confidence": "debated",
+  "note": "The Bible says 'the mountains of Ararat' — a whole region (ancient Urartu), not one peak. The pin is on Mount Ararat, the peak that later tradition settled on, but the text does not name it.",
+  "people": "Noah"
+ },
+ {
+  "id": "babel",
+  "title": "The tower of Babel",
+  "display": "Genesis 11",
+  "refs": [
+   [
+    "Genesis",
+    11,
+    11
+   ]
+  ],
+  "era": "OT",
+  "place": "Shinar / Babylon",
+  "modern": "Hillah, Iraq",
+  "lat": 32.5361,
+  "lng": 44.4207,
+  "confidence": "debated",
+  "note": "Most scholars connect the story with Babylon and its great ziggurat, Etemenanki, whose ruins are pinned here. The link is very widely held but the text itself only says 'a plain in Shinar'.",
+  "people": ""
+ },
+ {
+  "id": "ur",
+  "title": "Abraham leaves Ur",
+  "display": "Genesis 11:31",
+  "refs": [
+   [
+    "Genesis",
+    11,
+    11
+   ]
+  ],
+  "era": "OT",
+  "place": "Ur of the Chaldeans",
+  "modern": "Tell el-Muqayyar, Iraq",
+  "lat": 30.9626,
+  "lng": 46.103,
+  "confidence": "established",
+  "note": "The great Sumerian city of Ur, excavated by Leonard Woolley. A minority argue for a northern Ur near Urfa in Turkey, but the southern site is the standard identification.",
+  "people": "Abraham, Terah, Sarah"
+ },
+ {
+  "id": "haran",
+  "title": "Abraham settles in Haran",
+  "display": "Genesis 11:31 – 12:5",
+  "refs": [
+   [
+    "Genesis",
+    11,
+    12
+   ]
+  ],
+  "era": "OT",
+  "place": "Haran",
+  "modern": "Harran, Şanlıurfa, Turkey",
+  "lat": 36.8644,
+  "lng": 39.0306,
+  "confidence": "established",
+  "note": "A real, continuously known town on the trade route between Mesopotamia and Canaan. Its beehive mudbrick houses still stand.",
+  "people": "Abraham, Terah"
+ },
+ {
+  "id": "shechem-abraham",
+  "title": "Abraham arrives in Canaan",
+  "display": "Genesis 12:6-8",
+  "refs": [
+   [
+    "Genesis",
+    12,
+    12
+   ]
+  ],
+  "era": "OT",
+  "place": "Shechem, by the oak of Moreh",
+  "modern": "Tell Balata, Nablus, West Bank",
+  "lat": 32.2136,
+  "lng": 35.2833,
+  "confidence": "established",
+  "note": "Tell Balata has been excavated and matches Shechem's description in the text and in Egyptian records.",
+  "people": "Abraham"
+ },
+ {
+  "id": "sodom",
+  "title": "Sodom and Gomorrah",
+  "display": "Genesis 19",
+  "refs": [
+   [
+    "Genesis",
+    18,
+    19
+   ]
+  ],
+  "era": "OT",
+  "place": "The cities of the plain",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "Somewhere near the Dead Sea, almost certainly, but that is as far as agreement goes.",
+  "people": "Lot, Abraham",
+  "candidates": [
+   {
+    "name": "Bab edh-Dhra (southern Dead Sea)",
+    "lat": 31.25,
+    "lng": 35.53
+   },
+   {
+    "name": "Tall el-Hammam (northern Dead Sea)",
+    "lat": 31.8378,
+    "lng": 35.6667
+   }
+  ]
+ },
+ {
+  "id": "moriah",
+  "title": "Abraham and Isaac on the mountain",
+  "display": "Genesis 22",
+  "refs": [
+   [
+    "Genesis",
+    22,
+    22
+   ]
+  ],
+  "era": "OT",
+  "place": "The land of Moriah",
+  "modern": "Temple Mount, Jerusalem",
+  "lat": 31.778,
+  "lng": 35.2354,
+  "confidence": "debated",
+  "note": "2 Chronicles 3:1 links Moriah with the temple hill in Jerusalem, which is where the pin sits. The Samaritan tradition places it on Mount Gerizim instead.",
+  "people": "Abraham, Isaac"
+ },
+ {
+  "id": "machpelah",
+  "title": "Abraham buys a burial cave",
+  "display": "Genesis 23",
+  "refs": [
+   [
+    "Genesis",
+    23,
+    23
+   ]
+  ],
+  "era": "OT",
+  "place": "The cave of Machpelah",
+  "modern": "Cave of the Patriarchs, Hebron",
+  "lat": 31.5246,
+  "lng": 35.1106,
+  "confidence": "established",
+  "note": "One of the oldest continuously venerated sites anywhere. The Herodian enclosure above the cave still stands.",
+  "people": "Abraham, Sarah"
+ },
+ {
+  "id": "bethel-ladder",
+  "title": "Jacob's dream of the stairway",
+  "display": "Genesis 28",
+  "refs": [
+   [
+    "Genesis",
+    28,
+    28
+   ]
+  ],
+  "era": "OT",
+  "place": "Bethel",
+  "modern": "Beitin, West Bank",
+  "lat": 31.9276,
+  "lng": 35.2378,
+  "confidence": "established",
+  "note": "Beitin preserves the ancient name and fits the distances given in the Bible. A minority propose nearby el-Bireh.",
+  "people": "Jacob"
+ },
+ {
+  "id": "peniel",
+  "title": "Jacob wrestles until daybreak",
+  "display": "Genesis 32",
+  "refs": [
+   [
+    "Genesis",
+    32,
+    32
+   ]
+  ],
+  "era": "OT",
+  "place": "Peniel, at the ford of the Jabbok",
+  "modern": "Zarqa River, Jordan",
+  "lat": 32.1667,
+  "lng": 35.6167,
+  "confidence": "debated",
+  "note": "The river is certain — the Jabbok is today's Zarqa. Which ford, and where Peniel itself stood, is not settled; the leading candidate for the town is Tulul adh-Dhahab, about 7km upstream. The pin marks the river crossing area.",
+  "people": "Jacob"
+ },
+ {
+  "id": "dothan-joseph",
+  "title": "Joseph is sold by his brothers",
+  "display": "Genesis 37",
+  "refs": [
+   [
+    "Genesis",
+    37,
+    37
+   ]
+  ],
+  "era": "OT",
+  "place": "Dothan",
+  "modern": "Tell Dothan, West Bank",
+  "lat": 32.4139,
+  "lng": 35.2028,
+  "confidence": "established",
+  "note": "Excavated and securely identified, on the caravan route that ran down to Egypt — exactly the road the traders in the story were taking.",
+  "people": "Joseph"
+ },
+ {
+  "id": "joseph-egypt",
+  "title": "Joseph rules in Egypt",
+  "display": "Genesis 41",
+  "refs": [
+   [
+    "Genesis",
+    39,
+    47
+   ]
+  ],
+  "era": "OT",
+  "place": "Pharaoh's court",
+  "modern": "Egypt",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "The Bible never names the pharaoh or his capital, and Egypt's capital moved several times. Memphis and Avaris are both suggested; neither can be confirmed.",
+  "people": "Joseph, Pharaoh"
+ },
+ {
+  "id": "burning-bush",
+  "title": "The burning bush",
+  "display": "Exodus 3",
+  "refs": [
+   [
+    "Exodus",
+    3,
+    4
+   ]
+  ],
+  "era": "OT",
+  "place": "Horeb, the mountain of God",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "The same mountain as Sinai, and just as unlocated. Tradition points to Jebel Musa in the southern Sinai; other scholars argue for northern Sinai or even Arabia.",
+  "people": "Moses",
+  "candidates": [
+   {
+    "name": "Jebel Musa (traditional Mount Sinai)",
+    "lat": 28.5392,
+    "lng": 33.975
+   }
+  ]
+ },
+ {
+  "id": "red-sea",
+  "title": "Crossing the sea",
+  "display": "Exodus 14",
+  "refs": [
+   [
+    "Exodus",
+    13,
+    15
+   ]
+  ],
+  "era": "OT",
+  "place": "The Sea of Reeds",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "The Hebrew reads 'Sea of Reeds', which does not clearly mean the Red Sea. Proposed crossings run from the Bitter Lakes to the Gulf of Suez to the Gulf of Aqaba.",
+  "people": "Moses"
+ },
+ {
+  "id": "sinai",
+  "title": "The Ten Commandments",
+  "display": "Exodus 19–20",
+  "refs": [
+   [
+    "Exodus",
+    19,
+    20
+   ]
+  ],
+  "era": "OT",
+  "place": "Mount Sinai",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "Despite the monastery, the tour buses and fifteen centuries of tradition, no one can demonstrate which mountain this was.",
+  "people": "Moses",
+  "candidates": [
+   {
+    "name": "Jebel Musa, St Catherine's, Egypt",
+    "lat": 28.5392,
+    "lng": 33.975
+   }
+  ]
+ },
+ {
+  "id": "kadesh",
+  "title": "The twelve spies report back",
+  "display": "Numbers 13",
+  "refs": [
+   [
+    "Numbers",
+    13,
+    14
+   ]
+  ],
+  "era": "OT",
+  "place": "Kadesh Barnea",
+  "modern": "Tell el-Qudeirat, northern Sinai",
+  "lat": 30.66,
+  "lng": 34.42,
+  "confidence": "debated",
+  "note": "Tell el-Qudeirat has the largest spring in the area and is the leading candidate, but the identification rests on geography rather than an inscription.",
+  "people": "Moses, Caleb, Joshua"
+ },
+ {
+  "id": "nebo",
+  "title": "Moses sees the land he cannot enter",
+  "display": "Deuteronomy 34",
+  "refs": [
+   [
+    "Deuteronomy",
+    34,
+    34
+   ]
+  ],
+  "era": "OT",
+  "place": "Mount Nebo",
+  "modern": "Mount Nebo, Jordan",
+  "lat": 31.7683,
+  "lng": 35.7256,
+  "confidence": "established",
+  "note": "The view from the summit — Jericho, the Jordan valley, Jerusalem's hills on a clear day — matches the text closely. Venerated since at least the 4th century.",
+  "people": "Moses"
+ },
+ {
+  "id": "jordan-crossing",
+  "title": "Israel crosses the Jordan",
+  "display": "Joshua 3",
+  "refs": [
+   [
+    "Joshua",
+    3,
+    4
+   ]
+  ],
+  "era": "OT",
+  "place": "The Jordan, opposite Jericho",
+  "modern": "Qasr al-Yahud, Jordan River",
+  "lat": 31.8372,
+  "lng": 35.5386,
+  "confidence": "debated",
+  "note": "The text says 'opposite Jericho', which narrows it to a few kilometres of river. This pin marks the traditional ford.",
+  "people": "Joshua"
+ },
+ {
+  "id": "jericho",
+  "title": "The walls of Jericho fall",
+  "display": "Joshua 6",
+  "refs": [
+   [
+    "Joshua",
+    6,
+    6
+   ]
+  ],
+  "era": "OT",
+  "place": "Jericho",
+  "modern": "Tell es-Sultan, West Bank",
+  "lat": 31.8711,
+  "lng": 35.4442,
+  "confidence": "established",
+  "note": "One of the oldest walled towns on earth and beyond doubt as a location. Archaeologists argue hard about the dating of its destruction — but not about where it is.",
+  "people": "Joshua, Rahab"
+ },
+ {
+  "id": "gibeon",
+  "title": "The day the sun stood still",
+  "display": "Joshua 10",
+  "refs": [
+   [
+    "Joshua",
+    10,
+    10
+   ]
+  ],
+  "era": "OT",
+  "place": "Gibeon",
+  "modern": "al-Jib, West Bank",
+  "lat": 31.8464,
+  "lng": 35.1847,
+  "confidence": "established",
+  "note": "Jar handles stamped 'Gibeon' were found at the site, which is about as direct as archaeological confirmation gets.",
+  "people": "Joshua"
+ },
+ {
+  "id": "gerizim-ebal",
+  "title": "Blessings and curses on two mountains",
+  "display": "Joshua 8:30-35",
+  "refs": [
+   [
+    "Joshua",
+    8,
+    8
+   ]
+  ],
+  "era": "OT",
+  "place": "Mount Gerizim and Mount Ebal",
+  "modern": "Nablus, West Bank",
+  "lat": 32.2,
+  "lng": 35.2733,
+  "confidence": "established",
+  "note": "Both mountains are known and stand either side of the valley at Shechem. The pin is on Gerizim; Ebal is the taller peak opposite.",
+  "people": "Joshua"
+ },
+ {
+  "id": "tabor-deborah",
+  "title": "Deborah and Barak",
+  "display": "Judges 4",
+  "refs": [
+   [
+    "Judges",
+    4,
+    5
+   ]
+  ],
+  "era": "OT",
+  "place": "Mount Tabor",
+  "modern": "Mount Tabor, Lower Galilee",
+  "lat": 32.6869,
+  "lng": 35.3906,
+  "confidence": "established",
+  "note": "A distinctive dome of a hill rising alone out of the Jezreel valley — unmistakable, then and now.",
+  "people": "Deborah, Barak, Sisera"
+ },
+ {
+  "id": "harod",
+  "title": "Gideon's three hundred",
+  "display": "Judges 7",
+  "refs": [
+   [
+    "Judges",
+    6,
+    7
+   ]
+  ],
+  "era": "OT",
+  "place": "The spring of Harod",
+  "modern": "Ein Harod, Israel",
+  "lat": 32.5497,
+  "lng": 35.3556,
+  "confidence": "established",
+  "note": "The spring at the foot of Mount Gilboa, where Gideon watched how his men drank.",
+  "people": "Gideon"
+ },
+ {
+  "id": "gaza-samson",
+  "title": "Samson and the gates of Gaza",
+  "display": "Judges 16",
+  "refs": [
+   [
+    "Judges",
+    16,
+    16
+   ]
+  ],
+  "era": "OT",
+  "place": "Gaza",
+  "modern": "Gaza City",
+  "lat": 31.5017,
+  "lng": 34.4668,
+  "confidence": "established",
+  "note": "One of the five Philistine cities, occupied continuously since. The temple of Dagon he pulled down has never been found.",
+  "people": "Samson, Delilah"
+ },
+ {
+  "id": "bethlehem-ruth",
+  "title": "Ruth gleans in the fields",
+  "display": "Ruth 2",
+  "refs": [
+   [
+    "Ruth",
+    1,
+    4
+   ]
+  ],
+  "era": "OT",
+  "place": "Bethlehem",
+  "modern": "Bethlehem, West Bank",
+  "lat": 31.7054,
+  "lng": 35.2024,
+  "confidence": "established",
+  "note": "The town is certain. Which fields Boaz owned is not, but they lay in the valleys just east of the town.",
+  "people": "Ruth, Naomi, Boaz"
+ },
+ {
+  "id": "shiloh",
+  "title": "God calls the boy Samuel",
+  "display": "1 Samuel 3",
+  "refs": [
+   [
+    "1 Samuel",
+    1,
+    4
+   ]
+  ],
+  "era": "OT",
+  "place": "Shiloh",
+  "modern": "Khirbet Seilun, West Bank",
+  "lat": 32.0556,
+  "lng": 35.2894,
+  "confidence": "established",
+  "note": "Israel's worship centre before Jerusalem, and securely identified. Excavation has found a large storage complex from exactly this period.",
+  "people": "Samuel, Eli, Hannah"
+ },
+ {
+  "id": "ashdod-ark",
+  "title": "The ark in the temple of Dagon",
+  "display": "1 Samuel 5",
+  "refs": [
+   [
+    "1 Samuel",
+    5,
+    6
+   ]
+  ],
+  "era": "OT",
+  "place": "Ashdod",
+  "modern": "Tel Ashdod, Israel",
+  "lat": 31.7536,
+  "lng": 34.6617,
+  "confidence": "established",
+  "note": "A major Philistine city, excavated and well identified. The ancient tell sits a few kilometres from the modern city.",
+  "people": ""
+ },
+ {
+  "id": "elah",
+  "title": "David and Goliath",
+  "display": "1 Samuel 17",
+  "refs": [
+   [
+    "1 Samuel",
+    17,
+    17
+   ]
+  ],
+  "era": "OT",
+  "place": "The Valley of Elah",
+  "modern": "Valley of Elah, Israel",
+  "lat": 31.6906,
+  "lng": 34.9694,
+  "confidence": "established",
+  "note": "The text names Socoh and Azekah on either side, and both are identified — so the valley between them is fixed with unusual precision.",
+  "people": "David, Goliath, Saul"
+ },
+ {
+  "id": "engedi",
+  "title": "David spares Saul in the cave",
+  "display": "1 Samuel 24",
+  "refs": [
+   [
+    "1 Samuel",
+    23,
+    24
+   ]
+  ],
+  "era": "OT",
+  "place": "En Gedi",
+  "modern": "Ein Gedi, Dead Sea",
+  "lat": 31.4614,
+  "lng": 35.3925,
+  "confidence": "established",
+  "note": "The oasis is certain and still spectacular. Which of its many caves is anyone's guess.",
+  "people": "David, Saul"
+ },
+ {
+  "id": "endor",
+  "title": "Saul and the woman of Endor",
+  "display": "1 Samuel 28",
+  "refs": [
+   [
+    "1 Samuel",
+    28,
+    28
+   ]
+  ],
+  "era": "OT",
+  "place": "Endor",
+  "modern": "Northern Israel, near Mount Tabor",
+  "lat": 32.6436,
+  "lng": 35.3902,
+  "confidence": "debated",
+  "note": "The general area between Mount Tabor and the Hill of Moreh, to its south-west, is agreed. The precise site is not — at least five ruins in that basin have been proposed. The pin sits on the most commonly marked of them.",
+  "people": "Saul, Samuel"
+ },
+ {
+  "id": "gilboa",
+  "title": "Saul dies on the mountain",
+  "display": "1 Samuel 31",
+  "refs": [
+   [
+    "1 Samuel",
+    31,
+    31
+   ]
+  ],
+  "era": "OT",
+  "place": "Mount Gilboa",
+  "modern": "Mount Gilboa, Israel",
+  "lat": 32.5056,
+  "lng": 35.4139,
+  "confidence": "established",
+  "note": "The ridge overlooking the Jezreel valley, subject of David's lament: 'How the mighty have fallen.'",
+  "people": "Saul, Jonathan"
+ },
+ {
+  "id": "city-of-david",
+  "title": "David captures Jerusalem",
+  "display": "2 Samuel 5",
+  "refs": [
+   [
+    "2 Samuel",
+    5,
+    6
+   ]
+  ],
+  "era": "OT",
+  "place": "The stronghold of Zion",
+  "modern": "City of David, Jerusalem",
+  "lat": 31.7738,
+  "lng": 35.2354,
+  "confidence": "established",
+  "note": "The original Jebusite city sat on the narrow spur south of the Temple Mount — much smaller than most people picture. It is heavily excavated.",
+  "people": "David"
+ },
+ {
+  "id": "solomon-temple",
+  "title": "Solomon builds the temple",
+  "display": "1 Kings 6",
+  "refs": [
+   [
+    "1 Kings",
+    5,
+    8
+   ]
+  ],
+  "era": "OT",
+  "place": "The temple mount",
+  "modern": "Temple Mount / Haram al-Sharif, Jerusalem",
+  "lat": 31.778,
+  "lng": 35.2354,
+  "confidence": "established",
+  "note": "The platform is certain. Nothing of Solomon's building survives above ground, and the site cannot be excavated.",
+  "people": "Solomon"
+ },
+ {
+  "id": "sheba",
+  "title": "The Queen of Sheba visits Solomon",
+  "display": "1 Kings 10",
+  "refs": [
+   [
+    "1 Kings",
+    10,
+    10
+   ]
+  ],
+  "era": "OT",
+  "place": "Sheba",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "Sheba is usually placed in southern Arabia — modern Yemen — but Ethiopian tradition claims her, and the kingdom's borders are unclear. Her visit takes place in Jerusalem; her home does not.",
+  "people": "Solomon"
+ },
+ {
+  "id": "carmel",
+  "title": "Elijah and the prophets of Baal",
+  "display": "1 Kings 18",
+  "refs": [
+   [
+    "1 Kings",
+    18,
+    18
+   ]
+  ],
+  "era": "OT",
+  "place": "Mount Carmel",
+  "modern": "el-Muhraqa, Mount Carmel, Israel",
+  "lat": 32.6727,
+  "lng": 35.0881,
+  "confidence": "debated",
+  "note": "The mountain range is certain. This pin is the traditional spot at its south-eastern end, which fits the story's details — a view of the sea, and a run down to Jezreel — but is tradition, not proof.",
+  "people": "Elijah, Ahab"
+ },
+ {
+  "id": "jezreel",
+  "title": "Naboth's vineyard",
+  "display": "1 Kings 21",
+  "refs": [
+   [
+    "1 Kings",
+    21,
+    21
+   ]
+  ],
+  "era": "OT",
+  "place": "Jezreel",
+  "modern": "Tel Jezreel, Israel",
+  "lat": 32.5578,
+  "lng": 35.3319,
+  "confidence": "established",
+  "note": "Ahab's royal compound — a chariot base and second residence, with Samaria as the capital. Excavated in the 1990s. A large rock-cut winery has been found at the foot of the tell; the excavators date it to the Iron Age, though installations cut straight into bedrock are hard to date.",
+  "people": "Ahab, Jezebel, Naboth, Elijah"
+ },
+ {
+  "id": "dothan-elisha",
+  "title": "Chariots of fire around Elisha",
+  "display": "2 Kings 6",
+  "refs": [
+   [
+    "2 Kings",
+    6,
+    6
+   ]
+  ],
+  "era": "OT",
+  "place": "Dothan",
+  "modern": "Tell Dothan, West Bank",
+  "lat": 32.4139,
+  "lng": 35.2028,
+  "confidence": "established",
+  "note": "The same hill where Joseph was sold, centuries earlier. Excavated and securely identified.",
+  "people": "Elisha"
+ },
+ {
+  "id": "samaria-fall",
+  "title": "The fall of Samaria",
+  "display": "2 Kings 17",
+  "refs": [
+   [
+    "2 Kings",
+    17,
+    17
+   ]
+  ],
+  "era": "OT",
+  "place": "Samaria",
+  "modern": "Sebastia, West Bank",
+  "lat": 32.2794,
+  "lng": 35.1917,
+  "confidence": "established",
+  "note": "The capital of the northern kingdom, on a hill with commanding views. Extensively excavated; the Assyrian conquest is recorded on their side too.",
+  "people": "Hoshea"
+ },
+ {
+  "id": "siloam",
+  "title": "Hezekiah's tunnel",
+  "display": "2 Kings 20:20; 2 Chronicles 32",
+  "refs": [
+   [
+    "2 Kings",
+    20,
+    20
+   ],
+   [
+    "2 Chronicles",
+    32,
+    32
+   ]
+  ],
+  "era": "OT",
+  "place": "The Siloam tunnel",
+  "modern": "City of David, Jerusalem",
+  "lat": 31.7703,
+  "lng": 35.2354,
+  "confidence": "established",
+  "note": "You can still walk through it, in the water. An inscription cut by the tunnellers describing the moment the two teams met was found inside.",
+  "people": "Hezekiah"
+ },
+ {
+  "id": "jerusalem-fall",
+  "title": "Jerusalem falls; the exile begins",
+  "display": "2 Kings 25",
+  "refs": [
+   [
+    "2 Kings",
+    24,
+    25
+   ]
+  ],
+  "era": "OT",
+  "place": "Jerusalem, then Babylon",
+  "modern": "Jerusalem",
+  "lat": 31.7767,
+  "lng": 35.2345,
+  "confidence": "established",
+  "note": "Both ends of this story are known places. The Babylonian Chronicle records the earlier capture of the city in 597 BC, but breaks off before the final destruction — for that, the evidence is the burnt destruction layer in the City of David and the ration tablets naming the exiled king Jehoiachin in Babylon.",
+  "people": "Zedekiah, Nebuchadnezzar"
+ },
+ {
+  "id": "babylon-exile",
+  "title": "Daniel in Babylon",
+  "display": "Daniel 1–6",
+  "refs": [
+   [
+    "Daniel",
+    1,
+    6
+   ]
+  ],
+  "era": "OT",
+  "place": "Babylon",
+  "modern": "Hillah, Iraq",
+  "lat": 32.5355,
+  "lng": 44.4275,
+  "confidence": "established",
+  "note": "The city is one of the best known sites in the ancient world. The lions' den and the fiery furnace are not marked anywhere in it.",
+  "people": "Daniel, Nebuchadnezzar, Shadrach, Meshach, Abednego"
+ },
+ {
+  "id": "susa",
+  "title": "Esther in the palace",
+  "display": "Esther 1",
+  "refs": [
+   [
+    "Esther",
+    1,
+    10
+   ]
+  ],
+  "era": "OT",
+  "place": "Susa the citadel",
+  "modern": "Shush, Khuzestan, Iran",
+  "lat": 32.1897,
+  "lng": 48.2575,
+  "confidence": "established",
+  "note": "The Persian palace at Susa has been excavated, and its columned hall and garden courts fit the kind of setting the book describes.",
+  "people": "Esther, Mordecai, Xerxes"
+ },
+ {
+  "id": "nehemiah-walls",
+  "title": "Nehemiah rebuilds the walls",
+  "display": "Nehemiah 2–6",
+  "refs": [
+   [
+    "Nehemiah",
+    1,
+    7
+   ]
+  ],
+  "era": "OT",
+  "place": "Jerusalem",
+  "modern": "City of David, Jerusalem",
+  "lat": 31.7745,
+  "lng": 35.236,
+  "confidence": "established",
+  "note": "A stretch of wall on the eastern slope has been identified by some excavators as Nehemiah's, though that particular claim is argued over.",
+  "people": "Nehemiah"
+ },
+ {
+  "id": "anathoth",
+  "title": "Jeremiah buys a field",
+  "display": "Jeremiah 32",
+  "refs": [
+   [
+    "Jeremiah",
+    32,
+    32
+   ]
+  ],
+  "era": "OT",
+  "place": "Anathoth",
+  "modern": "Anata, West Bank",
+  "lat": 31.8117,
+  "lng": 35.2617,
+  "confidence": "debated",
+  "note": "Jeremiah's home village, a few kilometres north-east of Jerusalem. Three sites within about a kilometre of each other have been proposed; the modern village of Anata, where the pin sits, preserves the name and has produced pottery of the right period.",
+  "people": "Jeremiah"
+ },
+ {
+  "id": "kebar",
+  "title": "Ezekiel's vision by the river",
+  "display": "Ezekiel 1",
+  "refs": [
+   [
+    "Ezekiel",
+    1,
+    3
+   ]
+  ],
+  "era": "OT",
+  "place": "The Kebar canal",
+  "modern": "Near Nippur, Iraq",
+  "lat": 32.1264,
+  "lng": 45.2334,
+  "confidence": "debated",
+  "note": "The Kebar is generally identified with a canal near Nippur named in Babylonian records. The pin is on Nippur; the canal's exact course is uncertain.",
+  "people": "Ezekiel"
+ },
+ {
+  "id": "nineveh",
+  "title": "Jonah preaches to Nineveh",
+  "display": "Jonah 3",
+  "refs": [
+   [
+    "Jonah",
+    1,
+    4
+   ]
+  ],
+  "era": "OT",
+  "place": "Nineveh",
+  "modern": "Mosul, Iraq",
+  "lat": 36.3597,
+  "lng": 43.1528,
+  "confidence": "established",
+  "note": "The Assyrian capital, its walls and palaces excavated since the 1840s. Tarshish, the port Jonah fled towards, is the unknown half of this story.",
+  "people": "Jonah"
+ },
+ {
+  "id": "uz",
+  "title": "The land of Uz",
+  "display": "Job 1",
+  "refs": [
+   [
+    "Job",
+    1,
+    42
+   ]
+  ],
+  "era": "OT",
+  "place": "Uz",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "Somewhere east or south-east of Israel — Edom and northern Arabia are both suggested. The book is deliberately vague about it.",
+  "people": "Job"
+ },
+ {
+  "id": "nazareth-annunciation",
+  "title": "The angel visits Mary",
+  "display": "Luke 1:26-38",
+  "refs": [
+   [
+    "Luke",
+    1,
+    1
+   ]
+  ],
+  "era": "NT",
+  "place": "Nazareth",
+  "modern": "Nazareth, Israel",
+  "lat": 32.7021,
+  "lng": 35.2978,
+  "confidence": "established",
+  "note": "A small farming village of perhaps a few hundred people in Jesus' day. First-century houses and a wine press have been excavated beneath the modern city.",
+  "people": "Mary, Gabriel"
+ },
+ {
+  "id": "bethlehem-nativity",
+  "title": "Jesus is born",
+  "display": "Luke 2; Matthew 2",
+  "refs": [
+   [
+    "Luke",
+    2,
+    2
+   ],
+   [
+    "Matthew",
+    2,
+    2
+   ]
+  ],
+  "era": "NT",
+  "place": "Bethlehem",
+  "modern": "Bethlehem, West Bank",
+  "lat": 31.7042,
+  "lng": 35.2075,
+  "confidence": "established",
+  "note": "The town is certain. The pin is the Church of the Nativity, built over a cave that was already being pointed out as the birthplace by the 2nd century — early, but tradition all the same.",
+  "people": "Mary, Joseph, Jesus"
+ },
+ {
+  "id": "shepherds-fields",
+  "title": "The shepherds and the angels",
+  "display": "Luke 2:8-20",
+  "refs": [
+   [
+    "Luke",
+    2,
+    2
+   ]
+  ],
+  "era": "NT",
+  "place": "The fields near Bethlehem",
+  "modern": "Beit Sahour, West Bank",
+  "lat": 31.7073,
+  "lng": 35.2301,
+  "confidence": "debated",
+  "note": "The grazing land east of Bethlehem is the right kind of place, and this pin marks the traditional field. There are two rival 'shepherds' fields' a few hundred metres apart.",
+  "people": ""
+ },
+ {
+  "id": "magi",
+  "title": "The wise men and King Herod",
+  "display": "Matthew 2:1-12",
+  "refs": [
+   [
+    "Matthew",
+    2,
+    2
+   ]
+  ],
+  "era": "NT",
+  "place": "Jerusalem and Bethlehem",
+  "modern": "Herod's palace / the Citadel, Jerusalem",
+  "lat": 31.7757,
+  "lng": 35.2278,
+  "confidence": "established",
+  "note": "The pin marks Herod's palace beside today's Jaffa Gate, partly excavated, where the wise men would have been received. Bethlehem, six miles south, is where they found the child. Where they came from — \"the east\" — is unknown.",
+  "people": "Herod the Great"
+ },
+ {
+  "id": "flight-egypt",
+  "title": "The escape to Egypt",
+  "display": "Matthew 2:13-23",
+  "refs": [
+   [
+    "Matthew",
+    2,
+    2
+   ]
+  ],
+  "era": "NT",
+  "place": "Egypt",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "The Bible says only 'Egypt'. Coptic tradition traces a detailed route with many stops, but none of it can be verified.",
+  "people": "Mary, Joseph, Jesus"
+ },
+ {
+  "id": "boy-jesus-temple",
+  "title": "The boy Jesus in the temple",
+  "display": "Luke 2:41-52",
+  "refs": [
+   [
+    "Luke",
+    2,
+    2
+   ]
+  ],
+  "era": "NT",
+  "place": "The temple courts",
+  "modern": "Temple Mount, Jerusalem",
+  "lat": 31.778,
+  "lng": 35.2354,
+  "confidence": "established",
+  "note": "Herod's temple platform survives — the Western Wall is part of its retaining wall. The teaching would have happened in the porticoes around the courts.",
+  "people": "Jesus, Mary, Joseph"
+ },
+ {
+  "id": "baptism",
+  "title": "Jesus is baptised",
+  "display": "Matthew 3; John 1:28",
+  "refs": [
+   [
+    "Matthew",
+    3,
+    3
+   ],
+   [
+    "Mark",
+    1,
+    1
+   ],
+   [
+    "Luke",
+    3,
+    3
+   ],
+   [
+    "John",
+    1,
+    1
+   ]
+  ],
+  "era": "NT",
+  "place": "Bethany beyond the Jordan",
+  "modern": "Al-Maghtas, Jordan",
+  "lat": 31.8372,
+  "lng": 35.5528,
+  "confidence": "debated",
+  "note": "Al-Maghtas on the Jordanian bank is a UNESCO site with Byzantine churches built to mark the spot, and is the leading candidate. Qasr al-Yahud opposite makes the same claim.",
+  "people": "Jesus, John the Baptist"
+ },
+ {
+  "id": "temptation",
+  "title": "Tempted in the wilderness",
+  "display": "Matthew 4:1-11",
+  "refs": [
+   [
+    "Matthew",
+    4,
+    4
+   ],
+   [
+    "Mark",
+    1,
+    1
+   ],
+   [
+    "Luke",
+    4,
+    4
+   ]
+  ],
+  "era": "NT",
+  "place": "The wilderness of Judea",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "The Judean desert is a real and specific landscape, but no location is given. The cliff called the Mount of Temptation above Jericho is later tradition.",
+  "people": "Jesus",
+  "candidates": [
+   {
+    "name": "Mount of Temptation, Jericho (traditional)",
+    "lat": 31.8742,
+    "lng": 35.4308
+   }
+  ]
+ },
+ {
+  "id": "cana",
+  "title": "Water into wine",
+  "display": "John 2:1-11",
+  "refs": [
+   [
+    "John",
+    2,
+    2
+   ]
+  ],
+  "era": "NT",
+  "place": "Cana of Galilee",
+  "modern": "Kafr Kanna, Israel",
+  "lat": 32.75,
+  "lng": 35.3417,
+  "confidence": "debated",
+  "note": "Two sites compete: Kafr Kanna, which has the churches and the tour buses, and Khirbet Qana a few kilometres north, which many archaeologists prefer. The pin is on Kafr Kanna.",
+  "people": "Jesus, Mary"
+ },
+ {
+  "id": "nazareth-rejected",
+  "title": "Rejected in his home town",
+  "display": "Luke 4:16-30",
+  "refs": [
+   [
+    "Luke",
+    4,
+    4
+   ],
+   [
+    "Mark",
+    6,
+    6
+   ],
+   [
+    "Matthew",
+    13,
+    13
+   ]
+  ],
+  "era": "NT",
+  "place": "The synagogue at Nazareth",
+  "modern": "Nazareth, Israel",
+  "lat": 32.7021,
+  "lng": 35.2978,
+  "confidence": "established",
+  "note": "The town is certain; the synagogue building has not been found. The cliff the crowd dragged him to is traditionally the Mount of Precipice just south of the town.",
+  "people": "Jesus"
+ },
+ {
+  "id": "capernaum",
+  "title": "Jesus makes Capernaum his base",
+  "display": "Matthew 4:13",
+  "refs": [
+   [
+    "Matthew",
+    4,
+    4
+   ],
+   [
+    "Mark",
+    1,
+    2
+   ],
+   [
+    "Luke",
+    4,
+    4
+   ]
+  ],
+  "era": "NT",
+  "place": "Capernaum",
+  "modern": "Kfar Nahum, Sea of Galilee",
+  "lat": 32.8808,
+  "lng": 35.575,
+  "confidence": "established",
+  "note": "Excavated in detail: the basalt houses, the fishing harbour, and a limestone synagogue standing on earlier basalt walls that many excavators read as the first-century synagogue. The best-attested place in the gospels.",
+  "people": "Jesus, Peter"
+ },
+ {
+  "id": "first-disciples",
+  "title": "Calling the first disciples",
+  "display": "Mark 1:16-20",
+  "refs": [
+   [
+    "Mark",
+    1,
+    1
+   ],
+   [
+    "Matthew",
+    4,
+    4
+   ],
+   [
+    "Luke",
+    5,
+    5
+   ]
+  ],
+  "era": "NT",
+  "place": "The shore of the Sea of Galilee",
+  "modern": "Sea of Galilee, near Capernaum",
+  "lat": 32.88,
+  "lng": 35.57,
+  "confidence": "established",
+  "note": "The lake and the fishing villages along its north shore are certain. A first-century fishing boat pulled from the mud in 1986 is on display nearby.",
+  "people": "Peter, Andrew, James, John"
+ },
+ {
+  "id": "beatitudes",
+  "title": "The Sermon on the Mount",
+  "display": "Matthew 5–7",
+  "refs": [
+   [
+    "Matthew",
+    5,
+    7
+   ]
+  ],
+  "era": "NT",
+  "place": "A mountainside above the lake",
+  "modern": "Mount of Beatitudes, Israel",
+  "lat": 32.8806,
+  "lng": 35.5556,
+  "confidence": "debated",
+  "note": "The gospel says only 'a mountainside'. This hillside above Tabgha has been the traditional spot since the Byzantine period, and the acoustics genuinely work.",
+  "people": "Jesus"
+ },
+ {
+  "id": "bethesda",
+  "title": "Healing at the pool",
+  "display": "John 5",
+  "refs": [
+   [
+    "John",
+    5,
+    5
+   ]
+  ],
+  "era": "NT",
+  "place": "The pool of Bethesda",
+  "modern": "Bethesda pools, Jerusalem",
+  "lat": 31.7814,
+  "lng": 35.2364,
+  "confidence": "established",
+  "note": "Excavated beside St Anne's Church, with the five porticoes John describes — a detail once used to argue the gospel was unreliable, until the pools were dug up.",
+  "people": "Jesus"
+ },
+ {
+  "id": "samaritan-woman",
+  "title": "The woman at the well",
+  "display": "John 4",
+  "refs": [
+   [
+    "John",
+    4,
+    4
+   ]
+  ],
+  "era": "NT",
+  "place": "Jacob's well, near Sychar",
+  "modern": "Bir Ya'qub, Nablus, West Bank",
+  "lat": 32.2094,
+  "lng": 35.2839,
+  "confidence": "established",
+  "note": "One of the few gospel sites that is a fixed physical object rather than a general area. The well is 40 metres deep and still gives water.",
+  "people": "Jesus"
+ },
+ {
+  "id": "feeding-5000",
+  "title": "Feeding the five thousand",
+  "display": "Mark 6:30-44; Luke 9:10",
+  "refs": [
+   [
+    "Mark",
+    6,
+    6
+   ],
+   [
+    "Matthew",
+    14,
+    14
+   ],
+   [
+    "Luke",
+    9,
+    9
+   ],
+   [
+    "John",
+    6,
+    6
+   ]
+  ],
+  "era": "NT",
+  "place": "A remote place near Bethsaida",
+  "modern": "Tabgha, Sea of Galilee",
+  "lat": 32.8731,
+  "lng": 35.5486,
+  "confidence": "debated",
+  "note": "Luke says near Bethsaida, on the north-east shore; the traditional church is at Tabgha on the north-west shore. The pin follows tradition, but the two are several kilometres apart.",
+  "people": "Jesus, Philip, Andrew"
+ },
+ {
+  "id": "walking-water",
+  "title": "Walking on the water",
+  "display": "Matthew 14:22-33",
+  "refs": [
+   [
+    "Matthew",
+    14,
+    14
+   ],
+   [
+    "Mark",
+    6,
+    6
+   ],
+   [
+    "John",
+    6,
+    6
+   ]
+  ],
+  "era": "NT",
+  "place": "The Sea of Galilee",
+  "modern": "Sea of Galilee, Israel",
+  "lat": 32.8,
+  "lng": 35.59,
+  "confidence": "established",
+  "note": "The lake is the location, and the pin sits out on the open water. The sudden squalls the gospels describe are a real feature of it, funnelled down from the Golan.",
+  "people": "Jesus, Peter"
+ },
+ {
+  "id": "gerasene",
+  "title": "The man among the tombs",
+  "display": "Mark 5:1-20",
+  "refs": [
+   [
+    "Mark",
+    5,
+    5
+   ],
+   [
+    "Matthew",
+    8,
+    8
+   ],
+   [
+    "Luke",
+    8,
+    8
+   ]
+  ],
+  "era": "NT",
+  "place": "The country of the Gerasenes",
+  "modern": "Kursi, Sea of Galilee",
+  "lat": 32.825,
+  "lng": 35.65,
+  "confidence": "debated",
+  "note": "The manuscripts disagree — Gerasenes, Gadarenes, Gergesenes. Kursi is the only candidate on the lake shore with a steep bank running into the water, and has a Byzantine monastery marking the spot.",
+  "people": "Jesus"
+ },
+ {
+  "id": "jairus",
+  "title": "Jairus' daughter and the woman in the crowd",
+  "display": "Mark 5:21-43",
+  "refs": [
+   [
+    "Mark",
+    5,
+    5
+   ],
+   [
+    "Matthew",
+    9,
+    9
+   ],
+   [
+    "Luke",
+    8,
+    8
+   ]
+  ],
+  "era": "NT",
+  "place": "Capernaum",
+  "modern": "Kfar Nahum, Sea of Galilee",
+  "lat": 32.8808,
+  "lng": 35.575,
+  "confidence": "established",
+  "note": "Jairus was a synagogue leader. Capernaum's synagogue site is known — white limestone ruins standing on black basalt walls that most excavators take to be the earlier building.",
+  "people": "Jesus, Jairus"
+ },
+ {
+  "id": "caesarea-philippi",
+  "title": "'Who do you say I am?'",
+  "display": "Matthew 16:13-20",
+  "refs": [
+   [
+    "Matthew",
+    16,
+    16
+   ],
+   [
+    "Mark",
+    8,
+    8
+   ]
+  ],
+  "era": "NT",
+  "place": "Caesarea Philippi",
+  "modern": "Banias, Golan Heights",
+  "lat": 33.2483,
+  "lng": 35.6944,
+  "confidence": "established",
+  "note": "A spring gushing from a cliff face lined with pagan shrines — including a cave once called the gate of the underworld. Jesus chose this spot to talk about the rock and the gates of Hades.",
+  "people": "Jesus, Peter"
+ },
+ {
+  "id": "transfiguration",
+  "title": "The transfiguration",
+  "display": "Matthew 17:1-8",
+  "refs": [
+   [
+    "Matthew",
+    17,
+    17
+   ],
+   [
+    "Mark",
+    9,
+    9
+   ],
+   [
+    "Luke",
+    9,
+    9
+   ]
+  ],
+  "era": "NT",
+  "place": "A high mountain",
+  "modern": "Mount Tabor, Israel",
+  "lat": 32.6869,
+  "lng": 35.3906,
+  "confidence": "debated",
+  "note": "Tabor is the traditional site and carries the churches. Many scholars prefer Mount Hermon, which is genuinely high and much nearer Caesarea Philippi, where the previous scene happens.",
+  "people": "Jesus, Peter, James, John"
+ },
+ {
+  "id": "jericho-road",
+  "title": "The road the Good Samaritan travelled",
+  "display": "Luke 10:25-37",
+  "refs": [
+   [
+    "Luke",
+    10,
+    10
+   ]
+  ],
+  "era": "NT",
+  "place": "The Jerusalem–Jericho road",
+  "modern": "Mishor Adumim, West Bank",
+  "lat": 31.8163,
+  "lng": 35.3593,
+  "confidence": "debated",
+  "note": "The parable is a story, not a report — but the road is real, and notoriously dangerous. The pin marks the traditional 'Inn of the Good Samaritan' at the halfway point.",
+  "people": ""
+ },
+ {
+  "id": "bethany",
+  "title": "Lazarus is raised",
+  "display": "John 11",
+  "refs": [
+   [
+    "John",
+    11,
+    11
+   ]
+  ],
+  "era": "NT",
+  "place": "Bethany",
+  "modern": "al-Eizariya, West Bank",
+  "lat": 31.7714,
+  "lng": 35.2611,
+  "confidence": "established",
+  "note": "John puts it fifteen stadia from Jerusalem — under two miles — on the far side of the Mount of Olives, which fits exactly. The Arabic name al-Eizariya means \"place of Lazarus\".",
+  "people": "Jesus, Lazarus, Mary, Martha"
+ },
+ {
+  "id": "zacchaeus",
+  "title": "Zacchaeus in the tree",
+  "display": "Luke 19:1-10",
+  "refs": [
+   [
+    "Luke",
+    19,
+    19
+   ]
+  ],
+  "era": "NT",
+  "place": "Jericho",
+  "modern": "Tulul Abu al-Alayiq, Jericho",
+  "lat": 31.8531,
+  "lng": 35.4347,
+  "confidence": "established",
+  "note": "New Testament Jericho was a separate town from the old tell, built around Herod's winter palace at the mouth of the Wadi Qelt. Both sites are known; this pin is on the New Testament one.",
+  "people": "Jesus, Zacchaeus"
+ },
+ {
+  "id": "bartimaeus",
+  "title": "Blind Bartimaeus",
+  "display": "Mark 10:46-52",
+  "refs": [
+   [
+    "Mark",
+    10,
+    10
+   ],
+   [
+    "Luke",
+    18,
+    18
+   ]
+  ],
+  "era": "NT",
+  "place": "The roadside at Jericho",
+  "modern": "Tulul Abu al-Alayiq, Jericho",
+  "lat": 31.8531,
+  "lng": 35.4347,
+  "confidence": "established",
+  "note": "On the main pilgrim road up to Jerusalem — the reason a beggar would sit there in the first place. The pin is on New Testament Jericho, around Herod's winter palace.",
+  "people": "Jesus, Bartimaeus"
+ },
+ {
+  "id": "triumphal-entry",
+  "title": "The entry into Jerusalem",
+  "display": "Matthew 21:1-11",
+  "refs": [
+   [
+    "Matthew",
+    21,
+    21
+   ],
+   [
+    "Mark",
+    11,
+    11
+   ],
+   [
+    "Luke",
+    19,
+    19
+   ],
+   [
+    "John",
+    12,
+    12
+   ]
+  ],
+  "era": "NT",
+  "place": "From Bethphage over the Mount of Olives",
+  "modern": "Mount of Olives, Jerusalem",
+  "lat": 31.7783,
+  "lng": 35.2456,
+  "confidence": "established",
+  "note": "The route is fixed by geography: over the ridge, and the whole city opens up in front of you at once. That view is still there.",
+  "people": "Jesus"
+ },
+ {
+  "id": "temple-cleansing",
+  "title": "Turning over the tables",
+  "display": "Mark 11:15-19",
+  "refs": [
+   [
+    "Mark",
+    11,
+    11
+   ],
+   [
+    "Matthew",
+    21,
+    21
+   ],
+   [
+    "Luke",
+    19,
+    19
+   ],
+   [
+    "John",
+    2,
+    2
+   ]
+  ],
+  "era": "NT",
+  "place": "The court of the Gentiles",
+  "modern": "Temple Mount, Jerusalem",
+  "lat": 31.778,
+  "lng": 35.2354,
+  "confidence": "established",
+  "note": "The outer court was a vast open plaza — the money changers' tables would have stood near the southern entrance steps, which have been excavated.",
+  "people": "Jesus"
+ },
+ {
+  "id": "last-supper",
+  "title": "The Last Supper",
+  "display": "Luke 22:7-38",
+  "refs": [
+   [
+    "Luke",
+    22,
+    22
+   ],
+   [
+    "Matthew",
+    26,
+    26
+   ],
+   [
+    "Mark",
+    14,
+    14
+   ],
+   [
+    "John",
+    13,
+    17
+   ]
+  ],
+  "era": "NT",
+  "place": "An upstairs room in Jerusalem",
+  "modern": "The Cenacle, Mount Zion, Jerusalem",
+  "lat": 31.7717,
+  "lng": 35.2294,
+  "confidence": "debated",
+  "note": "The gospels do not say where the room was. The building on Mount Zion has carried the tradition since the Byzantine period, but the room you can visit is medieval.",
+  "people": "Jesus, the disciples"
+ },
+ {
+  "id": "gethsemane",
+  "title": "Gethsemane",
+  "display": "Mark 14:32-52",
+  "refs": [
+   [
+    "Mark",
+    14,
+    14
+   ],
+   [
+    "Matthew",
+    26,
+    26
+   ],
+   [
+    "Luke",
+    22,
+    22
+   ],
+   [
+    "John",
+    18,
+    18
+   ]
+  ],
+  "era": "NT",
+  "place": "The garden of Gethsemane",
+  "modern": "Church of All Nations, Jerusalem",
+  "lat": 31.7794,
+  "lng": 35.2397,
+  "confidence": "debated",
+  "note": "An olive grove at the foot of the Mount of Olives, across the Kidron valley from the temple. The area is certain; the exact plot is tradition, and four different churches keep rival gardens within a few hundred metres. Some of the olive trees are over 900 years old.",
+  "people": "Jesus, Judas, Peter"
+ },
+ {
+  "id": "peter-denial",
+  "title": "Peter denies Jesus",
+  "display": "Mark 14:66-72",
+  "refs": [
+   [
+    "Mark",
+    14,
+    14
+   ],
+   [
+    "Matthew",
+    26,
+    26
+   ],
+   [
+    "Luke",
+    22,
+    22
+   ],
+   [
+    "John",
+    18,
+    18
+   ]
+  ],
+  "era": "NT",
+  "place": "The high priest's courtyard",
+  "modern": "St Peter in Gallicantu, Jerusalem",
+  "lat": 31.7719,
+  "lng": 35.2314,
+  "confidence": "debated",
+  "note": "The house of Caiaphas has not been identified with certainty. This church on the eastern slope of Mount Zion is the traditional site and sits beside a first-century stepped street.",
+  "people": "Peter, Caiaphas"
+ },
+ {
+  "id": "pilate",
+  "title": "The trial before Pilate",
+  "display": "John 18:28 – 19:16",
+  "refs": [
+   [
+    "John",
+    18,
+    19
+   ],
+   [
+    "Matthew",
+    27,
+    27
+   ],
+   [
+    "Mark",
+    15,
+    15
+   ],
+   [
+    "Luke",
+    23,
+    23
+   ]
+  ],
+  "era": "NT",
+  "place": "The praetorium",
+  "modern": "Herod's palace / the Kishle, Jerusalem",
+  "lat": 31.7752,
+  "lng": 35.2277,
+  "confidence": "debated",
+  "note": "Two candidates: the Antonia fortress beside the temple, where the Via Dolorosa begins, or Herod's palace near today's Jaffa Gate. Most historians now favour the palace, and that is where this pin sits — but the older tradition points across the city.",
+  "people": "Jesus, Pilate"
+ },
+ {
+  "id": "golgotha",
+  "title": "The crucifixion",
+  "display": "Mark 15:21-41",
+  "refs": [
+   [
+    "Mark",
+    15,
+    15
+   ],
+   [
+    "Matthew",
+    27,
+    27
+   ],
+   [
+    "Luke",
+    23,
+    23
+   ],
+   [
+    "John",
+    19,
+    19
+   ]
+  ],
+  "era": "NT",
+  "place": "Golgotha, the place of the skull",
+  "modern": "Church of the Holy Sepulchre, Jerusalem",
+  "lat": 31.7784,
+  "lng": 35.2297,
+  "confidence": "debated",
+  "note": "The Holy Sepulchre is the strong favourite: it was an abandoned quarry with tombs, outside the city wall of the time, and the tradition runs back to the 4th century. The Garden Tomb, popular since the 1800s, has little going for it archaeologically.",
+  "people": "Jesus"
+ },
+ {
+  "id": "empty-tomb",
+  "title": "The empty tomb",
+  "display": "John 20",
+  "refs": [
+   [
+    "John",
+    20,
+    20
+   ],
+   [
+    "Matthew",
+    28,
+    28
+   ],
+   [
+    "Mark",
+    16,
+    16
+   ],
+   [
+    "Luke",
+    24,
+    24
+   ]
+  ],
+  "era": "NT",
+  "place": "The garden tomb of Joseph of Arimathea",
+  "modern": "Church of the Holy Sepulchre, Jerusalem",
+  "lat": 31.7784,
+  "lng": 35.2297,
+  "confidence": "debated",
+  "note": "Same site as Golgotha — John says the tomb was in a garden right beside the place of crucifixion. First-century rock-cut tombs survive inside the church, which supports the identification.",
+  "people": "Mary Magdalene, Peter, John"
+ },
+ {
+  "id": "emmaus",
+  "title": "The road to Emmaus",
+  "display": "Luke 24:13-35",
+  "refs": [
+   [
+    "Luke",
+    24,
+    24
+   ]
+  ],
+  "era": "NT",
+  "place": "Emmaus",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "Luke gives a distance — about seven miles from Jerusalem — and manuscripts disagree even on that. Four different villages claim it and none can prove it.",
+  "people": "Cleopas",
+  "candidates": [
+   {
+    "name": "Emmaus Nicopolis (Imwas)",
+    "lat": 31.8394,
+    "lng": 34.9894
+   },
+   {
+    "name": "Abu Ghosh",
+    "lat": 31.8106,
+    "lng": 35.1075
+   },
+   {
+    "name": "el-Qubeibeh",
+    "lat": 31.8425,
+    "lng": 35.15
+   },
+   {
+    "name": "Motza",
+    "lat": 31.7906,
+    "lng": 35.1614
+   }
+  ]
+ },
+ {
+  "id": "breakfast-shore",
+  "title": "Breakfast on the shore",
+  "display": "John 21",
+  "refs": [
+   [
+    "John",
+    21,
+    21
+   ]
+  ],
+  "era": "NT",
+  "place": "The shore of the Sea of Galilee",
+  "modern": "Tabgha, Israel",
+  "lat": 32.8731,
+  "lng": 35.5486,
+  "confidence": "debated",
+  "note": "John says only \"the Sea of Tiberias\". Tabgha is the traditional spot, and a flat rock inside the little church there is shown as the table of Christ — a tradition running back to the 4th century, though the early accounts are not clear which rock they meant.",
+  "people": "Jesus, Peter"
+ },
+ {
+  "id": "ascension",
+  "title": "The ascension",
+  "display": "Acts 1:6-12",
+  "refs": [
+   [
+    "Acts",
+    1,
+    1
+   ],
+   [
+    "Luke",
+    24,
+    24
+   ]
+  ],
+  "era": "NT",
+  "place": "The Mount of Olives, near Bethany",
+  "modern": "Mount of Olives, Jerusalem",
+  "lat": 31.7783,
+  "lng": 35.2456,
+  "confidence": "established",
+  "note": "Acts names the Mount of Olives and gives the distance back to the city. The exact summit point is marked by a small domed chapel, which is tradition.",
+  "people": "Jesus, the apostles"
+ },
+ {
+  "id": "pentecost",
+  "title": "Pentecost",
+  "display": "Acts 2",
+  "refs": [
+   [
+    "Acts",
+    2,
+    2
+   ]
+  ],
+  "era": "NT",
+  "place": "Jerusalem",
+  "modern": "Jerusalem Old City",
+  "lat": 31.7767,
+  "lng": 35.2345,
+  "confidence": "established",
+  "note": "The city is certain; the house is not. The crowd Peter addressed would have gathered near the temple, where thousands were in the city for the festival.",
+  "people": "Peter, the apostles"
+ },
+ {
+  "id": "stephen",
+  "title": "Stephen is stoned",
+  "display": "Acts 7",
+  "refs": [
+   [
+    "Acts",
+    6,
+    8
+   ]
+  ],
+  "era": "NT",
+  "place": "Outside the city wall, Jerusalem",
+  "modern": "Jerusalem",
+  "lat": 31.7811,
+  "lng": 35.2372,
+  "confidence": "debated",
+  "note": "Executions took place outside the walls. Two traditions compete — one north of the city, one at the eastern gate now called St Stephen's Gate, which is where the pin sits.",
+  "people": "Stephen, Saul"
+ },
+ {
+  "id": "ethiopian",
+  "title": "Philip and the Ethiopian official",
+  "display": "Acts 8:26-40",
+  "refs": [
+   [
+    "Acts",
+    8,
+    8
+   ]
+  ],
+  "era": "NT",
+  "place": "The desert road to Gaza",
+  "modern": "Unlocated",
+  "lat": null,
+  "lng": null,
+  "confidence": "unknown",
+  "note": "Acts says 'the road that goes down from Jerusalem to Gaza'. There were several such roads and no specific spot is given.",
+  "people": "Philip"
+ },
+ {
+  "id": "damascus-road",
+  "title": "Saul is stopped on the road",
+  "display": "Acts 9:1-19",
+  "refs": [
+   [
+    "Acts",
+    9,
+    9
+   ],
+   [
+    "Acts",
+    22,
+    22
+   ],
+   [
+    "Acts",
+    26,
+    26
+   ]
+  ],
+  "era": "NT",
+  "place": "The road to Damascus",
+  "modern": "Damascus, Syria",
+  "lat": 33.5138,
+  "lng": 36.2765,
+  "confidence": "established",
+  "note": "The city is certain, and Straight Street — where Saul stayed afterwards — still runs through the old city. The point on the road where it happened is not known.",
+  "people": "Saul, Ananias"
+ },
+ {
+  "id": "joppa",
+  "title": "Peter's vision on the roof",
+  "display": "Acts 10:9-23",
+  "refs": [
+   [
+    "Acts",
+    9,
+    10
+   ]
+  ],
+  "era": "NT",
+  "place": "Joppa",
+  "modern": "Jaffa, Tel Aviv",
+  "lat": 32.0536,
+  "lng": 34.7519,
+  "confidence": "established",
+  "note": "An ancient port, continuously occupied. The house of Simon the tanner is traditionally shown near the harbour, which is tradition rather than evidence.",
+  "people": "Peter, Tabitha"
+ },
+ {
+  "id": "caesarea-cornelius",
+  "title": "Peter and Cornelius",
+  "display": "Acts 10",
+  "refs": [
+   [
+    "Acts",
+    10,
+    11
+   ]
+  ],
+  "era": "NT",
+  "place": "Caesarea Maritima",
+  "modern": "Caesarea, Israel",
+  "lat": 32.5,
+  "lng": 34.8917,
+  "confidence": "established",
+  "note": "Herod's harbour city, extensively excavated — theatre, aqueduct, and an inscription bearing Pontius Pilate's name. This is where the gospel first reaches a Roman household.",
+  "people": "Peter, Cornelius"
+ },
+ {
+  "id": "antioch",
+  "title": "First called Christians",
+  "display": "Acts 11:19-26",
+  "refs": [
+   [
+    "Acts",
+    11,
+    11
+   ],
+   [
+    "Acts",
+    13,
+    13
+   ]
+  ],
+  "era": "NT",
+  "place": "Antioch on the Orontes",
+  "modern": "Antakya, Turkey",
+  "lat": 36.2,
+  "lng": 36.16,
+  "confidence": "established",
+  "note": "The third city of the Roman empire and the launch pad for Paul's journeys. Much of the ancient city lies under the modern one.",
+  "people": "Barnabas, Saul"
+ },
+ {
+  "id": "paphos",
+  "title": "Paul's first mission: Cyprus",
+  "display": "Acts 13:4-12",
+  "refs": [
+   [
+    "Acts",
+    13,
+    13
+   ]
+  ],
+  "era": "NT",
+  "place": "Paphos",
+  "modern": "Kato Paphos, Cyprus",
+  "lat": 34.7571,
+  "lng": 32.4067,
+  "confidence": "established",
+  "note": "The Roman provincial capital of Cyprus, where Paul met the governor Sergius Paulus. The archaeological park is open to visitors.",
+  "people": "Paul, Barnabas"
+ },
+ {
+  "id": "lystra",
+  "title": "Mistaken for gods at Lystra",
+  "display": "Acts 14:8-20",
+  "refs": [
+   [
+    "Acts",
+    14,
+    14
+   ]
+  ],
+  "era": "NT",
+  "place": "Lystra",
+  "modern": "Near Hatunsaray, Konya, Turkey",
+  "lat": 37.6017,
+  "lng": 32.3384,
+  "confidence": "established",
+  "note": "Identified by an inscribed Roman altar found at the mound in 1885 naming the colony. Timothy came from here.",
+  "people": "Paul, Barnabas"
+ },
+ {
+  "id": "jerusalem-council",
+  "title": "The Jerusalem council",
+  "display": "Acts 15",
+  "refs": [
+   [
+    "Acts",
+    15,
+    15
+   ]
+  ],
+  "era": "NT",
+  "place": "Jerusalem",
+  "modern": "Jerusalem",
+  "lat": 31.7767,
+  "lng": 35.2345,
+  "confidence": "established",
+  "note": "The meeting that decided non-Jewish believers did not have to become Jews first. The city is certain; the meeting place is not recorded.",
+  "people": "Paul, Peter, James, Barnabas"
+ },
+ {
+  "id": "philippi",
+  "title": "Lydia, and the earthquake in the jail",
+  "display": "Acts 16:11-40",
+  "refs": [
+   [
+    "Acts",
+    16,
+    16
+   ]
+  ],
+  "era": "NT",
+  "place": "Philippi",
+  "modern": "Filippoi, Greece",
+  "lat": 41.0131,
+  "lng": 24.2864,
+  "confidence": "established",
+  "note": "A Roman colony, well excavated — forum, theatre, and the riverside outside the gate where Acts says the women met to pray. The first church in Europe.",
+  "people": "Paul, Silas, Lydia"
+ },
+ {
+  "id": "thessalonica",
+  "title": "Trouble in Thessalonica",
+  "display": "Acts 17:1-9",
+  "refs": [
+   [
+    "Acts",
+    17,
+    17
+   ]
+  ],
+  "era": "NT",
+  "place": "Thessalonica",
+  "modern": "Thessaloniki, Greece",
+  "lat": 40.6403,
+  "lng": 22.9444,
+  "confidence": "established",
+  "note": "A major port, continuously a city ever since. Luke calls its officials 'politarchs' — an unusual title confirmed by inscriptions found there.",
+  "people": "Paul, Silas, Jason"
+ },
+ {
+  "id": "berea",
+  "title": "The Bereans check the scriptures",
+  "display": "Acts 17:10-15",
+  "refs": [
+   [
+    "Acts",
+    17,
+    17
+   ]
+  ],
+  "era": "NT",
+  "place": "Berea",
+  "modern": "Veria, Greece",
+  "lat": 40.5236,
+  "lng": 22.2028,
+  "confidence": "established",
+  "note": "A quiet inland town then and a working city now, with a monument marking Paul's visit.",
+  "people": "Paul, Silas"
+ },
+ {
+  "id": "athens",
+  "title": "Paul at the Areopagus",
+  "display": "Acts 17:16-34",
+  "refs": [
+   [
+    "Acts",
+    17,
+    17
+   ]
+  ],
+  "era": "NT",
+  "place": "The Areopagus, Athens",
+  "modern": "Areopagus, Athens, Greece",
+  "lat": 37.9725,
+  "lng": 23.7233,
+  "confidence": "established",
+  "note": "The bare rock outcrop below the Acropolis where the council met. You can walk up it; Paul's speech is on a bronze plaque at the foot.",
+  "people": "Paul"
+ },
+ {
+  "id": "corinth",
+  "title": "Eighteen months in Corinth",
+  "display": "Acts 18:1-17",
+  "refs": [
+   [
+    "Acts",
+    18,
+    18
+   ]
+  ],
+  "era": "NT",
+  "place": "Corinth",
+  "modern": "Ancient Corinth, Greece",
+  "lat": 37.9061,
+  "lng": 22.8792,
+  "confidence": "established",
+  "note": "The bema — the public platform where Paul was hauled before Gallio — has been excavated and is still there. An inscription dates Gallio's term, which anchors Paul's whole timeline.",
+  "people": "Paul, Aquila, Priscilla, Gallio"
+ },
+ {
+  "id": "ephesus",
+  "title": "The riot of the silversmiths",
+  "display": "Acts 19",
+  "refs": [
+   [
+    "Acts",
+    18,
+    19
+   ]
+  ],
+  "era": "NT",
+  "place": "Ephesus",
+  "modern": "Efes, Selçuk, Turkey",
+  "lat": 37.9397,
+  "lng": 27.3417,
+  "confidence": "established",
+  "note": "One of the best preserved ancient cities anywhere. The theatre where the crowd chanted for two hours seats 24,000 and is still standing.",
+  "people": "Paul, Demetrius"
+ },
+ {
+  "id": "miletus",
+  "title": "Paul's farewell to the Ephesian elders",
+  "display": "Acts 20:17-38",
+  "refs": [
+   [
+    "Acts",
+    20,
+    20
+   ]
+  ],
+  "era": "NT",
+  "place": "Miletus",
+  "modern": "Milet, Aydın, Turkey",
+  "lat": 37.5306,
+  "lng": 27.2778,
+  "confidence": "established",
+  "note": "A great harbour city in Paul's day; the coastline has since silted up and the ruins now sit inland.",
+  "people": "Paul"
+ },
+ {
+  "id": "caesarea-trial",
+  "title": "Paul on trial before Felix and Agrippa",
+  "display": "Acts 24–26",
+  "refs": [
+   [
+    "Acts",
+    23,
+    26
+   ]
+  ],
+  "era": "NT",
+  "place": "Caesarea Maritima",
+  "modern": "Caesarea, Israel",
+  "lat": 32.5,
+  "lng": 34.8917,
+  "confidence": "established",
+  "note": "Paul was held here for two years. The governor's palace on the promontory, where the hearings took place, has been excavated.",
+  "people": "Paul, Felix, Festus, Agrippa"
+ },
+ {
+  "id": "malta",
+  "title": "Shipwrecked on Malta",
+  "display": "Acts 27–28",
+  "refs": [
+   [
+    "Acts",
+    27,
+    28
+   ]
+  ],
+  "era": "NT",
+  "place": "Malta",
+  "modern": "St Paul's Island, Malta",
+  "lat": 35.9631,
+  "lng": 14.4022,
+  "confidence": "debated",
+  "note": "The island is named in the text and is not in doubt. Which bay the ship broke up in is — St Paul's Bay carries the tradition, and that is where the pin sits, but other bays fit the sailing directions better.",
+  "people": "Paul"
+ },
+ {
+  "id": "rome",
+  "title": "Paul reaches Rome",
+  "display": "Acts 28:11-31",
+  "refs": [
+   [
+    "Acts",
+    28,
+    28
+   ]
+  ],
+  "era": "NT",
+  "place": "Rome",
+  "modern": "Rome, Italy",
+  "lat": 41.8925,
+  "lng": 12.4853,
+  "confidence": "established",
+  "note": "Acts ends with Paul under house arrest, still preaching. The Appian Way he entered the city on is still walkable.",
+  "people": "Paul"
+ },
+ {
+  "id": "patmos",
+  "title": "John's visions on Patmos",
+  "display": "Revelation 1:9",
+  "refs": [
+   [
+    "Revelation",
+    1,
+    1
+   ]
+  ],
+  "era": "NT",
+  "place": "Patmos",
+  "modern": "Patmos, Greece",
+  "lat": 37.3089,
+  "lng": 26.5475,
+  "confidence": "established",
+  "note": "A small Aegean island named directly in the text. The cave shown as the place of the visions is tradition, but the island is not in doubt.",
+  "people": "John"
+ },
+ {
+  "id": "seven-churches",
+  "title": "The letters to the seven churches",
+  "display": "Revelation 2–3",
+  "refs": [
+   [
+    "Revelation",
+    2,
+    3
+   ]
+  ],
+  "era": "NT",
+  "place": "Seven cities of Roman Asia",
+  "modern": "Western Turkey",
+  "lat": 38.4886,
+  "lng": 28.04,
+  "confidence": "established",
+  "note": "All seven are named and all seven have been located: Ephesus, Smyrna (Izmir), Pergamum, Thyatira (Akhisar), Sardis, Philadelphia (Alaşehir) and Laodicea. The pin is on Sardis, roughly at the centre of the circuit.",
+  "people": "John",
+  "candidates": [
+   {
+    "name": "Ephesus",
+    "lat": 37.9397,
+    "lng": 27.3417
+   },
+   {
+    "name": "Smyrna (Izmir)",
+    "lat": 38.4189,
+    "lng": 27.1287
+   },
+   {
+    "name": "Pergamum",
+    "lat": 39.1319,
+    "lng": 27.1839
+   },
+   {
+    "name": "Thyatira (Akhisar)",
+    "lat": 38.9167,
+    "lng": 27.8333
+   },
+   {
+    "name": "Sardis",
+    "lat": 38.4886,
+    "lng": 28.04
+   },
+   {
+    "name": "Philadelphia (Alaşehir)",
+    "lat": 38.35,
+    "lng": 28.52
+   },
+   {
+    "name": "Laodicea",
+    "lat": 37.8361,
+    "lng": 29.1078
+   }
+  ]
+ },
+ {
+  "id": "tyre-sidon",
+  "title": "The Syrophoenician woman",
+  "display": "Mark 7:24-30",
+  "refs": [
+   [
+    "Mark",
+    7,
+    7
+   ],
+   [
+    "Matthew",
+    15,
+    15
+   ]
+  ],
+  "era": "NT",
+  "place": "The region of Tyre and Sidon",
+  "modern": "Tyre, Lebanon",
+  "lat": 33.2704,
+  "lng": 35.2038,
+  "confidence": "established",
+  "note": "Both cities are ancient, continuously occupied and certain. Jesus went outside Jewish territory here — that is the point of the story.",
+  "people": "Jesus"
+ },
+ {
+  "id": "bethsaida",
+  "title": "Healing the blind man at Bethsaida",
+  "display": "Mark 8:22-26",
+  "refs": [
+   [
+    "Mark",
+    8,
+    8
+   ]
+  ],
+  "era": "NT",
+  "place": "Bethsaida",
+  "modern": "Et-Tell / el-Araj, Sea of Galilee",
+  "lat": 32.91,
+  "lng": 35.63,
+  "confidence": "debated",
+  "note": "The home town of Peter, Andrew and Philip. Two nearby sites both claim it — et-Tell on the hill and el-Araj by the shore — and excavation continues at both.",
+  "people": "Jesus"
+ },
+ {
+  "id": "sychar-samaria",
+  "title": "Jesus travels through Samaria",
+  "display": "John 4:1-6",
+  "refs": [
+   [
+    "John",
+    4,
+    4
+   ]
+  ],
+  "era": "NT",
+  "place": "Sychar",
+  "modern": "Askar, near Nablus, West Bank",
+  "lat": 32.2144,
+  "lng": 35.2856,
+  "confidence": "debated",
+  "note": "Sychar is usually identified with the village of Askar beside Jacob's well, though some argue it is Shechem itself, a little further west.",
+  "people": "Jesus"
+ },
+ {
+  "id": "jordan-naaman",
+  "title": "Naaman washes in the Jordan",
+  "display": "2 Kings 5",
+  "refs": [
+   [
+    "2 Kings",
+    5,
+    5
+   ]
+  ],
+  "era": "OT",
+  "place": "The Jordan River",
+  "modern": "Jordan River",
+  "lat": 32.4,
+  "lng": 35.55,
+  "confidence": "debated",
+  "note": "The river is certain; the stretch he washed in is not recorded. The pin sits on the middle Jordan, between Galilee and the Dead Sea.",
+  "people": "Naaman, Elisha"
+ },
+ {
+  "id": "ezion-geber",
+  "title": "Solomon's fleet",
+  "display": "1 Kings 9:26-28",
+  "refs": [
+   [
+    "1 Kings",
+    9,
+    9
+   ]
+  ],
+  "era": "OT",
+  "place": "Ezion Geber, near Elath",
+  "modern": "Tell el-Kheleifeh, Aqaba, Jordan",
+  "lat": 29.5472,
+  "lng": 34.9803,
+  "confidence": "debated",
+  "note": "The head of the Gulf of Aqaba is certain from the text. The pin is Tell el-Kheleifeh, the leading candidate — but excavation there has found nothing from Solomon's period, and the island of Jezirat Faraun is the main rival.",
+  "people": "Solomon"
+ },
+ {
+  "id": "mount-hermon",
+  "title": "Mount Hermon",
+  "display": "Psalm 133; Deuteronomy 3:8",
+  "refs": [
+   [
+    "Deuteronomy",
+    3,
+    3
+   ],
+   [
+    "Psalms",
+    133,
+    133
+   ]
+  ],
+  "era": "OT",
+  "place": "Mount Hermon",
+  "modern": "Hermon, Syria / Lebanon border",
+  "lat": 33.4164,
+  "lng": 35.8572,
+  "confidence": "established",
+  "note": "The snow-capped mountain at Israel's northern edge, named repeatedly as a boundary marker and never in doubt.",
+  "people": ""
+ },
+ {
+  "id": "beersheba",
+  "title": "Beersheba, the southern edge",
+  "display": "Genesis 21:22-34",
+  "refs": [
+   [
+    "Genesis",
+    21,
+    21
+   ],
+   [
+    "Genesis",
+    26,
+    26
+   ]
+  ],
+  "era": "OT",
+  "place": "Beersheba",
+  "modern": "Tel Sheva, Israel",
+  "lat": 31.245,
+  "lng": 34.8408,
+  "confidence": "established",
+  "note": "'From Dan to Beersheba' was the standard way of saying 'the whole country'. The tell has an excavated well and a reconstructed horned altar.",
+  "people": "Abraham, Isaac"
+ },
+ {
+  "id": "dan",
+  "title": "Dan, the northern edge",
+  "display": "Judges 18; 1 Kings 12:29",
+  "refs": [
+   [
+    "Judges",
+    18,
+    18
+   ],
+   [
+    "1 Kings",
+    12,
+    12
+   ]
+  ],
+  "era": "OT",
+  "place": "Dan",
+  "modern": "Tel Dan, northern Israel",
+  "lat": 33.2486,
+  "lng": 35.6522,
+  "confidence": "established",
+  "note": "The Tel Dan inscription found here mentions the 'House of David' — the earliest reference to David outside the Bible.",
+  "people": "Jeroboam"
+ },
+ {
+  "id": "megiddo",
+  "title": "Megiddo, and Armageddon",
+  "display": "1 Kings 9:15; Revelation 16:16",
+  "refs": [
+   [
+    "1 Kings",
+    9,
+    9
+   ],
+   [
+    "2 Kings",
+    23,
+    23
+   ],
+   [
+    "Revelation",
+    16,
+    16
+   ]
+  ],
+  "era": "OT",
+  "place": "Megiddo",
+  "modern": "Tel Megiddo, Israel",
+  "lat": 32.5847,
+  "lng": 35.1839,
+  "confidence": "established",
+  "note": "A fortress city guarding the main pass into the Jezreel valley, with more than twenty cities stacked on top of each other. 'Armageddon' means 'mountain of Megiddo'.",
+  "people": "Solomon, Josiah"
+ },
+ {
+  "id": "lachish",
+  "title": "The siege of Lachish",
+  "display": "2 Kings 18:13-17",
+  "refs": [
+   [
+    "2 Kings",
+    18,
+    19
+   ],
+   [
+    "2 Chronicles",
+    32,
+    32
+   ]
+  ],
+  "era": "OT",
+  "place": "Lachish",
+  "modern": "Tel Lachish, Israel",
+  "lat": 31.5647,
+  "lng": 34.8492,
+  "confidence": "established",
+  "note": "The one Bible siege we can see from the other side: Sennacherib carved the whole assault in stone for his palace at Nineveh, and the reliefs are in the British Museum.",
+  "people": "Sennacherib, Hezekiah"
+ },
+ {
+  "id": "elijah-flees",
+  "title": "Elijah runs for his life",
+  "display": "1 Kings 19:1-8",
+  "refs": [
+   [
+    "1 Kings",
+    19,
+    19
+   ]
+  ],
+  "era": "OT",
+  "place": "Beersheba, then the wilderness",
+  "modern": "Tel Sheva, Israel",
+  "lat": 31.245,
+  "lng": 34.8408,
+  "confidence": "established",
+  "note": "Beersheba, where Elijah left his servant, is certain — the pin sits there. Where he walked for forty days afterwards, and which mountain he reached, is not: it is the same unlocated Horeb as in Exodus.",
+  "people": "Elijah"
+ },
+ {
+  "id": "gerar",
+  "title": "Isaac digs the wells",
+  "display": "Genesis 26",
+  "refs": [
+   [
+    "Genesis",
+    20,
+    20
+   ],
+   [
+    "Genesis",
+    26,
+    26
+   ]
+  ],
+  "era": "OT",
+  "place": "Gerar",
+  "modern": "Tel Haror, northern Negev, Israel",
+  "lat": 31.3833,
+  "lng": 34.6167,
+  "confidence": "debated",
+  "note": "Tel Haror is the leading candidate for Gerar and fits the region described, but the identification is not certain.",
+  "people": "Isaac, Abimelech"
+ },
+ {
+  "id": "hebron-david",
+  "title": "David is made king at Hebron",
+  "display": "2 Samuel 2; 2 Samuel 5:1-5",
+  "refs": [
+   [
+    "2 Samuel",
+    2,
+    5
+   ]
+  ],
+  "era": "OT",
+  "place": "Hebron",
+  "modern": "Hebron, West Bank",
+  "lat": 31.5246,
+  "lng": 35.1106,
+  "confidence": "established",
+  "note": "David ruled here for seven years before taking Jerusalem. The town has been continuously occupied since the Bronze Age.",
+  "people": "David"
+ },
+ {
+  "id": "mizpah",
+  "title": "Samuel judges Israel at Mizpah",
+  "display": "1 Samuel 7",
+  "refs": [
+   [
+    "1 Samuel",
+    7,
+    7
+   ],
+   [
+    "1 Samuel",
+    10,
+    10
+   ]
+  ],
+  "era": "OT",
+  "place": "Mizpah",
+  "modern": "Tell en-Nasbeh, West Bank",
+  "lat": 31.8842,
+  "lng": 35.2164,
+  "confidence": "debated",
+  "note": "Two candidates: Tell en-Nasbeh, where the pin sits, and Nebi Samwil a few kilometres south. Most archaeologists favour Tell en-Nasbeh.",
+  "people": "Samuel, Saul"
+ },
+ {
+  "id": "troas",
+  "title": "The vision of the man from Macedonia",
+  "display": "Acts 16:6-10",
+  "refs": [
+   [
+    "Acts",
+    16,
+    16
+   ]
+  ],
+  "era": "NT",
+  "place": "Troas",
+  "modern": "Alexandria Troas, Turkey",
+  "lat": 39.75,
+  "lng": 26.159,
+  "confidence": "established",
+  "note": "The port where Paul turned west into Europe. The ruins, including a large bath complex, lie in the fields near the coast.",
+  "people": "Paul, Luke"
+ },
+ {
+  "id": "antioch-pisidia",
+  "title": "Paul preaches in the synagogue",
+  "display": "Acts 13:13-52",
+  "refs": [
+   [
+    "Acts",
+    13,
+    13
+   ]
+  ],
+  "era": "NT",
+  "place": "Antioch of Pisidia",
+  "modern": "Yalvaç, Isparta, Turkey",
+  "lat": 38.305,
+  "lng": 31.1897,
+  "confidence": "established",
+  "note": "A different Antioch from the Syrian one — a Roman colony up on the Anatolian plateau. Excavated, with a preserved aqueduct and theatre.",
+  "people": "Paul, Barnabas"
+ },
+ {
+  "id": "colossae",
+  "title": "The letter to the Colossians",
+  "display": "Colossians 1",
+  "refs": [
+   [
+    "Colossians",
+    1,
+    4
+   ]
+  ],
+  "era": "NT",
+  "place": "Colossae",
+  "modern": "Höyük, near Honaz, Turkey",
+  "lat": 37.79,
+  "lng": 29.26,
+  "confidence": "established",
+  "note": "The mound is identified and visible. It sat unexcavated for a century; Turkish archaeologists began digging in 2021 and have since uncovered a large rock-cut necropolis on the slope below the city.",
+  "people": "Paul, Epaphras"
+ },
+ {
+  "id": "cenchreae",
+  "title": "Phoebe's church at Cenchreae",
+  "display": "Romans 16:1",
+  "refs": [
+   [
+    "Romans",
+    16,
+    16
+   ],
+   [
+    "Acts",
+    18,
+    18
+   ]
+  ],
+  "era": "NT",
+  "place": "Cenchreae",
+  "modern": "Kechries, Greece",
+  "lat": 37.885,
+  "lng": 22.9878,
+  "confidence": "established",
+  "note": "Corinth's eastern port. The submerged harbour moles are still visible in the shallow water.",
+  "people": "Paul, Phoebe"
+ }
+];
+
+/* ============================================================================
+   Reference parsing
+   ========================================================================= */
+const BOOKS = [{"name":"Genesis","alt":["gen","ge","gn"]},{"name":"Exodus","alt":["exod","exo","ex"]},{"name":"Leviticus","alt":["lev","lv"]},{"name":"Numbers","alt":["num","nm","nu"]},{"name":"Deuteronomy","alt":["deut","deu","dt"]},{"name":"Joshua","alt":["josh","jos","jsh"]},{"name":"Judges","alt":["judg","jdg","jdgs"]},{"name":"Ruth","alt":["rth","ru"]},{"name":"1 Samuel","alt":["1 sam","1 sa","1 sm","1s"]},{"name":"2 Samuel","alt":["2 sam","2 sa","2 sm","2s"]},{"name":"1 Kings","alt":["1 kings","1 kgs","1 ki","1k"]},{"name":"2 Kings","alt":["2 kings","2 kgs","2 ki","2k"]},{"name":"1 Chronicles","alt":["1 chron","1 chr","1 ch"]},{"name":"2 Chronicles","alt":["2 chron","2 chr","2 ch"]},{"name":"Ezra","alt":["ezr"]},{"name":"Nehemiah","alt":["neh","ne"]},{"name":"Esther","alt":["esth","est","es"]},{"name":"Job","alt":["jb"]},{"name":"Psalms","alt":["psalm","psa","pss","ps"]},{"name":"Proverbs","alt":["prov","prv","pro","pr"]},{"name":"Ecclesiastes","alt":["eccl","eccles","ecc","qoheleth"]},{"name":"Song of Songs","alt":["song of solomon","song","sos","canticles"]},{"name":"Isaiah","alt":["isa","is"]},{"name":"Jeremiah","alt":["jer","je"]},{"name":"Lamentations","alt":["lam","lm"]},{"name":"Ezekiel","alt":["ezek","ezk","eze"]},{"name":"Daniel","alt":["dan","dn","da"]},{"name":"Hosea","alt":["hos","ho"]},{"name":"Joel","alt":["joe","jl"]},{"name":"Amos","alt":["am"]},{"name":"Obadiah","alt":["obad","oba","ob"]},{"name":"Jonah","alt":["jonah","jnh","jon"]},{"name":"Micah","alt":["mic","mi"]},{"name":"Nahum","alt":["nah","na"]},{"name":"Habakkuk","alt":["hab","hb"]},{"name":"Zephaniah","alt":["zeph","zep","zp"]},{"name":"Haggai","alt":["hag","hg"]},{"name":"Zechariah","alt":["zech","zec","zc"]},{"name":"Malachi","alt":["mal","ml"]},{"name":"Matthew","alt":["matt","mat","mt"]},{"name":"Mark","alt":["mrk","mar","mk"]},{"name":"Luke","alt":["luk","lk"]},{"name":"John","alt":["jhn","jn"]},{"name":"Acts","alt":["act","ac"]},{"name":"Romans","alt":["rom","rm","ro"]},{"name":"1 Corinthians","alt":["1 cor","1 co"]},{"name":"2 Corinthians","alt":["2 cor","2 co"]},{"name":"Galatians","alt":["gal","ga"]},{"name":"Ephesians","alt":["eph","ephes"]},{"name":"Philippians","alt":["phil","php"]},{"name":"Colossians","alt":["col","cl"]},{"name":"1 Thessalonians","alt":["1 thess","1 thes","1 th"]},{"name":"2 Thessalonians","alt":["2 thess","2 thes","2 th"]},{"name":"1 Timothy","alt":["1 tim","1 ti"]},{"name":"2 Timothy","alt":["2 tim","2 ti"]},{"name":"Titus","alt":["tit","ti"]},{"name":"Philemon","alt":["philem","phlm","pm"]},{"name":"Hebrews","alt":["heb","hb"]},{"name":"James","alt":["jas","jm"]},{"name":"1 Peter","alt":["1 pet","1 pe","1 pt"]},{"name":"2 Peter","alt":["2 pet","2 pe","2 pt"]},{"name":"1 John","alt":["1 jn","1 jhn"]},{"name":"2 John","alt":["2 jn","2 jhn"]},{"name":"3 John","alt":["3 jn","3 jhn"]},{"name":"Jude","alt":["jud","jde"]},{"name":"Revelation","alt":["rev","revelations","apocalypse","re"]}];
+
+const ALIAS = {};
+for (const b of BOOKS) {
+  ALIAS[norm(b.name)] = b.name;
+  for (const a of b.alt) ALIAS[norm(a)] = b.name;
+}
+const ALIAS_KEYS = Object.keys(ALIAS).sort((a, b) => b.length - a.length);
+
+function norm(s) {
+  return String(s).toLowerCase()
+    .replace(/[.,'’]/g, '')
+    .replace(/^(1st|first|i)\s+/, '1 ')
+    .replace(/^(2nd|second|ii)\s+/, '2 ')
+    .replace(/^(3rd|third|iii)\s+/, '3 ')
+    .replace(/^([123])\s*/, '$1 ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function parseReference(raw) {
+  const s = norm(raw);
+  if (!s) return null;
+  for (const key of ALIAS_KEYS) {
+    if (s === key || s.startsWith(key + ' ') || s.startsWith(key)) {
+      const rest = s.slice(key.length).trim();
+      if (rest && !/^[\d\s:.–-]+$/.test(rest)) continue;
+      const m = rest.match(/^(\d+)/);
+      return { book: ALIAS[key], chapter: m ? parseInt(m[1], 10) : null };
+    }
+  }
+  return null;
+}
+
+function matchesRef(entry, ref) {
+  return entry.refs.some(function (r) {
+    if (r[0] !== ref.book) return false;
+    if (ref.chapter === null) return true;
+    return ref.chapter >= r[1] && ref.chapter <= r[2];
+  });
+}
+
+/* ============================================================================
+   Rendering
+   ========================================================================= */
+const LABEL = {
+  established: 'Location established',
+  debated: 'Debated site',
+  unknown: 'We are not sure'
+};
+
+const resultsEl = document.getElementById('results');
+const countEl = document.getElementById('count');
+const qEl = document.getElementById('q');
+const clearEl = document.getElementById('clear');
+
+let filter = 'all';
+
+STORY_LOCATIONS.forEach(function (e) {
+  e._hay = [e.title, e.display, e.place, e.modern, e.people, e.note].join(' ').toLowerCase();
+});
+
+function mapsUrl(lat, lng) {
+  return 'https://www.google.com/maps/search/?api=1&query=' +
+         lat.toFixed(5) + ',' + lng.toFixed(5);
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
+
+function entryHTML(e) {
+  let html = '<li class="entry" data-conf="' + e.confidence + '">';
+  html += '<p class="entry-ref">' + esc(e.display) + '</p>';
+  html += '<h2 class="entry-title">' + esc(e.title) + '</h2>';
+  html += '<p class="entry-place"><span class="place-name">' + esc(e.place) + '</span>' +
+          '<span class="place-modern">' + esc(e.modern) + '</span></p>';
+  if (e.confidence !== 'unknown') {
+    html += '<span class="badge"><span class="glyph"></span>' + LABEL[e.confidence] + '</span>';
+  }
+  html += '<p class="entry-note">' + esc(e.note) + '</p>';
+
+  if (e.lat !== null && e.lng !== null) {
+    html += '<div class="actions">' +
+      '<a class="btn-map" target="_blank" rel="noopener" href="' + mapsUrl(e.lat, e.lng) + '">' +
+      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">' +
+      '<path d="M10 18s6-5.2 6-9.4A6 6 0 004 8.6C4 12.8 10 18 10 18z" stroke-linejoin="round"/>' +
+      '<circle cx="10" cy="8.5" r="2.1"/></svg>Open in Google Maps</a>' +
+      '<span class="coords">' + e.lat.toFixed(4) + ', ' + e.lng.toFixed(4) + '</span></div>';
+  } else {
+    html += '<p class="notsure"><span class="glyph"></span>We are not sure where this happened, so there is no pin.</p>';
+  }
+
+  if (e.candidates && e.candidates.length) {
+    html += '<details class="cands"><summary>' +
+            (e.lat === null ? 'Sites people have proposed' : 'The other sites in this story') +
+            ' (' + e.candidates.length + ')</summary>' +
+            '<p class="cand-note">' +
+            (e.lat === null
+              ? 'Proposals only. None of these is agreed on, and pointing at one is not the same as knowing.'
+              : 'All named in the text and all located.') +
+            '</p><ul class="cand-list">';
+    e.candidates.forEach(function (c) {
+      html += '<li><a target="_blank" rel="noopener" href="' + mapsUrl(c.lat, c.lng) + '">' + esc(c.name) + '</a></li>';
+    });
+    html += '</ul></details>';
+  }
+
+  html += '</li>';
+  return html;
+}
+
+function emptyHTML(query) {
+  const ref = parseReference(query);
+  if (ref) {
+    return '<li class="empty"><h2>Nothing on file for ' + esc(ref.book) +
+      (ref.chapter ? ' ' + ref.chapter : '') + '</h2>' +
+      '<p>That is a real passage — it just has no story with a place attached to it here, ' +
+      'or it is a letter or a psalm rather than an event. Try a nearby chapter.</p></li>';
+  }
+  return '<li class="empty"><h2>No match</h2><p>Try a passage like <code>Mark 5</code> or ' +
+    '<code>Genesis 22</code>, a place like <code>Jericho</code>, or a person like <code>Elijah</code>.</p></li>';
+}
+
+function render() {
+  const query = qEl.value.trim();
+  const ref = query ? parseReference(query) : null;
+  const lower = query.toLowerCase();
+
+  let list = STORY_LOCATIONS.filter(function (e) {
+    if (filter === 'OT' || filter === 'NT') { if (e.era !== filter) return false; }
+    else if (filter !== 'all') { if (e.confidence !== filter) return false; }
+    if (!query) return true;
+    if (ref) return matchesRef(e, ref);
+    return e._hay.indexOf(lower) !== -1;
+  });
+
+  clearEl.hidden = !query;
+
+  if (!list.length) {
+    resultsEl.innerHTML = emptyHTML(query);
+    countEl.textContent = '0 of ' + STORY_LOCATIONS.length + ' stories';
+    return;
+  }
+
+  resultsEl.innerHTML = list.map(entryHTML).join('');
+
+  const est = list.filter(function (e) { return e.confidence === 'established'; }).length;
+  const deb = list.filter(function (e) { return e.confidence === 'debated'; }).length;
+  const unk = list.length - est - deb;
+  countEl.textContent = list.length + ' of ' + STORY_LOCATIONS.length + ' stories  ·  ' +
+    est + ' established  ·  ' + deb + ' debated  ·  ' + unk + ' not sure';
+}
+
+qEl.addEventListener('input', render);
+clearEl.addEventListener('click', function () { qEl.value = ''; qEl.focus(); render(); });
+
+document.querySelectorAll('.chip').forEach(function (chip) {
+  chip.addEventListener('click', function () {
+    filter = chip.dataset.f;
+    document.querySelectorAll('.chip').forEach(function (c) {
+      c.setAttribute('aria-pressed', String(c === chip));
+    });
+    render();
+  });
+});
+
+document.getElementById('stamp').textContent =
+  STORY_LOCATIONS.length + ' stories  ·  ' +
+  STORY_LOCATIONS.filter(function (e) { return e.confidence === 'established'; }).length + ' established  ·  ' +
+  STORY_LOCATIONS.filter(function (e) { return e.confidence === 'debated'; }).length + ' debated  ·  ' +
+  STORY_LOCATIONS.filter(function (e) { return e.confidence === 'unknown'; }).length + ' not sure';
+
+render();
+
+/* ============================================================================
+   Contour field behind the masthead — isolines, the way a survey map draws
+   ground it has actually walked.
+   ========================================================================= */
+(function () {
+  const canvas = document.getElementById('contours');
+  const ctx = canvas.getContext('2d');
+  let w = 0, h = 0;
+
+  function draw() {
+    const host = canvas.parentElement;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = host.offsetWidth; h = host.offsetHeight;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--contour').trim();
+    ctx.lineWidth = 1;
+
+    const lines = 26;
+    for (let i = 0; i < lines; i++) {
+      const t = i / (lines - 1);
+      const base = h * (0.06 + t * 1.02);
+      ctx.beginPath();
+      for (let x = -10; x <= w + 10; x += 6) {
+        const p = x / w;
+        const y = base
+          + Math.sin(p * 3.1 + i * 0.42) * (16 + i * 1.9)
+          + Math.sin(p * 7.4 - i * 0.27) * (5 + i * 0.5)
+          + Math.sin(p * 1.3 + i * 0.9) * 9;
+        if (x === -10) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  draw();
+  let t;
+  window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(draw, 120); });
+  if (window.matchMedia) {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', draw);
+  }
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+</body>
+</html>

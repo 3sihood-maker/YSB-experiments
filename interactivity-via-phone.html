@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Interactivity Via the Phone Itself</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1116;
+    --bg2:#141922;
+    --card:#171D27;
+    --card2:#1C2330;
+    --line:rgba(233,238,246,.10);
+    --line2:rgba(233,238,246,.20);
+    --ink:#E9EEF6;
+    --dim:#98A4B6;
+    --faint:#6B7688;
+    --s1:#F2B233;   /* sensors */
+    --s2:#5BC8E8;   /* time */
+    --s3:#B98CF0;   /* senses */
+    --s4:#5FD09A;   /* real world */
+    --s5:#F2795B;   /* other phones */
+    --s6:#EE6C9B;   /* inverted */
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    background:
+      radial-gradient(120% 70% at 50% -8%, rgba(91,200,232,.08), transparent 62%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.6;
+    -webkit-font-smoothing:antialiased;padding:0 0 60px;min-height:100dvh}
+  .wrap{max-width:720px;margin:0 auto;padding:0 18px}
+  a{color:inherit}
+
+  header{padding:34px 18px 24px;border-bottom:1px solid var(--line)}
+  header .inner{max-width:720px;margin:0 auto}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--s2)}
+  h1{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+    font-size:clamp(28px,7.2vw,44px);line-height:1.02;margin:8px 0 10px}
+  .kicker{color:var(--s1);font-family:'Oswald',sans-serif;font-weight:500;
+    text-transform:uppercase;letter-spacing:.03em;font-size:clamp(14px,3.4vw,17px);
+    margin-bottom:12px}
+  .lede{color:var(--dim);font-size:15px;max-width:58ch}
+  .lede b{color:var(--ink);font-weight:600}
+
+  .actions{margin-top:20px}
+  .act{display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+    font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+    letter-spacing:.04em;font-size:13px;padding:11px 18px;border-radius:999px;
+    border:1.5px solid var(--s2);color:var(--s2);
+    transition:background .15s,color .15s}
+  .act:hover{background:var(--s2);color:#0E1116}
+
+  nav.jump{display:flex;gap:8px;overflow-x:auto;padding:16px 0 4px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  nav.jump::-webkit-scrollbar{display:none}
+  nav.jump a{flex:0 0 auto;text-decoration:none;font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    padding:7px 13px;border-radius:999px;border:1px solid var(--line2);color:var(--dim)}
+  nav.jump a:hover{color:var(--ink);border-color:var(--c)}
+  nav.jump a{--c:var(--line2)}
+
+  section.grp{margin-top:34px;scroll-margin-top:14px}
+  .grp-h{display:flex;align-items:baseline;gap:11px;margin-bottom:4px}
+  .grp-h h2{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+    font-size:20px;letter-spacing:.02em;color:var(--c)}
+  .grp-h .rng{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint);
+    letter-spacing:.1em}
+  .grp-rule{height:2px;border-radius:2px;background:var(--c);opacity:.5;margin-bottom:16px}
+
+  .idea{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 17px 15px;margin-bottom:11px;
+    display:grid;grid-template-columns:auto 1fr;gap:0 14px;align-items:start}
+  .idea .n{grid-row:1 / span 3;font-family:'Oswald',sans-serif;font-weight:700;
+    font-size:19px;line-height:1;color:var(--c);min-width:26px;
+    padding-top:2px;font-variant-numeric:tabular-nums}
+  .idea h3{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;
+    letter-spacing:.01em;line-height:1.25;color:var(--ink)}
+  .idea p{color:var(--dim);font-size:14.5px;line-height:1.58;margin-top:6px}
+  .idea .tech{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;
+    line-height:1.5;color:var(--faint);border-top:1px dashed var(--line);padding-top:9px}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;
+    color:var(--faint);text-transform:uppercase}
+
+  @media(max-width:420px){
+    .idea{padding:15px 14px 14px;gap:0 11px}
+    .idea .n{font-size:17px;min-width:22px}
+  }
+  @media print{
+    @page{size:A4;margin:14mm}
+    body{background:#fff;color:#111;padding:0}
+    .actions,nav.jump{display:none}
+    .idea{break-inside:avoid;background:#fff;border-color:#ccc}
+    .idea p,.idea .tech{color:#444}
+    h1,.grp-h h2{color:#111}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <div class="eyebrow">Youth Sports Bible · Idea Bank</div>
+    <h1>Interactivity Via<br>the Phone Itself</h1>
+    <div class="kicker">20 concepts where the phone stops being a window and becomes an instrument</div>
+    <p class="lede">Where most interactive Bible concepts focus on what happens on the screen, these use <b>what the phone itself can do</b> — its battery, microphone, sensors, clock, location, haptics, and its neighbouring devices — so that the hardware carries theological weight. All are buildable with the standard web stack (three.js and browser Web APIs, no app store required).</p>
+    <div class="actions">
+      <a class="act" href="interactivity-via-phone.pdf" download>↓ Download the PDF</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <nav class="jump">
+    <a href="#sensors" style="--c:var(--s1)">Sensors as theology</a>
+    <a href="#time" style="--c:var(--s2)">Time as a mechanic</a>
+    <a href="#senses" style="--c:var(--s3)">Beyond sight</a>
+    <a href="#world" style="--c:var(--s4)">The real world</a>
+    <a href="#others" style="--c:var(--s5)">Other phones</a>
+    <a href="#inverted" style="--c:var(--s6)">Inverted mechanics</a>
+  </nav>
+
+  <section class="grp" id="sensors" style="--c:var(--s1)">
+    <div class="grp-h"><h2>Sensors as Theology</h2><span class="rng">01–05</span></div>
+    <div class="grp-rule"></div>
+
+    <div class="idea"><span class="n">01</span>
+      <h3>The Ten Virgins’ Battery</h3>
+      <p>Your phone’s actual battery level is your lamp oil. The parable experience is only fully lit above 50%; below 20% the scene dims and the wise/foolish tension becomes personal.</p>
+      <div class="tech">Battery Status API + dynamic scene lighting.</div>
+    </div>
+
+    <div class="idea"><span class="n">02</span>
+      <h3>Peace, Be Still — Room Noise Storm</h3>
+      <p>The Sea of Galilee storm rages in proportion to your real room’s ambient noise. The waves only calm when your actual environment goes quiet.</p>
+      <div class="tech">Microphone amplitude → Gerstner wave intensity.</div>
+    </div>
+
+    <div class="idea"><span class="n">03</span>
+      <h3>Still Small Voice</h3>
+      <p>A game that rejects loud input. Shouting into the mic does nothing — wind, earthquake and fire particles roar past. Only whispering the verse advances Elijah out of the cave.</p>
+      <div class="tech">Volume-thresholded speech recognition, inverted.</div>
+    </div>
+
+    <div class="idea"><span class="n">04</span>
+      <h3>Emmaus Road Pedometer</h3>
+      <p>The story only unlocks as you physically walk. 11 km of cumulative real steps, over days, walks the road; the stranger’s identity is revealed at journey’s end.</p>
+      <div class="tech">Accelerometer step detection + persistent state.</div>
+    </div>
+
+    <div class="idea"><span class="n">05</span>
+      <h3>Toward Jerusalem</h3>
+      <p>Like a qibla compass: hold the phone flat and it points to Jerusalem from anywhere on earth, with distance and a Daniel 6 prayer prompt. Absurdly simple, weirdly moving.</p>
+      <div class="tech">Device Orientation API + great-circle math.</div>
+    </div>
+  </section>
+
+  <section class="grp" id="time" style="--c:var(--s2)">
+    <div class="grp-h"><h2>Time as a Mechanic</h2><span class="rng">06–10</span></div>
+    <div class="grp-rule"></div>
+
+    <div class="idea"><span class="n">06</span>
+      <h3>Manna</h3>
+      <p>Daily content that cannot be hoarded. Today’s reading vanishes at midnight; tapping “save for later” makes it rot, with a maggot particle shader. A double portion appears on Fridays.</p>
+      <div class="tech">Server time + expiring state.</div>
+    </div>
+
+    <div class="idea"><span class="n">07</span>
+      <h3>Sabbath Mode</h3>
+      <p>One day a week the app refuses to gamify. Streaks pause without penalty, all mechanics grey out, and it offers only stillness. An app that models rest is genuinely countercultural.</p>
+      <div class="tech">Scheduled state — the surprise is restraint.</div>
+    </div>
+
+    <div class="idea"><span class="n">08</span>
+      <h3>Gethsemane Heartbeat</h3>
+      <p>The phone vibrates with Jesus’ heartbeat through the passion narrative — steady in the garden, racing at the arrest, stopping at 3pm, returning on Sunday. Read in the dark, phone against your palm.</p>
+      <div class="tech">Vibration API pattern sequencing.</div>
+    </div>
+
+    <div class="idea"><span class="n">09</span>
+      <h3>The Watchman’s Sunrise</h3>
+      <p>Psalm 130 — “more than watchmen wait for the morning”. A night vigil scene whose lighting is locked to your real local sun. The dawn in the app arrives exactly when dawn arrives outside your window, and not one minute sooner.</p>
+      <div class="tech">Solar position calculation + real-time directional light.</div>
+    </div>
+
+    <div class="idea"><span class="n">10</span>
+      <h3>Pentecost Rolling Wave</h3>
+      <p>Once a year, or weekly at 9am local, a wind-and-fire event sweeps the live global user map timezone by timezone, hitting each teen at their own 9am, Acts 2 style. You can watch it coming toward you across the planet.</p>
+      <div class="tech">Scheduled global event + instanced world map.</div>
+    </div>
+  </section>
+
+  <section class="grp" id="senses" style="--c:var(--s3)">
+    <div class="grp-h"><h2>The Senses Beyond Sight</h2><span class="rng">11–13</span></div>
+    <div class="grp-rule"></div>
+
+    <div class="idea"><span class="n">11</span>
+      <h3>Bartimaeus — Screen Off</h3>
+      <p>An entire experience with a black screen. Navigate Jericho’s crowd toward Jesus’ voice using spatial audio alone; sight is restored only at the end, when the scene renders for the first time.</p>
+      <div class="tech">Web Audio PositionalAudio; headphones required.</div>
+    </div>
+
+    <div class="idea"><span class="n">12</span>
+      <h3>Thomas’s Hands — Haptic Wounds</h3>
+      <p>Trace your finger across the 3D wounds; the phone answers with distinct haptic textures. Belief through touch, literally.</p>
+      <div class="tech">Pointer position → vibration waveform mapping.</div>
+    </div>
+
+    <div class="idea"><span class="n">13</span>
+      <h3>The Twinkling of an Eye</h3>
+      <p>Blink-detection via webcam. The resurrection transformation of 1 Corinthians 15:52 happens literally during your blink — you never see the change occur, only the before and after.</p>
+      <div class="tech">Face landmark detection + frame swap on eye-close.</div>
+    </div>
+  </section>
+
+  <section class="grp" id="world" style="--c:var(--s4)">
+    <div class="grp-h"><h2>The Real World Leaks In</h2><span class="rng">14–16</span></div>
+    <div class="grp-rule"></div>
+
+    <div class="idea"><span class="n">14</span>
+      <h3>Real Weather Windows</h3>
+      <p>Scenes bind to your live local weather. Elijah’s drought story is only playable when it’s actually dry; the moment real rain hits your suburb, 1 Kings 18 erupts. Patience becomes a mechanic.</p>
+      <div class="tech">Weather API → shader states.</div>
+    </div>
+
+    <div class="idea"><span class="n">15</span>
+      <h3>The Lost Coin — In Your Actual Room</h3>
+      <p>WebXR hides a virtual drachma somewhere in your real room. You sweep your phone’s virtual lamplight across your actual floor until it glints. Then the app asks who you’ll celebrate with.</p>
+      <div class="tech">WebXR hit-testing + spotlight shader.</div>
+    </div>
+
+    <div class="idea"><span class="n">16</span>
+      <h3>Zacchaeus Lookup</h3>
+      <p>AR that only triggers when you physically point the phone up — into a real tree if you can find one. Jesus’ line “come down” plays only from above your head.</p>
+      <div class="tech">Camera + orientation gating.</div>
+    </div>
+  </section>
+
+  <section class="grp" id="others" style="--c:var(--s5)">
+    <div class="grp-h"><h2>Other Phones, Other People</h2><span class="rng">17–18</span></div>
+    <div class="grp-rule"></div>
+
+    <div class="idea"><span class="n">17</span>
+      <h3>Body of Christ Screen-Tiling</h3>
+      <p>1 Corinthians 12 as hardware: each teen’s phone renders one fragment of a scene. Only when the group physically lays phones edge-to-edge does the full image assemble and animate across all screens.</p>
+      <div class="tech">WebSockets + relative position handshake.</div>
+    </div>
+
+    <div class="idea"><span class="n">18</span>
+      <h3>Babel Undone</h3>
+      <p>Two teens on different continents speak into their phones in their own languages; each hears the other in their own tongue while a shared Pentecost scene builds between them.</p>
+      <div class="tech">WebRTC + live translation — sits right next to Max7 Live Translate.</div>
+    </div>
+  </section>
+
+  <section class="grp" id="inverted" style="--c:var(--s6)">
+    <div class="grp-h"><h2>Inverted Mechanics</h2><span class="rng">19–20</span></div>
+    <div class="grp-rule"></div>
+
+    <div class="idea"><span class="n">19</span>
+      <h3>70 × 7 Shredder</h3>
+      <p>Type a grievance. Watch it torn into Voronoi fragments and blown away — and the app keeps count toward 490, quietly making Peter’s math absurd by week three.</p>
+      <div class="tech">Text-to-mesh fracture physics + persistent counter.</div>
+    </div>
+
+    <div class="idea"><span class="n">20</span>
+      <h3>Fresco Restoration — Spaced Repetition in Disguise</h3>
+      <p>Verses you’ve memorised are painted as frescoes that genuinely weather and fade over real weeks. Return and recite to restore the pigment. Forgetting is visible.</p>
+      <div class="tech">Time-decayed textures + speech verification.</div>
+    </div>
+  </section>
+
+  <footer>Deep Till · YSB Experiments · Interactivity Via the Phone Itself</footer>
+</div>
+
+</body>
+</html>

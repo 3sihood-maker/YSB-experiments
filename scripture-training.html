@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Daily Workouts — Scripture Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101314;
+    --surface:#1a1e1f;
+    --surface-2:#22282a;
+    --line: rgba(255,255,255,0.08);
+    --text:#f4f4ef;
+    --text-dim:#8d9497;
+    --mind:#d7ff3d;
+    --mind-dim: rgba(215,255,61,0.14);
+    --body-c:#fc4c02;
+    --body-dim: rgba(252,76,2,0.14);
+    --radius: 22px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#000;
+    font-family:'Inter',sans-serif;
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  .display{ font-family:'Bebas Neue', sans-serif; letter-spacing:0.5px; }
+  .mono{ font-family:'Roboto Mono', monospace; }
+
+  .phone{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:var(--bg);
+    position:relative;
+    overflow-x:hidden;
+    padding-bottom:96px;
+  }
+
+  .statusbar{
+    height:34px;
+  }
+
+  /* ---------- SCREENS ---------- */
+  .screen{ display:none; animation:fadeIn .35s ease; }
+  .screen.active{ display:block; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- HOME ---------- */
+  .home-header{ padding:8px 24px 4px; }
+  .eyebrow{
+    font-family:'Roboto Mono', monospace;
+    font-size:12px;
+    letter-spacing:2px;
+    color:var(--text-dim);
+    margin:0 0 6px;
+    text-transform:uppercase;
+  }
+  .home-header h1{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:64px;
+    line-height:0.92;
+    margin:0;
+    letter-spacing:0.5px;
+  }
+  .home-sub{
+    color:var(--text-dim);
+    font-size:14px;
+    margin:10px 0 0;
+    max-width:280px;
+  }
+
+  .streak-row{
+    display:flex;
+    gap:10px;
+    padding:22px 24px 4px;
+  }
+  .streak-pill{
+    flex:1;
+    background:var(--surface);
+    border-radius:16px;
+    padding:12px 14px;
+    border:1px solid var(--line);
+  }
+  .streak-pill .num{ font-family:'Roboto Mono'; font-weight:700; font-size:20px; display:block; }
+  .streak-pill .lbl{ font-size:11px; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; }
+
+  .track-select{
+    padding:22px 24px 8px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .track-card{
+    position:relative;
+    border:none;
+    border-radius:var(--radius);
+    padding:26px 22px;
+    text-align:left;
+    cursor:pointer;
+    overflow:hidden;
+    transition:transform .15s ease;
+    font-family:inherit;
+  }
+  .track-card:active{ transform:scale(0.97); }
+  .track-card.track-body{ background: linear-gradient(135deg, #1a1e1f 40%, var(--body-dim)); border:1px solid rgba(252,76,2,0.35); }
+  .track-card.track-mind{ background: linear-gradient(135deg, #1a1e1f 40%, var(--mind-dim)); border:1px solid rgba(215,255,61,0.35); }
+
+  .track-tag{
+    font-family:'Roboto Mono';
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+  }
+  .track-body .track-tag{ color: var(--body-c); }
+  .track-mind .track-tag{ color: var(--mind); }
+
+  .track-title{
+    font-family:'Bebas Neue';
+    font-size:46px;
+    line-height:1;
+    margin:6px 0 8px;
+    color:var(--text);
+  }
+  .track-desc{ color:var(--text-dim); font-size:13px; margin:0; max-width:70%; }
+  .track-arrow{
+    position:absolute;
+    right:22px;
+    bottom:22px;
+    width:40px; height:40px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;
+  }
+  .track-body .track-arrow{ background:var(--body-c); color:#101314; }
+  .track-mind .track-arrow{ background:var(--mind); color:#101314; }
+
+  .verse-strip{
+    margin:26px 24px 0;
+    padding:20px;
+    border-radius:18px;
+    background:var(--surface);
+    border:1px solid var(--line);
+  }
+  .verse-strip .eyebrow{ margin-bottom:8px; }
+  .verse-strip p{ margin:0; font-size:15px; line-height:1.5; font-style:italic; color:#dcdfd8; }
+  .verse-strip .ref{ display:block; margin-top:10px; font-family:'Roboto Mono'; font-size:12px; color:var(--text-dim); font-style:normal; }
+
+  /* ---------- PLAN SCREEN ---------- */
+  .plan-topbar{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 20px 0;
+  }
+  .back-btn{
+    width:38px;height:38px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--text);
+    font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .plan-topbar .track-name{
+    font-family:'Roboto Mono';
+    letter-spacing:2px;
+    font-size:12px;
+    color:var(--text-dim);
+    text-transform:uppercase;
+  }
+
+  .plan-hero{ padding:18px 24px 0; }
+  .plan-hero h2{
+    font-family:'Bebas Neue';
+    font-size:46px;
+    line-height:0.95;
+    margin:0 0 6px;
+  }
+  .plan-passage{
+    font-family:'Roboto Mono';
+    font-size:13px;
+    margin:0 0 20px;
+  }
+  #plan-passage-text.mind{ color:var(--mind); }
+  #plan-passage-text.body-c{ color:var(--body-c); }
+
+  .level-toggle{
+    display:flex;
+    background:var(--surface);
+    border-radius:999px;
+    padding:4px;
+    border:1px solid var(--line);
+  }
+  .level-toggle button{
+    flex:1;
+    border:none;
+    background:transparent;
+    color:var(--text-dim);
+    font-family:'Roboto Mono';
+    font-size:12px;
+    letter-spacing:1.5px;
+    padding:11px 0;
+    border-radius:999px;
+    cursor:pointer;
+    transition: background .2s ease, color .2s ease;
+  }
+  .level-toggle button.active{ background:var(--text); color:#101314; font-weight:700; }
+
+  .plan-stats-row{
+    display:flex;
+    justify-content:space-between;
+    padding:22px 24px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:6px;
+  }
+  .plan-stats-row .stat{ text-align:left; }
+  .plan-stats-row .stat-num{ display:block; font-family:'Roboto Mono'; font-weight:700; font-size:26px; }
+  .plan-stats-row .stat-label{ font-size:10px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; }
+
+  #weeks-list{ padding:8px 24px 12px; display:flex; flex-direction:column; gap:14px; }
+
+  .week-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:18px;
+    overflow:hidden;
+  }
+  .week-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:16px 18px;
+    cursor:pointer;
+  }
+  .week-ring{ position:relative; width:46px; height:46px; flex-shrink:0; }
+  .week-ring svg{ transform:rotate(-90deg); }
+  .week-ring circle.bg{ stroke:var(--surface-2); }
+  .week-ring circle.fg{ stroke-linecap:round; transition:stroke-dashoffset .3s ease; }
+  .week-ring .ring-label{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Roboto Mono'; font-size:11px; font-weight:700;
+  }
+  .week-head-text{ flex:1; }
+  .week-num{ font-size:10px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-bottom:2px; }
+  .week-title{ font-family:'Bebas Neue'; font-size:24px; letter-spacing:0.5px; }
+  .week-chevron{ color:var(--text-dim); transition:transform .2s ease; font-size:14px; }
+  .week-card.open .week-chevron{ transform:rotate(180deg); }
+
+  .week-body{ max-height:0; overflow:hidden; transition:max-height .3s ease; }
+  .week-card.open .week-body{ max-height:900px; }
+
+  .day-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:12px 18px;
+    border-top:1px solid var(--line);
+  }
+  .day-row.rest{ opacity:0.5; }
+  .day-check{
+    width:24px;height:24px;
+    border-radius:50%;
+    border:2px solid var(--text-dim);
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .day-row.rest .day-check{ cursor:default; border-style:dashed; }
+  .day-check.done{ background:var(--text); border-color:var(--text); color:#101314; }
+  .track-mind-active .day-check.done{ background:var(--mind); border-color:var(--mind); }
+  .track-body-active .day-check.done{ background:var(--body-c); border-color:var(--body-c); }
+
+  .day-mid{ flex:1; }
+  .day-label{ font-size:14px; font-weight:600; }
+  .day-desc{ font-size:12.5px; color:var(--text-dim); margin-top:2px; line-height:1.4; }
+  .day-num{ font-family:'Roboto Mono'; font-size:11px; color:var(--text-dim); width:38px; }
+  .day-dur{
+    font-family:'Roboto Mono';
+    font-size:11px;
+    color:var(--text-dim);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:4px 8px;
+    white-space:nowrap;
+  }
+  .day-row.done .day-label{ text-decoration:line-through; color:var(--text-dim); }
+
+  /* ---------- BOTTOM NAV ---------- */
+  .bottom-nav{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    max-width:430px;
+    background:rgba(16,19,20,0.92);
+    backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-around;
+    padding:12px 0 20px;
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--text-dim);
+    font-size:10px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    font-family:'Roboto Mono';
+  }
+  .nav-item.active{ color:var(--text); }
+  .nav-item .dot{ width:6px;height:6px;border-radius:50%; background:transparent; }
+  .nav-item.active .dot{ background:var(--mind); }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="statusbar"></div>
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="screen-home">
+    <div class="home-header">
+      <p class="eyebrow" id="today-date">TODAY</p>
+      <h1>DAILY<br>WORKOUTS</h1>
+      <p class="home-sub">Two training tracks. One passage each. Pick where you're showing up today.</p>
+    </div>
+
+    <div class="streak-row">
+      <div class="streak-pill"><span class="num mono" id="pill-streak">0</span><span class="lbl">Day streak</span></div>
+      <div class="streak-pill"><span class="num mono" id="pill-total">0</span><span class="lbl">Sessions done</span></div>
+      <div class="streak-pill"><span class="num mono" id="pill-week">0</span><span class="lbl">Sessions wk</span></div>
+    </div>
+
+    <div class="track-select">
+      <button class="track-card track-body" data-track="body">
+        <span class="track-tag">Track 01 · Practice</span>
+        <div class="track-title">BODY</div>
+        <p class="track-desc">Living the Word — Romans 12:1&ndash;2</p>
+        <span class="track-arrow">→</span>
+      </button>
+      <button class="track-card track-mind" data-track="mind">
+        <span class="track-tag">Track 02 · Study</span>
+        <div class="track-title">MIND</div>
+        <p class="track-desc">Studying the Word — Philippians 4:4&ndash;9</p>
+        <span class="track-arrow">→</span>
+      </button>
+    </div>
+
+    <div class="verse-strip">
+      <p class="eyebrow">Today's line</p>
+      <p>"Whatever is true, whatever is noble, whatever is right, whatever is pure &mdash; think about such things."</p>
+      <span class="ref">PHILIPPIANS 4:8</span>
+    </div>
+  </div>
+
+  <!-- PLAN SCREEN -->
+  <div class="screen" id="screen-plan">
+    <div class="plan-topbar">
+      <button class="back-btn" id="back-btn">←</button>
+      <span class="track-name" id="plan-track-name">MIND TRACK</span>
+    </div>
+    <div class="plan-hero">
+      <h2>FOUR WEEK<br>TRAINING PLAN</h2>
+      <p class="plan-passage mono" id="plan-passage-text">Philippians 4:4&ndash;9</p>
+      <div class="level-toggle">
+        <button data-level="beginner" class="active">BEGINNER</button>
+        <button data-level="advanced">ADVANCED</button>
+      </div>
+    </div>
+    <div class="plan-stats-row">
+      <div class="stat"><span class="stat-num mono" id="stat-weeks">4</span><span class="stat-label">Weeks</span></div>
+      <div class="stat"><span class="stat-num mono" id="stat-sessions">12</span><span class="stat-label">Sessions</span></div>
+      <div class="stat"><span class="stat-num mono" id="stat-mins">10</span><span class="stat-label">Min / day</span></div>
+    </div>
+    <div id="weeks-list"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active"><span class="dot"></span>Home</div>
+    <div class="nav-item"><span class="dot"></span>Plans</div>
+    <div class="nav-item"><span class="dot"></span>Progress</div>
+    <div class="nav-item"><span class="dot"></span>Profile</div>
+  </nav>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const PLANS = {
+  mind: {
+    label: "MIND TRACK",
+    passage: "Philippians 4:4–9",
+    colorClass: "mind",
+    beginner: {
+      minPerDay: 10,
+      weeks: [
+        { title: "Read & Observe", days: [
+          {label:"Easy Read", dur:"10 min", desc:"Read Philippians 4:4–9 slowly, twice. Don't analyze, just notice."},
+          {rest:true},
+          {label:"Observation Walk", dur:"10 min", desc:"List every instruction Paul gives — rejoice, don't worry, present requests, think on these things."},
+          {rest:true},
+          {label:"Word Study", dur:"10 min", desc:"Circle the words that repeat: rejoice, peace, think."},
+          {rest:true},
+          {label:"Recovery Read", dur:"5 min", desc:"Read the passage once more. No notes — just let it sit."},
+        ]},
+        { title: "Understand & Interpret", days: [
+          {label:"Context Check", dur:"10 min", desc:"Read Phil 1:1–11. Who is Paul writing to, and what's going on?"},
+          {rest:true},
+          {label:"Ask It", dur:"10 min", desc:"Write down one question this passage raises for you."},
+          {rest:true},
+          {label:"Cross Reference", dur:"10 min", desc:"Look up Proverbs 3:5–6. How does it relate to \"do not be anxious\"?"},
+          {rest:true},
+          {label:"Recovery Read", dur:"5 min", desc:"Re-read the whole passage in one sitting."},
+        ]},
+        { title: "Memorize & Meditate", days: [
+          {label:"First Rep", dur:"10 min", desc:"Memorize verses 4–5."},
+          {rest:true},
+          {label:"Second Rep", dur:"10 min", desc:"Add verses 6–7 to what you know."},
+          {rest:true},
+          {label:"Full Set", dur:"15 min", desc:"Recite verses 4–7 from memory, three times through."},
+          {rest:true},
+          {label:"Recovery Recite", dur:"5 min", desc:"Say the verses once, slowly, as a prayer."},
+        ]},
+        { title: "Apply & Live It", days: [
+          {label:"Name One Anxiety", dur:"10 min", desc:"Journal one worry. Pray it using verses 6–7 as your template."},
+          {rest:true},
+          {label:"Gratitude Rep", dur:"10 min", desc:"List three things in your week that are true, noble, or right (v.8)."},
+          {rest:true},
+          {label:"Full Recall", dur:"15 min", desc:"Recite the whole passage, 4–9, from memory."},
+          {rest:true},
+          {label:"Finish Line", dur:"10 min", desc:"Look back over the month. What actually changed in how you think?"},
+        ]},
+      ]
+    },
+    advanced: {
+      minPerDay: 25,
+      weeks: [
+        { title: "Read & Observe", days: [
+          {label:"Full Read", dur:"20 min", desc:"Read Philippians 4:4–9 in two translations back to back."},
+          {label:"Structure Map", dur:"20 min", desc:"Diagram the passage — commands vs. promises vs. reasons."},
+          {rest:true},
+          {label:"Word Study", dur:"25 min", desc:"Look up the Greek behind \"rejoice\" (chairo) and \"peace\" (eirene)."},
+          {label:"Wide Read", dur:"20 min", desc:"Read all of Philippians in one sitting to feel the whole letter."},
+          {rest:true},
+          {label:"Recovery Read", dur:"10 min", desc:"Read the passage once, slowly, no tools."},
+        ]},
+        { title: "Understand & Interpret", days: [
+          {label:"Context Dig", dur:"25 min", desc:"Study Paul's circumstances — writing from prison (Phil 1:12–14)."},
+          {label:"Commentary Pass", dur:"25 min", desc:"Read one commentary entry on vv.4–9 and note where you agree or push back."},
+          {rest:true},
+          {label:"Cross Reference Set", dur:"25 min", desc:"Trace \"peace that surpasses understanding\" through Isaiah 26:3 and John 14:27."},
+          {label:"Greek Focus", dur:"25 min", desc:"Study \"noeo\" (v.8, \"think on\") — what kind of thinking is this?"},
+          {rest:true},
+          {label:"Recovery Read", dur:"10 min", desc:"Reread the passage against your notes."},
+        ]},
+        { title: "Memorize & Meditate", days: [
+          {label:"Rep 1", dur:"20 min", desc:"Memorize verses 4–6, word perfect."},
+          {label:"Rep 2", dur:"20 min", desc:"Add verses 7–9."},
+          {rest:true},
+          {label:"Full Set", dur:"25 min", desc:"Recite the entire passage, 4–9, without notes."},
+          {label:"Teach-Back Prep", dur:"20 min", desc:"Prepare a two-minute explanation of the passage as if teaching someone else."},
+          {rest:true},
+          {label:"Recovery Recite", dur:"10 min", desc:"Recite the passage as a prayer, unhurried."},
+        ]},
+        { title: "Apply & Live It", days: [
+          {label:"Anxiety Audit", dur:"25 min", desc:"Journal the specific things stealing your peace this month. Pray each one through v.6–7."},
+          {label:"Teach It", dur:"20 min", desc:"Actually teach the two-minute explanation to someone else."},
+          {rest:true},
+          {label:"Renewal Rep", dur:"20 min", desc:"Build a short list of \"true, noble, right\" inputs to replace one habitual worry-input."},
+          {label:"Full Recall + Reflect", dur:"25 min", desc:"Recite the whole passage, then write what's different in you now versus week 1."},
+          {rest:true},
+          {label:"Finish Line", dur:"15 min", desc:"Choose the next passage you'll train on."},
+        ]},
+      ]
+    }
+  },
+  body: {
+    label: "BODY TRACK",
+    passage: "Romans 12:1–2",
+    colorClass: "body-c",
+    beginner: {
+      minPerDay: 10,
+      weeks: [
+        { title: "Read & Notice", days: [
+          {label:"Easy Read", dur:"10 min", desc:"Read Romans 12:1–2 slowly. Notice any physical reaction as you read."},
+          {rest:true},
+          {label:"Body Scan", dur:"10 min", desc:"Re-read it. Where in your body do you carry stress or tension right now?"},
+          {rest:true},
+          {label:"List It", dur:"10 min", desc:"Write what \"living sacrifice\" and \"renewing your mind\" might mean for your actual week."},
+          {rest:true},
+          {label:"Recovery Read", dur:"5 min", desc:"Read the passage once more, no analysis."},
+        ]},
+        { title: "Understand the Call", days: [
+          {label:"Context Check", dur:"10 min", desc:"Read Romans 11:33–12:2 — what does the \"therefore\" point back to?"},
+          {rest:true},
+          {label:"Define It", dur:"10 min", desc:"Compare Old Testament animal sacrifice with a \"living\" one. What's the difference?"},
+          {rest:true},
+          {label:"Cross Reference", dur:"10 min", desc:"Look up 1 Corinthians 6:19–20 — the body as a temple."},
+          {rest:true},
+          {label:"Recovery Read", dur:"5 min", desc:"Reread the whole passage."},
+        ]},
+        { title: "Practice a Rhythm", days: [
+          {label:"Fuel Fast", dur:"1 meal", desc:"Skip one meal this week. Pray in the space it leaves instead."},
+          {rest:true},
+          {label:"Move & Pray", dur:"15 min", desc:"Take a prayer walk. Talk to God about what's conforming you to the world."},
+          {rest:true},
+          {label:"Serve Set", dur:"15 min", desc:"Do one physical act of service for someone — with your hands, not just your wallet."},
+          {rest:true},
+          {label:"Sabbath Rest", dur:"—", desc:"Rest on purpose. Notice what it's like to stop."},
+        ]},
+        { title: "Apply & Live It", days: [
+          {label:"Name the Pattern", dur:"10 min", desc:"Journal one \"pattern of this world\" you want to stop conforming to."},
+          {rest:true},
+          {label:"Swap Habit", dur:"10 min", desc:"Replace one screen habit today with two minutes of prayer instead."},
+          {rest:true},
+          {label:"Full Review", dur:"15 min", desc:"Recite Romans 12:1–2 and review your month's notes."},
+          {rest:true},
+          {label:"Finish Line", dur:"10 min", desc:"Choose one rhythm from week 3 to keep going after this plan ends."},
+        ]},
+      ]
+    },
+    advanced: {
+      minPerDay: 25,
+      weeks: [
+        { title: "Read & Notice", days: [
+          {label:"Full Read", dur:"20 min", desc:"Read Romans 12:1–2 in two translations. Notice every verb."},
+          {label:"Structure Map", dur:"20 min", desc:"Diagram it: mercy → sacrifice → non-conformity → transformation → testing."},
+          {rest:true},
+          {label:"Word Study", dur:"25 min", desc:"Study the Greek behind \"living sacrifice\" (thysia) and \"renewing\" (anakainosis)."},
+          {label:"Wide Read", dur:"20 min", desc:"Read Romans 9–12 in one sitting to see the argument leading here."},
+          {rest:true},
+          {label:"Recovery Read", dur:"10 min", desc:"Reread the passage slowly, no tools."},
+        ]},
+        { title: "Understand the Call", days: [
+          {label:"Context Dig", dur:"25 min", desc:"Study the sacrificial system in Leviticus 1 as background for v.1."},
+          {label:"Commentary Pass", dur:"25 min", desc:"Read a commentary on Romans 12:1–2 and note where you agree or push back."},
+          {rest:true},
+          {label:"Cross Reference Set", dur:"25 min", desc:"Trace \"testing what God's will is\" through Ephesians 5:15–17."},
+          {label:"Greek Focus", dur:"25 min", desc:"Study \"metamorphoo\" (v.2, \"transformed\") — same root as the Transfiguration."},
+          {rest:true},
+          {label:"Recovery Read", dur:"10 min", desc:"Reread against your notes."},
+        ]},
+        { title: "Practice a Rhythm", days: [
+          {label:"Fuel Fast", dur:"1 day", desc:"Do a one-day fast (or a scaled version) and journal what it exposes in you."},
+          {label:"Move & Pray", dur:"25 min", desc:"Extended prayer walk — bring the \"patterns of this world\" you named in week 2."},
+          {rest:true},
+          {label:"Serve Set", dur:"30 min", desc:"Commit to a physical act of service that costs you time, not just money."},
+          {label:"Teach-Back Prep", dur:"20 min", desc:"Prepare a two-minute explanation of \"living sacrifice\" as if teaching someone else."},
+          {rest:true},
+          {label:"Sabbath Rest", dur:"—", desc:"A full rest day. No output, no exceptions."},
+        ]},
+        { title: "Apply & Live It", days: [
+          {label:"Pattern Audit", dur:"25 min", desc:"Journal every pattern of conformity you've noticed since week 1. Be specific."},
+          {label:"Teach It", dur:"20 min", desc:"Actually teach your explanation of \"living sacrifice\" to someone else."},
+          {rest:true},
+          {label:"Renewal Rep", dur:"20 min", desc:"Build one concrete replacement rhythm for a pattern you're ready to leave."},
+          {label:"Full Recall + Reflect", dur:"25 min", desc:"Recite Romans 12:1–2, then write what's actually different in your body and habits now."},
+          {rest:true},
+          {label:"Finish Line", dur:"15 min", desc:"Choose the next passage you'll train on."},
+        ]},
+      ]
+    }
+  }
+};
+
+/* ---------------- STATE ---------------- */
+let currentTrack = null;
+let currentLevel = "beginner";
+
+/* Saved on this device. A four-week plan that forgets every tick when the tab
+   closes isn't a plan, so each completed session is stored — as the date it was
+   ticked, which is also what makes the streak and weekly count real rather than
+   decorative. Reads and writes are wrapped: a browser in private mode, or one
+   with site data blocked, throws on access. */
+const STORE_KEY = "ysb-scripture-training-v1";
+let progress = {};   // key: track|level|weekIdx|dayIdx -> "YYYY-MM-DD"
+
+const dateKey = d => d.getFullYear() + "-" +
+  String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+const todayKey = () => dateKey(new Date());
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return {};
+    const parsed = JSON.parse(raw);
+    if(!parsed || typeof parsed !== "object") return {};
+    const out = {};
+    Object.keys(parsed).forEach(k => {
+      const v = parsed[k];
+      if(v === true) out[k] = todayKey();                                 // tolerate an older shape
+      else if(typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v)) out[k] = v;
+    });
+    return out;
+  }catch(e){ return {}; }
+}
+function saveProgress(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(progress)); }
+  catch(e){ /* storage unavailable — the session still works, it just won't be remembered */ }
+}
+
+/* The home-screen figures, worked out from what has actually been ticked. */
+function dayStreak(){
+  const days = new Set(Object.values(progress));
+  if(!days.size) return 0;
+  const d = new Date();
+  if(!days.has(dateKey(d))) d.setDate(d.getDate()-1);   // still a streak if today isn't done yet
+  let n = 0;
+  while(days.has(dateKey(d))){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+function sessionsThisWeek(){
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));   // the week starts Monday
+  monday.setHours(0,0,0,0);
+  return Object.values(progress).filter(ds => {
+    const [y,m,dd] = ds.split("-").map(Number);
+    return new Date(y, m-1, dd) >= monday;
+  }).length;
+}
+function renderPills(){
+  document.getElementById("pill-streak").textContent = dayStreak();
+  document.getElementById("pill-total").textContent  = Object.keys(progress).length;
+  document.getElementById("pill-week").textContent   = sessionsThisWeek();
+}
+
+/* ---------------- HELPERS ---------------- */
+function show(screenId){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(screenId).classList.add("active");
+}
+
+function ringSvg(id, pct){
+  const r = 18, c = 2*Math.PI*r;
+  const offset = c - (pct/100)*c;
+  return `<svg width="46" height="46">
+    <circle class="bg" cx="23" cy="23" r="${r}" stroke-width="4" fill="none"/>
+    <circle class="fg" cx="23" cy="23" r="${r}" stroke-width="4" fill="none"
+      stroke="currentColor" stroke-dasharray="${c}" stroke-dashoffset="${offset}"/>
+  </svg>`;
+}
+
+function weekProgress(trackKey, level, wIdx){
+  const week = PLANS[trackKey][level].weeks[wIdx];
+  const activeDays = week.days.filter(d => !d.rest);
+  const done = activeDays.filter((d,i) => progress[`${trackKey}|${level}|${wIdx}|${week.days.indexOf(d)}`]);
+  return activeDays.length ? Math.round((done.length/activeDays.length)*100) : 0;
+}
+
+function renderPlan(){
+  const plan = PLANS[currentTrack];
+  const data = plan[currentLevel];
+  document.getElementById("plan-track-name").textContent = plan.label;
+  const passageEl = document.getElementById("plan-passage-text");
+  passageEl.textContent = plan.passage;
+  passageEl.className = "plan-passage mono " + plan.colorClass;
+
+  document.getElementById("stat-weeks").textContent = data.weeks.length;
+  const totalSessions = data.weeks.reduce((sum,w) => sum + w.days.filter(d=>!d.rest).length, 0);
+  document.getElementById("stat-sessions").textContent = totalSessions;
+  document.getElementById("stat-mins").textContent = data.minPerDay;
+
+  document.getElementById("phone").classList.remove("track-mind-active","track-body-active");
+  document.getElementById("phone").classList.add(currentTrack === "mind" ? "track-mind-active" : "track-body-active");
+
+  const list = document.getElementById("weeks-list");
+  list.innerHTML = "";
+
+  data.weeks.forEach((week, wIdx) => {
+    const pct = weekProgress(currentTrack, currentLevel, wIdx);
+    const card = document.createElement("div");
+    card.className = "week-card" + (wIdx === 0 ? " open" : "");
+
+    let daysHtml = "";
+    week.days.forEach((day, dIdx) => {
+      const key = `${currentTrack}|${currentLevel}|${wIdx}|${dIdx}`;
+      if(day.rest){
+        daysHtml += `
+          <div class="day-row rest">
+            <span class="day-num mono">D${dIdx+1}</span>
+            <div class="day-check"></div>
+            <div class="day-mid">
+              <div class="day-label">Rest Day</div>
+              <div class="day-desc">Nothing due. Let the last session settle.</div>
+            </div>
+          </div>`;
+      } else {
+        const done = !!progress[key];
+        daysHtml += `
+          <div class="day-row ${done ? "done":""}" data-key="${key}">
+            <span class="day-num mono">D${dIdx+1}</span>
+            <div class="day-check ${done ? "done":""}">${done ? "✓" : ""}</div>
+            <div class="day-mid">
+              <div class="day-label">${day.label}</div>
+              <div class="day-desc">${day.desc}</div>
+            </div>
+            <span class="day-dur mono">${day.dur}</span>
+          </div>`;
+      }
+    });
+
+    card.innerHTML = `
+      <div class="week-head">
+        <div class="week-ring" style="color:var(--${plan.colorClass === 'body-c' ? 'body-c' : 'mind'})">
+          ${ringSvg(wIdx, pct)}
+          <div class="ring-label">${pct}%</div>
+        </div>
+        <div class="week-head-text">
+          <div class="week-num">Week ${wIdx+1} of ${data.weeks.length}</div>
+          <div class="week-title">${week.title}</div>
+        </div>
+        <span class="week-chevron">▾</span>
+      </div>
+      <div class="week-body">${daysHtml}</div>
+    `;
+
+    card.querySelector(".week-head").addEventListener("click", () => {
+      card.classList.toggle("open");
+    });
+
+    list.appendChild(card);
+  });
+
+  // day-check toggle listeners
+  list.querySelectorAll(".day-row:not(.rest)").forEach(row => {
+    row.addEventListener("click", (e) => {
+      const key = row.dataset.key;
+      if(progress[key]) delete progress[key];
+      else progress[key] = todayKey();
+      saveProgress();
+      renderPills();
+      renderPlan();
+    });
+  });
+}
+
+function openTrack(trackKey){
+  currentTrack = trackKey;
+  currentLevel = "beginner";
+  document.querySelectorAll(".level-toggle button").forEach(b => {
+    b.classList.toggle("active", b.dataset.level === "beginner");
+  });
+  renderPlan();
+  show("screen-plan");
+}
+
+/* ---------------- EVENTS ---------------- */
+document.querySelectorAll(".track-card").forEach(card => {
+  card.addEventListener("click", () => openTrack(card.dataset.track));
+});
+
+document.getElementById("back-btn").addEventListener("click", () => show("screen-home"));
+
+document.querySelectorAll(".level-toggle button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".level-toggle button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentLevel = btn.dataset.level;
+    renderPlan();
+  });
+});
+
+/* ---------------- INIT ---------------- */
+progress = loadProgress();
+renderPills();
+
+(function initDate(){
+  const d = new Date();
+  const opts = { weekday: 'long', month: 'short', day: 'numeric' };
+  document.getElementById("today-date").textContent = d.toLocaleDateString('en-US', opts).toUpperCase();
+})();
+</script>
+</body>
+</html>

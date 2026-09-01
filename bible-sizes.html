@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Bible Sizes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#070b14;--chrome:rgba(198,222,240,.62);--hot:#ffb547;--cool:#4fd2ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--ink);overflow:hidden}
+body{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--chrome);
+  -webkit-font-smoothing:antialiased;overscroll-behavior:none;touch-action:none}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;cursor:grab}
+#gl:active{cursor:grabbing}
+.hud{position:fixed;z-index:3;opacity:0;transition:opacity .8s ease}
+body.ready .hud{opacity:1}
+#head{top:max(11px,env(safe-area-inset-top));left:16px;pointer-events:none;max-width:58vw}
+#brand{font-size:8px;letter-spacing:.3em;text-transform:uppercase;opacity:.42}
+#title{font-family:"Big Shoulders Display",Impact,sans-serif;font-weight:700;
+  font-size:clamp(20px,5.6vw,30px);line-height:1;color:#e8f4ff;margin-top:3px}
+#cite{margin-top:4px;font-size:9px;letter-spacing:.14em;color:var(--hot);opacity:.9}
+#note{margin-top:3px;font-size:8px;letter-spacing:.08em;opacity:.45;line-height:1.6;max-width:46vw}
+#stats{top:max(11px,env(safe-area-inset-top));right:16px;text-align:right;pointer-events:none;
+  font-size:10px;line-height:1.65;font-variant-numeric:tabular-nums;max-width:40vw}
+#stats .k{opacity:.42;letter-spacing:.12em;text-transform:uppercase;font-size:8px}
+#stats .v{color:#e8f4ff;font-weight:500}
+#stats .a .v{color:var(--hot)} #stats .b .v{color:var(--cool)}
+#stats .row{margin-bottom:6px}
+#verdict{position:fixed;z-index:3;left:50%;transform:translateX(-50%);
+  bottom:calc(150px + env(safe-area-inset-bottom));width:min(600px,92vw);text-align:center;
+  pointer-events:none;font-family:"Big Shoulders Display",Impact,sans-serif;font-weight:600;
+  font-size:clamp(15px,4.1vw,22px);line-height:1.25;color:rgba(232,244,255,.9);
+  opacity:0;transition:opacity .5s ease}
+body.ready #verdict{opacity:1}
+#verdict em{font-style:normal;color:var(--hot)}
+.dock{position:fixed;z-index:4;left:0;right:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;padding:0 12px;opacity:0;transition:opacity .8s ease}
+.dock::-webkit-scrollbar{display:none}
+body.ready .dock{opacity:1}
+#subjects{bottom:calc(104px + env(safe-area-inset-bottom))}
+#others{bottom:calc(62px + env(safe-area-inset-bottom))}
+.dock .row{display:flex;gap:6px;width:max-content;margin:0 auto;padding:2px}
+.dock button{white-space:nowrap;font:500 9px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;
+  text-transform:uppercase;color:rgba(198,222,240,.6);background:rgba(20,32,52,.6);
+  border:1px solid rgba(120,190,240,.16);border-radius:999px;padding:9px 12px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:color .2s,background .2s,border-color .2s}
+#subjects button[aria-pressed="true"]{color:#150c02;background:var(--hot);border-color:var(--hot)}
+#others button[aria-pressed="true"]{color:#06121e;background:var(--cool);border-color:var(--cool)}
+.dock button:focus-visible{outline:2px solid var(--cool);outline-offset:3px}
+#bar{position:fixed;z-index:4;left:50%;transform:translateX(-50%);
+  bottom:calc(12px + env(safe-area-inset-bottom));display:flex;gap:5px;align-items:center;
+  padding:5px 8px;border-radius:999px;background:rgba(12,20,36,.66);
+  border:1px solid rgba(120,190,240,.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  max-width:94vw;overflow-x:auto;scrollbar-width:none;opacity:0;transition:opacity .8s ease}
+#bar::-webkit-scrollbar{display:none}
+body.ready #bar{opacity:1}
+#bar button{white-space:nowrap;font:500 9px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;
+  text-transform:uppercase;color:rgba(198,222,240,.6);background:none;border:0;border-radius:999px;
+  padding:8px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:color .2s,background .2s,opacity .2s}
+#bar button[aria-pressed="true"]{color:#06121e;background:rgba(232,244,255,.9)}
+#bar button[disabled]{opacity:.22;cursor:default}
+#bar .sep{width:1px;height:16px;flex:none;background:rgba(120,190,240,.18)}
+#bar #info{font-size:11px;padding:7px 11px;border:1px solid rgba(120,190,240,.22)}
+#modal{position:fixed;inset:0;z-index:8;display:none;place-items:center;padding:22px;
+  background:rgba(3,6,14,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#modal.on{display:grid}
+#card{max-width:520px;max-height:78vh;overflow-y:auto;padding:24px 22px;border-radius:16px;
+  background:#0d1524;border:1px solid rgba(120,190,240,.2)}
+#card h2{font-family:"Big Shoulders Display",Impact,sans-serif;font-weight:700;font-size:24px;
+  color:#e8f4ff;margin-bottom:4px}
+#card h3{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--hot);margin:16px 0 5px}
+#card p{font-size:11px;line-height:1.85;margin-bottom:8px;color:rgba(212,232,248,.8)}
+#card .sm{font-size:9px;opacity:.55;line-height:1.8}
+#close{margin-top:18px;width:100%;font:500 9px/1 "IBM Plex Mono",monospace;letter-spacing:.2em;
+  text-transform:uppercase;color:#06121e;background:var(--cool);border:0;border-radius:999px;
+  padding:12px;cursor:pointer}
+#close:focus-visible{outline:2px solid #fff;outline-offset:3px}
+#boot{position:fixed;inset:0;z-index:9;display:grid;place-items:center;background:var(--ink);
+  font-size:10px;letter-spacing:.28em;text-transform:uppercase;text-align:center;padding:24px;
+  transition:opacity .8s ease}
+body.ready #boot{opacity:0;pointer-events:none}
+@media (max-width:620px){#stats{font-size:9px}#note{max-width:52vw}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div class="hud" id="head">
+  <div id="brand">Bible Sizes</div>
+  <div id="title"></div>
+  <div id="cite"></div>
+  <div id="note"></div>
+</div>
+<div class="hud" id="stats"></div>
+<div id="verdict"></div>
+<div class="dock" id="subjects"><div class="row"></div></div>
+<div class="dock" id="others"><div class="row"></div></div>
+<div id="bar">
+  <button class="md" data-m="size" type="button" aria-pressed="true">Size</button>
+  <button class="md" data-m="dist" type="button" aria-pressed="false">Distance</button>
+  <button class="md" data-m="tall" type="button" aria-pressed="false">Height</button>
+  <span class="sep"></span>
+  <button class="un" data-u="m" type="button" aria-pressed="true">m</button>
+  <button class="un" data-u="ft" type="button" aria-pressed="false">ft</button>
+  <span class="sep"></span>
+  <button class="cb" data-c="0.4445" type="button" aria-pressed="false">17.5&Prime;</button>
+  <button class="cb" data-c="0.4572" type="button" aria-pressed="true">18&Prime;</button>
+  <button class="cb" data-c="0.5232" type="button" aria-pressed="false">20.6&Prime;</button>
+  <span class="sep"></span>
+  <button id="ov" type="button" aria-pressed="false"
+          title="Lay the field on the floor and tile it">Overlay</button>
+  <button id="info" type="button" aria-label="About these measurements">i</button>
+</div>
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="ctitle">
+  <div id="card">
+    <h2 id="ctitle">How long is a cubit?</h2>
+    <p>A cubit is the length of a forearm, elbow to fingertip. It was never standardised the way a metre is, so every figure here shifts depending on which one you choose.</p>
+    <h3>17.5 inches &middot; 44.5 cm</h3>
+    <p>The short or common cubit, at the lower end of the range suggested by excavated Israelite buildings and water systems. Some measurements at Hezekiah's tunnel and Iron Age structures sit near this.</p>
+    <h3>18 inches &middot; 45.7 cm</h3>
+    <p>The convention most English Bibles and study notes use. It is a round working figure rather than an archaeological finding, which is why it turns up so often in margins and footnotes.</p>
+    <h3>20.6 inches &middot; 52.3 cm</h3>
+    <p>The royal or long cubit, known from Egypt and Mesopotamia, where a "cubit and a handbreadth" made a longer official measure. Ezekiel 40:5 and 43:13 describe exactly that longer cubit, so it is the right one for the temple visions.</p>
+    <h3>Why it matters</h3>
+    <p>Across this range Noah's Ark varies by about 24 metres end to end, and Goliath by half a metre. Showing the spread is more honest than picking one and calling it the answer.</p>
+    <p class="sm">Distances are route estimates over terrain, not straight lines, and are rounded. The Temple Mount platform is measured archaeologically rather than given in cubits, so the cubit buttons do not apply to it.</p>
+    <button id="close" type="button">Close</button>
+  </div>
+</div>
+<div id="boot">Building&hellip;</div>
+
+<script>
+const fail = m => { const b=document.getElementById('boot');
+  if (b){ b.textContent=String(m).slice(0,240); b.style.fontSize='9px'; } };
+addEventListener('error', e => fail(e.message||'error'));
+
+(() => {
+'use strict';
+try {
+
+/* ═════════ DATA — add rows here and the app follows ═════════ */
+// parts are boxes in cubits: [x, y, z, length, height, width]
+const STRUCTURES = [
+  { n:"Noah's Ark", cite:'Genesis 6:15-16', cubits:{l:300,w:50,h:30}, decks:3,
+    note:'A chest-like vessel: three decks, one door, one window.' },
+  { n:'Tabernacle court', cite:'Exodus 27:9-18', cubits:{l:100,w:50,h:5}, decks:1,
+    note:'Sixty bronze pillars around a linen enclosure; the tent stood inside.',
+    parts:[[-20,0,0,30,10,10]], pillars:{ n:60, h:5 } },
+  { n:"Solomon's Temple", cite:'1 Kings 6:2-3', cubits:{l:70,w:20,h:30}, decks:1,
+    note:'Porch 10 deep, holy place 40, most holy 20 - a 70-cubit line.',
+    parts:[[-30,0,0,10,30,20],[5,0,0,40,30,20],[25,0,0,20,20,20]] },
+  { n:'House of the Forest', cite:'1 Kings 7:2-5', cubits:{l:100,w:50,h:30}, decks:1,
+    note:'Named for its four rows of cedar columns - like standing in a forest.',
+    columns:{ rows:4, per:15, h:30 } },
+  { n:'Temple Mount', cite:'Herodian platform', metres:{l:488,w:315,h:12}, decks:1,
+    note:'Archaeological measurement of the retaining platform, not a cubit figure.' }
+];
+const FIELDS = [
+  { n:'Tennis', label:'tennis court', l:23.77, w:10.97, s:0, surf:[0.13,0.34,0.60] },
+  { n:'Basketball', label:'basketball court', l:28.00, w:15.00, s:1, surf:[0.66,0.44,0.22] },
+  { n:'Netball', label:'netball court', l:30.50, w:15.25, s:1, surf:[0.16,0.42,0.34] },
+  { n:'50 m pool', label:'Olympic pool', l:50.00, w:25.00, s:2, surf:[0.04,0.33,0.58] },
+  { n:'Hockey rink', label:'hockey rink', l:60.96, w:25.91, s:3, surf:[0.80,0.87,0.93] },
+  { n:'Gridiron', label:'gridiron field', l:109.73, w:48.77, s:4, surf:[0.11,0.38,0.17] },
+  { n:'Soccer', label:'soccer pitch', l:105.00, w:68.00, s:5, surf:[0.10,0.42,0.19] },
+  { n:'Rugby union', label:'rugby field', l:120.00, w:70.00, s:5, surf:[0.10,0.42,0.19] },
+  { n:'400 m track', label:'400 m track', l:176.91, w:92.50, s:6, surf:[0.55,0.22,0.15] },
+  { n:'Cricket oval', label:'cricket oval', l:171.00, w:146.00, s:7, surf:[0.14,0.44,0.20] }
+];
+const JOURNEYS = [
+  { n:'Emmaus road', cite:'Luke 24:13', km:11.1, note:'Sixty stadia from Jerusalem - and they walked back that night.' },
+  { n:'Emmaus return', cite:'Luke 24:33', km:22.2, note:'There and back, after a full day.' },
+  { n:'Jerusalem-Jericho', cite:'Luke 10:30', km:27, note:'The Good Samaritan road, dropping about a kilometre in altitude.' },
+  { n:'Nazareth-Bethlehem', cite:'Luke 2:4', km:150, note:'The Jordan valley route, avoiding Samaria.' },
+  { n:'Egypt-Canaan', cite:'Exodus 13:17', km:250, note:'The coast road God led them away from.' },
+  { n:'Flight to Egypt', cite:'Matthew 2:14', km:400, note:'Bethlehem to the Nile delta, with an infant.' }
+];
+const RACES = [
+  { n:'Parkrun 5 km', label:'5 km parkrun', km:5 },
+  { n:'10 km', label:'10 km race', km:10 },
+  { n:'Half marathon', label:'half marathon', km:21.0975 },
+  { n:'Marathon', label:'marathon', km:42.195 },
+  { n:'Channel swim', label:'English Channel swim', km:34 },
+  { n:'Comrades', label:'Comrades Marathon', km:89 },
+  { n:'Tour stage', label:'Tour de France stage', km:170 },
+  { n:'Ironman bike', label:'Ironman bike leg', km:180.25 }
+];
+const GIANTS = [
+  { n:'Goliath (Hebrew)', cite:'1 Samuel 17:4', cubitsTall:6.5,
+    note:'Six cubits and a span, in the Masoretic text.' },
+  { n:'Goliath (Greek)', cite:'1 Samuel 17:4 LXX', cubitsTall:4.5,
+    note:'Four cubits and a span in the Septuagint and a Dead Sea scroll - the older reading.' },
+  { n:"Og's bed", cite:'Deuteronomy 3:11', cubitsTall:9, lying:true,
+    note:'Nine cubits long - a bed, not a body, but offered as a measure of the man.' }
+];
+const PEOPLE = [
+  { n:'Messi', label:'Lionel Messi', m:1.70 },
+  { n:'Ronaldo', label:'Cristiano Ronaldo', m:1.87 },
+  { n:'Ibrahimovic', label:'Zlatan Ibrahimovic', m:1.95 },
+  { n:'Crouch', label:'Peter Crouch', m:2.01 },
+  { n:'LeBron', label:'LeBron James', m:2.06 },
+  { n:"O'Neal", label:"Shaquille O'Neal", m:2.16 },
+  { n:'Wembanyama', label:'Victor Wembanyama', m:2.24 },
+  { n:'Yao Ming', label:'Yao Ming', m:2.29 },
+  { n:'Kosen', label:'Sultan Kosen', m:2.51 },
+  { n:'Wadlow', label:'Robert Wadlow', m:2.72 }
+];
+const HOOP = 3.05;
+
+let mode='size', cubit=0.4572, units='m', iA=0, iB=6, overlay=false;
+const LISTS={ size:{a:STRUCTURES,b:FIELDS}, dist:{a:JOURNEYS,b:RACES}, tall:{a:GIANTS,b:PEOPLE} };
+const A=()=>LISTS[mode].a[iA], B=()=>LISTS[mode].b[iB];
+
+const FT=3.280839895, MI=0.621371192;
+const fmtLen=m=>units==='m'?((m>=100?m.toFixed(0):m.toFixed(1))+' m')
+  :(((m*FT)>=100?(m*FT).toFixed(0):(m*FT).toFixed(1))+' ft');
+const fmtTall=m=>{ if(units==='m') return m.toFixed(2)+' m';
+  const t=m*FT, f=Math.floor(t), i=Math.round((t-f)*12);
+  return i===12 ? (f+1)+"\u2032 0\u2033" : f+"\u2032 "+i+"\u2033"; };
+const fmtDist=km=>units==='m'?((km<100?km.toFixed(1):km.toFixed(0))+' km')
+  :(((km*MI)<100?(km*MI).toFixed(1):(km*MI).toFixed(0))+' mi');
+const fmtArea=a=>units==='m'?a.toLocaleString('en-AU',{maximumFractionDigits:0})+' m\u00b2'
+  :(a*FT*FT).toLocaleString('en-AU',{maximumFractionDigits:0})+' ft\u00b2';
+const structDims=S=>S.metres?{l:S.metres.l,w:S.metres.w,h:S.metres.h,fixed:true,decks:S.decks}
+  :{l:S.cubits.l*cubit,w:S.cubits.w*cubit,h:S.cubits.h*cubit,fixed:false,decks:S.decks};
+const giantH=G=>G.cubitsTall*cubit;
+
+const canvas=document.getElementById('gl');
+const gl=canvas.getContext('webgl2',{antialias:true,alpha:false,powerPreference:'high-performance'});
+if(!gl){ fail('Needs WebGL 2'); return; }
+
+const M={
+  persp:(fov,a,n,f)=>{const t=1/Math.tan(fov/2),nf=1/(n-f);
+    return new Float32Array([t/a,0,0,0,0,t,0,0,0,0,(f+n)*nf,-1,0,0,2*f*n*nf,0]);},
+  look:(e,c,u)=>{let zx=e[0]-c[0],zy=e[1]-c[1],zz=e[2]-c[2];
+    let rl=1/Math.hypot(zx,zy,zz);zx*=rl;zy*=rl;zz*=rl;
+    let xx=u[1]*zz-u[2]*zy,xy=u[2]*zx-u[0]*zz,xz=u[0]*zy-u[1]*zx;
+    rl=1/(Math.hypot(xx,xy,xz)||1);xx*=rl;xy*=rl;xz*=rl;
+    const yx=zy*xz-zz*xy,yy=zz*xx-zx*xz,yz=zx*xy-zy*xx;
+    return new Float32Array([xx,yx,zx,0,xy,yy,zy,0,xz,yz,zz,0,
+      -(xx*e[0]+xy*e[1]+xz*e[2]),-(yx*e[0]+yy*e[1]+yz*e[2]),-(zx*e[0]+zy*e[1]+zz*e[2]),1]);},
+  mul:(a,b)=>{const o=new Float32Array(16);
+    for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}
+    return o;},
+  trs:(t,s)=>new Float32Array([s[0],0,0,0,0,s[1],0,0,0,0,s[2],0,t[0],t[1],t[2],1]),
+  // same, turned a quarter turn about Y: local x runs along world -z, local z along world x
+  trsTurn:(t,s)=>new Float32Array([0,0,-s[0],0,0,s[1],0,0,s[2],0,0,0,t[0],t[1],t[2],1])
+};
+
+const V_SIMPLE=`#version 300 es
+precision highp float;
+in vec3 aPos; in vec3 aNrm;
+uniform mat4 uVP, uModel;
+out vec3 vN;
+void main(){ vN=mat3(uModel)*aNrm; gl_Position=uVP*(uModel*vec4(aPos,1.0)); }`;
+const F_SOLID=`#version 300 es
+precision highp float;
+in vec3 vN; out vec4 frag;
+uniform vec4 uCol; uniform float uLit;
+void main(){
+  vec3 n=normalize(vN);
+  float d=mix(1.0, 0.44+0.56*max(dot(n,normalize(vec3(0.4,0.85,0.3))),0.0), uLit);
+  frag=vec4(uCol.rgb*d*uCol.a, uCol.a);
+}`;
+const V_PLANE=`#version 300 es
+precision highp float;
+in vec3 aPos;
+uniform mat4 uVP, uModel;
+out vec2 vUv; out vec3 vW;
+void main(){ vUv=aPos.xz+0.5; vec4 w=uModel*vec4(aPos,1.0); vW=w.xyz; gl_Position=uVP*w; }`;
+const F_GROUND=`#version 300 es
+precision highp float;
+in vec2 vUv; in vec3 vW; out vec4 frag;
+uniform vec3 uEye; uniform float uCell;
+float g(float v,float w){ float d=abs(fract(v)-0.5)/max(fwidth(v),1e-5); return 1.0-smoothstep(0.0,w,d); }
+void main(){
+  vec2 p=vW.xz/uCell;
+  float minor=max(g(p.x,1.2),g(p.y,1.2));
+  float major=max(g(p.x*0.2,1.0),g(p.y*0.2,1.0));
+  float fade=exp(-length(vW.xz-uEye.xz)/(uCell*90.0));
+  vec3 c=vec3(0.032,0.05,0.085);
+  c+=vec3(0.10,0.20,0.30)*minor*0.45*fade;
+  c+=vec3(0.20,0.38,0.55)*major*0.75*fade;
+  frag=vec4(c,1.0);
+}`;
+const F_FIELD=`#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 frag;
+uniform vec2 uDim; uniform int uStyle; uniform vec3 uSurf; uniform float uAlpha;
+float sdRect(vec2 p,vec2 h){ vec2 d=abs(p)-h; return length(max(d,0.0))+min(max(d.x,d.y),0.0); }
+float sdRound(vec2 p,vec2 h,float r){ return sdRect(p,h-vec2(r))-r; }
+float sdStad(vec2 p,float hx,float r){ return length(max(abs(p)-vec2(hx,0.0),0.0))-r; }
+float ink(float d,float w,float aa){ return 1.0-smoothstep(w-aa,w+aa,abs(d)); }
+float rep(float v,float per,float w,float aa){
+  float m=abs(mod(v+per*0.5,per)-per*0.5); return 1.0-smoothstep(w-aa,w+aa,m); }
+void main(){
+  vec2 p=(vUv-0.5)*uDim, h=uDim*0.5;
+  float aa=max(fwidth(p.x),fwidth(p.y))*0.75;
+  float w=max(0.075,aa*1.05);
+  float m=0.0, fill=0.0;
+  vec3 surf=uSurf, lineCol=vec3(0.96,0.98,1.0);
+  if (uStyle==0){
+    fill=1.0-step(0.0,sdRect(p,h));
+    m=max(m,ink(sdRect(p,h*0.995),w*1.3,aa));
+    m=max(m,ink(abs(p.y)-(h.y-1.372),w,aa)*fill);
+    m=max(m,ink(p.x,w*1.6,aa)*fill);
+    m=max(m,ink(abs(p.x)-6.40,w,aa)*step(abs(p.y),h.y-1.372));
+    m=max(m,ink(p.y,w,aa)*step(abs(p.x),6.40));
+  } else if (uStyle==1){
+    fill=1.0-step(0.0,sdRect(p,h));
+    m=max(m,ink(sdRect(p,h*0.985),w,aa));
+    m=max(m,ink(p.x,w,aa)); m=max(m,ink(length(p)-1.8,w,aa));
+    m=max(m,ink(sdRect(vec2(abs(p.x)-(h.x-2.9),p.y),vec2(2.9,2.45)),w,aa));
+    m=max(m,ink(length(vec2(abs(p.x)-(h.x-1.575),p.y))-6.75,w,aa)*step(abs(p.x),h.x-1.575));
+  } else if (uStyle==2){
+    fill=1.0-step(0.0,sdRect(p,h));
+    surf=uSurf*(0.86+0.14*sin(p.x*2.2)*sin(p.y*3.1));
+    m=max(m,rep(p.y+1.25,2.5,w*2.4,aa)*fill);
+    m=max(m,ink(abs(p.x)-(h.x-5.0),w*1.2,aa)*fill*0.55);
+    m=max(m,ink(sdRect(p,h*0.999),w*1.6,aa));
+  } else if (uStyle==3){
+    float d=sdRound(p,h,8.5); fill=1.0-step(0.0,d);
+    m=max(m,ink(d,w,aa));
+    m=max(m,ink(p.x,w*2.4,aa)*fill);
+    m=max(m,ink(abs(p.x)-9.75,w*2.4,aa)*fill);
+    m=max(m,ink(abs(p.x)-(h.x-4.0),w*1.4,aa)*fill);
+    m=max(m,ink(length(p)-4.57,w,aa));
+    m=max(m,ink(length(vec2(abs(p.x)-(h.x-15.0),abs(p.y)-7.0))-4.57,w,aa));
+  } else if (uStyle==4){
+    fill=1.0-step(0.0,sdRect(p,h));
+    surf=uSurf*(0.93+0.07*step(0.0,sin(p.x*3.14159/9.144)));
+    surf=mix(uSurf*0.55,surf,step(abs(p.x),h.x-9.144));
+    m=max(m,rep(p.x,4.572,w,aa)*step(abs(p.x),h.x-9.144));
+    m=max(m,ink(abs(p.x)-(h.x-9.144),w*2.0,aa));
+    m=max(m,ink(sdRect(p,h*0.998),w*1.6,aa));
+    m=max(m,rep(p.y,uDim.y/3.0,w*0.9,aa)*step(abs(p.x),h.x-9.144)*0.5);
+  } else if (uStyle==5){
+    fill=1.0-step(0.0,sdRect(p,h));
+    surf=uSurf*(0.92+0.08*step(0.0,sin(p.x*3.14159/(uDim.x/10.0))));
+    m=max(m,ink(sdRect(p,h*0.995),w*1.4,aa));
+    m=max(m,ink(p.x,w*1.4,aa));
+    m=max(m,ink(length(p)-9.15,w*1.4,aa));
+    m=max(m,ink(sdRect(vec2(abs(p.x)-(h.x-8.25),p.y),vec2(8.25,20.16)),w*1.4,aa));
+    m=max(m,ink(sdRect(vec2(abs(p.x)-(h.x-2.75),p.y),vec2(2.75,9.16)),w*1.4,aa));
+  } else if (uStyle==6){
+    float r=h.y, straight=max(0.0,h.x-r), d=sdStad(p,straight,r);
+    fill=1.0-step(0.0,d);
+    float inner=d+8.0*1.22;
+    surf = inner<0.0 ? vec3(0.11,0.36,0.17) : uSurf;
+    for(int i=0;i<=8;i++) m=max(m,ink(d+float(i)*1.22,w*1.2,aa)*fill);
+    m=max(m,ink(sdRect(vec2(p.x-straight*0.55,p.y),vec2(0.06,4.88)),w,aa)*step(d+9.76,0.0));
+  } else {
+    float e=(length(p/h)-1.0)*min(h.x,h.y);
+    fill=1.0-step(0.0,e);
+    surf=uSurf*(0.93+0.07*step(0.0,sin(atan(p.y,p.x)*6.0)));
+    m=max(m,ink(e,w*2.2,aa));
+    m=max(m,ink((length(p/(h*0.66))-1.0)*min(h.x,h.y)*0.66,w*1.4,aa)*fill);
+    surf=mix(surf,vec3(0.78,0.70,0.50),step(sdRect(p,vec2(10.06,1.525)),0.0));
+    m=max(m,ink(sdRect(p,vec2(10.06,1.525)),w,aa));
+  }
+  if (fill<0.5 && m<0.01) discard;
+  float a=uAlpha*max(fill,m);
+  frag=vec4(mix(surf,lineCol,clamp(m,0.0,1.0))*a, a);
+}`;
+
+function prog(vs,fs){
+  const c=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);
+    if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+    return sh;};
+  const p=gl.createProgram();
+  gl.attachShader(p,c(gl.VERTEX_SHADER,vs)); gl.attachShader(p,c(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(p);
+  if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  return p;
+}
+const uni=(p,ns)=>{const o={};for(const n of ns)o[n]=gl.getUniformLocation(p,n);return o;};
+const pSolid=prog(V_SIMPLE,F_SOLID), uSolid=uni(pSolid,['uVP','uModel','uCol','uLit']);
+const pGnd=prog(V_PLANE,F_GROUND), uGnd=uni(pGnd,['uVP','uModel','uEye','uCell']);
+const pFld=prog(V_PLANE,F_FIELD), uFld=uni(pFld,['uVP','uModel','uDim','uStyle','uSurf','uAlpha']);
+
+function vao(p,data,attrs){
+  const v=gl.createVertexArray(); gl.bindVertexArray(v);
+  const b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b);
+  gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+  const stride=attrs.reduce((s,a)=>s+a[1],0)*4; let off=0;
+  for(const [n,size] of attrs){
+    const loc=gl.getAttribLocation(p,n);
+    if(loc>=0){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,stride,off);}
+    off+=size*4;
+  }
+  return v;
+}
+const CUBE=(()=>{const f=[
+  [[0,0,1],[[-.5,-.5,.5],[.5,-.5,.5],[.5,.5,.5],[-.5,-.5,.5],[.5,.5,.5],[-.5,.5,.5]]],
+  [[0,0,-1],[[.5,-.5,-.5],[-.5,-.5,-.5],[-.5,.5,-.5],[.5,-.5,-.5],[-.5,.5,-.5],[.5,.5,-.5]]],
+  [[1,0,0],[[.5,-.5,.5],[.5,-.5,-.5],[.5,.5,-.5],[.5,-.5,.5],[.5,.5,-.5],[.5,.5,.5]]],
+  [[-1,0,0],[[-.5,-.5,-.5],[-.5,-.5,.5],[-.5,.5,.5],[-.5,-.5,-.5],[-.5,.5,.5],[-.5,.5,-.5]]],
+  [[0,1,0],[[-.5,.5,.5],[.5,.5,.5],[.5,.5,-.5],[-.5,.5,.5],[.5,.5,-.5],[-.5,.5,-.5]]],
+  [[0,-1,0],[[-.5,-.5,-.5],[.5,-.5,-.5],[.5,-.5,.5],[-.5,-.5,-.5],[.5,-.5,.5],[-.5,-.5,.5]]]];
+  const a=[]; for(const [n,vs] of f) for(const v of vs) a.push(v[0],v[1],v[2],n[0],n[1],n[2]);
+  return new Float32Array(a);})();
+const EDGES=(()=>{
+  const c=[[-.5,-.5,-.5],[.5,-.5,-.5],[.5,-.5,.5],[-.5,-.5,.5],[-.5,.5,-.5],[.5,.5,-.5],[.5,.5,.5],[-.5,.5,.5]];
+  const e=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  const a=[]; for(const [i,j] of e) a.push(...c[i],0,1,0,...c[j],0,1,0);
+  return new Float32Array(a);})();
+const QUAD=new Float32Array([-.5,0,-.5, .5,0,-.5, .5,0,.5, -.5,0,-.5, .5,0,.5, -.5,0,.5]);
+const vCube=vao(pSolid,CUBE,[['aPos',3],['aNrm',3]]);
+const vEdge=vao(pSolid,EDGES,[['aPos',3],['aNrm',3]]);
+const vGnd=vao(pGnd,QUAD,[['aPos',3]]);
+const vFld=vao(pFld,QUAD,[['aPos',3]]);
+
+let theta=-0.62, phi=0.52, dist=340, distT=340, idle=0, dpr=1, aspect=1;
+function resize(){
+  dpr=Math.min(devicePixelRatio||1,2);
+  canvas.width=Math.round(innerWidth*dpr); canvas.height=Math.round(innerHeight*dpr);
+  gl.viewport(0,0,canvas.width,canvas.height); aspect=innerWidth/innerHeight;
+}
+addEventListener('resize',resize,{passive:true}); resize();
+
+/* How the field packs onto the structure's floor. Whichever way round fits more
+   wins, which is also what the "N fit whole" figure counts — so the tiles you can
+   see and the number in the readout are always the same number. */
+function packing(a,f){
+  const cA=Math.floor(a.l/f.l), rA=Math.floor(a.w/f.w);
+  const cB=Math.floor(a.l/f.w), rB=Math.floor(a.w/f.l);
+  const turn=cB*rB>cA*rA;
+  return { turn,
+           c:Math.max(1,turn?cB:cA), r:Math.max(1,turn?rB:rA),
+           sx:turn?f.w:f.l, sz:turn?f.l:f.w };
+}
+
+function extent(){
+  if(mode==='size'){
+    const a=structDims(A()), f=B();
+    if(overlay){
+      const p=packing(a,f);
+      return { x:Math.max(a.l,p.c*p.sx), z:Math.max(a.w,p.r*p.sz), y:a.h, cell:10 };
+    }
+    return { x:Math.max(a.l,f.l),
+             z:a.w+f.w+Math.max(18,a.w*0.5),
+             y:a.h, cell:10 };
+  }
+  if(mode==='dist'){
+    const L=Math.max(A().km,B().km)*1000;
+    return { x:L, z:L*0.14, y:0, cell:Math.pow(10,Math.max(1,Math.round(Math.log10(L/40)))) };
+  }
+  return { x:6, z:3, y:Math.max(giantH(A()),B().m,HOOP), cell:1 };
+}
+const fitDistance=()=>{ const e=extent();
+  return Math.max(6, Math.max(e.x/Math.max(aspect,0.55), e.z, e.y*2.6)*1.45); };
+
+const $=id=>document.getElementById(id);
+const subjRow=document.querySelector('#subjects .row');
+const othRow=document.querySelector('#others .row');
+function buildChips(){
+  subjRow.innerHTML=''; othRow.innerHTML='';
+  LISTS[mode].a.forEach((s,i)=>{
+    const b=document.createElement('button'); b.type='button'; b.textContent=s.n;
+    b.setAttribute('aria-pressed',String(i===iA));
+    b.addEventListener('click',()=>{ iA=i;
+      [...subjRow.children].forEach((c,j)=>c.setAttribute('aria-pressed',String(j===iA)));
+      distT=fitDistance(); update(); });
+    subjRow.appendChild(b);
+  });
+  LISTS[mode].b.forEach((s,i)=>{
+    const b=document.createElement('button'); b.type='button'; b.textContent=s.n;
+    b.setAttribute('aria-pressed',String(i===iB));
+    b.addEventListener('click',()=>{ iB=i;
+      [...othRow.children].forEach((c,j)=>c.setAttribute('aria-pressed',String(j===iB)));
+      distT=fitDistance(); update(); });
+    othRow.appendChild(b);
+  });
+}
+document.querySelectorAll('.md').forEach(b=>b.addEventListener('click',()=>{
+  mode=b.dataset.m; iA=0; iB= mode==='size'?6 : mode==='dist'?3 : 6;
+  document.querySelectorAll('.md').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  phi = mode==='tall' ? 0.16 : 0.52;
+  buildChips(); distT=fitDistance(); dist=distT; update();
+}));
+document.querySelectorAll('.un').forEach(b=>b.addEventListener('click',()=>{
+  units=b.dataset.u;
+  document.querySelectorAll('.un').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  update();
+}));
+const cbs=[...document.querySelectorAll('.cb')];
+cbs.forEach(b=>b.addEventListener('click',()=>{
+  cubit=+b.dataset.c;
+  cbs.forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  distT=fitDistance(); update();
+}));
+/* Overlay lays the field on the structure's own floor and tiles it, so "how many
+   fit" is something you see rather than read. Only means anything in size mode. */
+const ovBtn=$('ov');
+ovBtn.addEventListener('click',()=>{
+  if(ovBtn.disabled) return;
+  overlay=!overlay;
+  ovBtn.setAttribute('aria-pressed',String(overlay));
+  distT=fitDistance(); update();
+});
+$('info').addEventListener('click',()=>$('modal').classList.add('on'));
+$('close').addEventListener('click',()=>$('modal').classList.remove('on'));
+$('modal').addEventListener('click',e=>{ if(e.target.id==='modal') $('modal').classList.remove('on'); });
+addEventListener('keydown',e=>{ if(e.key==='Escape') $('modal').classList.remove('on'); });
+
+function update(){
+  const a=A(), b=B();
+  $('title').textContent=a.n;
+  $('cite').textContent=a.cite||'';
+  $('note').textContent=a.note||'';
+  let html='', line='';
+  if(mode==='size'){
+    const d=structDims(a), fa=b.l*b.w, foot=d.l*d.w, all=foot*d.decks;
+    const fit=Math.max(Math.floor(d.l/b.l)*Math.floor(d.w/b.w),
+                       Math.floor(d.l/b.w)*Math.floor(d.w/b.l));
+    cbs.forEach(x=>x.disabled=d.fixed); ovBtn.disabled=false;
+    html='<div class="row a"><span class="k">'+a.n+'</span><br><span class="v">'+
+      fmtLen(d.l)+' \u00d7 '+fmtLen(d.w)+' \u00d7 '+fmtLen(d.h)+'</span><br><span class="v">'+
+      fmtArea(foot)+'</span>'+(d.decks>1?' \u00b7 <span class="v">'+fmtArea(all)+' over '+d.decks+'</span>':'')+'</div>'+
+      '<div class="row b"><span class="k">'+b.n+'</span><br><span class="v">'+fmtLen(b.l)+' \u00d7 '+fmtLen(b.w)+
+      '</span> \u00b7 <span class="v">'+fmtArea(fa)+'</span></div>'+
+      '<div class="row"><span class="k">Floor \u00f7 field</span><br><span class="v">'+(foot/fa).toFixed(2)+
+      '\u00d7</span> \u00b7 <span class="v">'+(fit>0?fit+' fit whole':'none fit whole')+'</span></div>';
+    const lr=d.l/b.l, wr=d.w/b.w;
+    line = (lr>=1&&wr<1) ? a.n+' is <em>'+((lr-1)*100).toFixed(0)+'% longer</em> than a '+b.label+' \u2014 but only <em>'+(wr*100).toFixed(0)+'%</em> as wide.'
+      : (lr>=1&&wr>=1) ? 'A '+b.label+' fits inside '+a.n+' \u2014 <em>'+(fit>0?fit:1)+'</em> on one floor.'
+      : a.n+' is <em>'+(lr*100).toFixed(0)+'%</em> the length of a '+b.label+', and <em>'+(wr*100).toFixed(0)+'%</em> of its width.';
+  } else if(mode==='dist'){
+    cbs.forEach(x=>x.disabled=true); ovBtn.disabled=true;
+    const r=a.km/b.km;
+    html='<div class="row a"><span class="k">'+a.n+'</span><br><span class="v">'+fmtDist(a.km)+'</span></div>'+
+      '<div class="row b"><span class="k">'+b.n+'</span><br><span class="v">'+fmtDist(b.km)+'</span></div>'+
+      '<div class="row"><span class="k">Ratio</span><br><span class="v">'+r.toFixed(2)+'\u00d7</span></div>';
+    line = r>=1 ? 'The '+a.n.toLowerCase()+' is <em>'+r.toFixed(1)+'\u00d7</em> a '+b.label+'.'
+                : 'The '+a.n.toLowerCase()+' is <em>'+(r*100).toFixed(0)+'%</em> of a '+b.label+'.';
+  } else {
+    cbs.forEach(x=>x.disabled=false); ovBtn.disabled=true;
+    const ha=giantH(a), hb=b.m;
+    html='<div class="row a"><span class="k">'+a.n+'</span><br><span class="v">'+fmtTall(ha)+
+      '</span><br><span class="v">'+a.cubitsTall+' cubits</span></div>'+
+      '<div class="row b"><span class="k">'+b.n+'</span><br><span class="v">'+fmtTall(hb)+'</span></div>'+
+      '<div class="row"><span class="k">Difference</span><br><span class="v">'+fmtTall(Math.abs(ha-hb))+
+      '</span> \u00b7 <span class="v">rim '+fmtTall(HOOP)+'</span></div>';
+    line = ha>hb ? a.n+' stands <em>'+fmtTall(ha-hb)+'</em> over '+b.label+
+        (ha<HOOP?' \u2014 and still <em>'+fmtTall(HOOP-ha)+'</em> under the rim.':' \u2014 and above the rim.')
+      : a.n+' is <em>'+fmtTall(hb-ha)+'</em> shorter than '+b.label+'.';
+  }
+  $('stats').innerHTML=html;
+  $('verdict').innerHTML=line;
+}
+
+const pts=new Map(); let lx=0,ly=0,p0=0,d0=0;
+canvas.addEventListener('pointerdown',e=>{
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); lx=e.clientX; ly=e.clientY; idle=0;
+  if(pts.size===2){const v=[...pts.values()];p0=Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y);d0=distT;}
+},{passive:true});
+canvas.addEventListener('pointermove',e=>{
+  if(!pts.has(e.pointerId))return;
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); idle=0;
+  if(pts.size===2&&p0>0){const v=[...pts.values()];
+    distT=Math.max(3,Math.min(2e6,d0*p0/Math.max(1,Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y))));return;}
+  theta-=(e.clientX-lx)*0.006;
+  phi=Math.max(0.03,Math.min(1.45,phi+(e.clientY-ly)*0.005));
+  lx=e.clientX; ly=e.clientY;
+},{passive:true});
+const drop=e=>{pts.delete(e.pointerId); if(pts.size<2)p0=0;};
+canvas.addEventListener('pointerup',drop,{passive:true});
+canvas.addEventListener('pointercancel',drop,{passive:true});
+addEventListener('wheel',e=>{
+  if(e.target.closest&&e.target.closest('#bar,.dock,#modal'))return;
+  e.preventDefault(); idle=0;
+  distT=Math.max(3,Math.min(2e6,distT*(1+e.deltaY*0.0014)));
+},{passive:false});
+
+function box(VP,t,s,col,lit){
+  gl.bindVertexArray(vCube); gl.useProgram(pSolid);
+  gl.uniformMatrix4fv(uSolid.uVP,false,VP);
+  gl.uniform1f(uSolid.uLit,lit); gl.uniform4f(uSolid.uCol,col[0],col[1],col[2],col[3]);
+  gl.uniformMatrix4fv(uSolid.uModel,false,M.trs(t,s));
+  gl.drawArrays(gl.TRIANGLES,0,36);
+}
+function wire(VP,t,s,col){
+  gl.bindVertexArray(vEdge); gl.useProgram(pSolid);
+  gl.uniformMatrix4fv(uSolid.uVP,false,VP);
+  gl.uniform1f(uSolid.uLit,0); gl.uniform4f(uSolid.uCol,col[0],col[1],col[2],col[3]);
+  gl.uniformMatrix4fv(uSolid.uModel,false,M.trs(t,s));
+  gl.drawArrays(gl.LINES,0,24);
+}
+function person(VP,h,x,z,col){
+  box(VP,[x,0.235*h,z],[0.19*h,0.47*h,0.13*h],col,1);
+  box(VP,[x,0.635*h,z],[0.26*h,0.33*h,0.15*h],col,1);
+  box(VP,[x,0.825*h,z],[0.10*h,0.06*h,0.10*h],col,1);
+  box(VP,[x,0.925*h,z],[0.14*h,0.15*h,0.15*h],col,1);
+  box(VP,[x-0.145*h,0.63*h,z],[0.055*h,0.31*h,0.075*h],col,1);
+  box(VP,[x+0.145*h,0.63*h,z],[0.055*h,0.31*h,0.075*h],col,1);
+}
+
+gl.clearColor(0.027,0.043,0.078,1);
+gl.enable(gl.BLEND); gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+buildChips(); distT=fitDistance(); dist=distT; update();
+document.body.classList.add('ready');
+
+const GOLD=[1.0,0.71,0.28], CYAN=[0.31,0.82,1.0];
+let last=performance.now();
+(function tick(now){
+  const dt=Math.min((now-last)/1000,0.05); last=now;
+  idle+=dt; if(idle>4) theta-=dt*0.045;
+  dist+=(distT-dist)*Math.min(1,dt*3.2);
+
+  const e=extent();
+  const tgtY = mode==='tall' ? e.y*0.45 : e.y*0.3;
+  const eye=[Math.sin(theta)*Math.cos(phi)*dist, Math.max(0.4,Math.sin(phi)*dist), Math.cos(theta)*Math.cos(phi)*dist];
+  const near=Math.max(0.05,dist*0.02), far=dist*8+2000;
+  const VP=M.mul(M.persp(46*Math.PI/180,aspect,near,far),M.look(eye,[0,tgtY,0],[0,1,0]));
+
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST); gl.depthMask(true);
+  gl.useProgram(pGnd); gl.bindVertexArray(vGnd);
+  gl.uniformMatrix4fv(uGnd.uVP,false,VP);
+  gl.uniformMatrix4fv(uGnd.uModel,false,M.trs([0,0,0],[e.cell*4000,1,e.cell*4000]));
+  gl.uniform3f(uGnd.uEye,eye[0],eye[1],eye[2]);
+  gl.uniform1f(uGnd.uCell,e.cell);
+  gl.drawArrays(gl.TRIANGLES,0,6);
+
+  if(mode==='size'){
+    const S=A(), a=structDims(S), f=B();
+    gl.disable(gl.DEPTH_TEST); gl.depthMask(false);
+    gl.useProgram(pFld); gl.bindVertexArray(vFld);
+    gl.uniformMatrix4fv(uFld.uVP,false,VP);
+    gl.uniform2f(uFld.uDim,f.l,f.w); gl.uniform1i(uFld.uStyle,f.s);
+    gl.uniform3f(uFld.uSurf,f.surf[0],f.surf[1],f.surf[2]);
+    if(overlay){
+      const P=packing(a,f);
+      gl.uniform1f(uFld.uAlpha,P.c*P.r>1?0.92:0.75);
+      for(let i=0;i<P.c;i++)for(let j=0;j<P.r;j++){
+        const t=[(i-(P.c-1)/2)*P.sx,0,(j-(P.r-1)/2)*P.sz];
+        gl.uniformMatrix4fv(uFld.uModel,false,(P.turn?M.trsTurn:M.trs)(t,[f.l,1,f.w]));
+        gl.drawArrays(gl.TRIANGLES,0,6);}
+    } else {
+      gl.uniform1f(uFld.uAlpha,1);
+      gl.uniformMatrix4fv(uFld.uModel,false,M.trs([0,0,a.w/2+f.w/2+Math.max(18,a.w*0.5)],[f.l,1,f.w]));
+      gl.drawArrays(gl.TRIANGLES,0,6);
+    }
+    gl.enable(gl.DEPTH_TEST);
+    const c = S.metres ? 1 : cubit;
+    if(S.parts){
+      for(let k=0;k<S.parts.length;k++){
+        const q=S.parts[k];
+        const t=[q[0]*c,(q[1]+q[4]/2)*c,q[2]*c], s=[q[3]*c,q[4]*c,q[5]*c];
+        box(VP,t,s,[GOLD[0],GOLD[1],GOLD[2],0.16],1);
+        wire(VP,t,s,[GOLD[0],GOLD[1],GOLD[2],0.9]);
+      }
+      wire(VP,[0,a.h/2,0],[a.l,a.h,a.w],[GOLD[0],GOLD[1],GOLD[2],0.3]);
+    } else {
+      box(VP,[0,a.h/2,0],[a.l,a.h,a.w],[0.68,0.46,0.18,0.22],1);
+      wire(VP,[0,a.h/2,0],[a.l,a.h,a.w],[GOLD[0],GOLD[1],GOLD[2],1]);
+    }
+    for(let d=1;d<a.decks;d++)
+      wire(VP,[0,d*(a.h/a.decks),0],[a.l,0.001,a.w],[GOLD[0],GOLD[1],GOLD[2],0.4]);
+    if(S.pillars){
+      const ph=S.pillars.h*c, per=Math.round(S.pillars.n/3);
+      for(let i=0;i<per;i++){
+        const x=(i/(per-1)-0.5)*a.l;
+        box(VP,[x,ph/2,-a.w/2],[ph*0.13,ph,ph*0.13],[GOLD[0],GOLD[1],GOLD[2],0.85],1);
+        box(VP,[x,ph/2, a.w/2],[ph*0.13,ph,ph*0.13],[GOLD[0],GOLD[1],GOLD[2],0.85],1);
+      }
+    }
+    if(S.columns){
+      const H=S.columns.h*c, rows=S.columns.rows, per=S.columns.per;
+      for(let r=0;r<rows;r++) for(let i=0;i<per;i++){
+        const x=(i/(per-1)-0.5)*a.l*0.92, z=(r/(rows-1)-0.5)*a.w*0.78;
+        box(VP,[x,H/2,z],[H*0.05,H,H*0.05],[GOLD[0],GOLD[1],GOLD[2],0.75],1);
+      }
+    }
+    for(let i=0;i<6;i++) person(VP,1.75,-a.l/2-4,-8+i*3.2,[0.85,0.92,1,1]);
+
+  } else if(mode==='dist'){
+    const a=A(), b=B(), LA=a.km*1000, LB=b.km*1000;
+    const W=Math.max(LA,LB)*0.022;
+    const step=Math.pow(10,Math.floor(Math.log10(Math.max(LA,LB)/6)));
+    const lanes=[[LA,-W*1.4,GOLD],[LB,W*1.4,CYAN]];
+    for(let k=0;k<lanes.length;k++){
+      const len=lanes[k][0], z=lanes[k][1], col=lanes[k][2];
+      box(VP,[len/2,W*0.06,z],[len,W*0.12,W],[col[0],col[1],col[2],0.55],0);
+      wire(VP,[len/2,W*0.06,z],[len,W*0.12,W],[col[0],col[1],col[2],0.95]);
+      const ticks=Math.min(60,Math.floor(len/step));
+      for(let i=1;i<=ticks;i++)
+        box(VP,[i*step,W*0.14,z],[W*0.05,W*0.16,W*1.5],[col[0],col[1],col[2],0.8],0);
+    }
+    for(let i=0;i<3;i++) person(VP,1.75,-Math.max(LA,LB)*0.012,-W*1.4+i*2.4,[0.85,0.92,1,1]);
+
+  } else {
+    const a=A(), b=B(), ha=giantH(a), hb=b.m;
+    const top=Math.ceil(Math.max(ha,hb,HOOP));
+    for(let i=1;i<=top;i++) wire(VP,[0,i,0],[9,0.001,5],[0.35,0.55,0.72,0.22]);
+    wire(VP,[0,HOOP,0],[9,0.001,5],[1,0.35,0.35,0.8]);
+    if(a.lying) box(VP,[0,0.25,-1.2],[ha,0.5,1.0],[GOLD[0],GOLD[1],GOLD[2],0.5],1);
+    else person(VP,ha,-1.15,0,[GOLD[0],GOLD[1],GOLD[2],1]);
+    person(VP,hb,1.15,0,[CYAN[0],CYAN[1],CYAN[2],1]);
+  }
+  requestAnimationFrame(tick);
+})(last);
+
+} catch(err){ fail(err&&err.message?err.message:err); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pray Play Say — Matchday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B1220;
+    --bg-elev: #131C2B;
+    --bg-elev-2: #1A2436;
+    --line: #253248;
+    --line-soft: #1D2839;
+    --text: #EDEFF4;
+    --text-dim: #8B96AC;
+    --text-faint: #5B6579;
+    --gold: #E8B23D;
+    --gold-soft: rgba(232,178,61,0.14);
+    --teal: #2FB6A5;
+    --teal-soft: rgba(47,182,165,0.14);
+    --coral: #E85D4E;
+    --coral-soft: rgba(232,93,78,0.14);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  .display{ font-family:'Anton', sans-serif; letter-spacing: 0.02em; text-transform: uppercase; }
+  .mono{ font-family:'Space Mono', monospace; }
+  #app{
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background:
+      radial-gradient(120% 60% at 50% -10%, #17223590 0%, transparent 60%),
+      var(--bg);
+  }
+  /* ===== HEADER / SCOREBOARD ===== */
+  .scoreboard{
+    padding: 22px 18px 16px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #0E1727 0%, #0B1220 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .scoreboard::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.015) 3px, rgba(255,255,255,0.015) 4px);
+    pointer-events:none;
+  }
+  .sb-top{
+    display:flex; align-items:center; justify-content:space-between;
+    position: relative; z-index:1;
+  }
+  .sb-brand{
+    display:flex; align-items:center; gap:9px;
+  }
+  .sb-crest{
+    width:30px; height:30px; border-radius:8px;
+    background: linear-gradient(135deg, var(--gold), var(--coral));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Anton',sans-serif; font-size:14px; color:#0B1220;
+    flex-shrink:0;
+  }
+  .sb-brand-text{ line-height:1.05; }
+  .sb-brand-text .l1{ font-size:10px; letter-spacing:0.18em; color:var(--text-dim); text-transform:uppercase; }
+  .sb-brand-text .l2{ font-size:14px; font-weight:800; letter-spacing:0.02em; }
+  .sb-name-pill{
+    font-size:11px; color:var(--text-dim); background: var(--bg-elev-2);
+    border:1px solid var(--line); padding:5px 10px; border-radius:20px;
+    cursor:pointer; white-space:nowrap;
+  }
+  .sb-main{
+    display:flex; align-items:flex-end; gap:18px; margin-top:18px; position:relative; z-index:1;
+  }
+  .sb-streak{
+    display:flex; flex-direction:column; align-items:flex-start;
+  }
+  .sb-streak .digits{
+    font-family:'Anton',sans-serif;
+    font-size: 58px;
+    line-height: 0.85;
+    display:flex; gap:2px;
+  }
+  .digit{
+    background: #0F1826; border:1px solid var(--line);
+    border-radius: 6px; padding: 2px 8px 0;
+    min-width: 40px; text-align:center;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+  }
+  /* The gradient sits on the numeral itself, not on the row. On the row it was
+     clipped to the text but then painted over by each box's own opaque
+     background, so the streak showed as two empty boxes. */
+  .digit b{
+    font-weight: 400;
+    background: linear-gradient(180deg,#fff, #C9CEDA);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .sb-streak .lbl{ font-size:10.5px; letter-spacing:0.16em; color:var(--text-dim); text-transform:uppercase; margin-top:6px;}
+  .sb-mini-stats{
+    flex:1; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:4px;
+  }
+  .mini-stat{
+    background: var(--bg-elev); border:1px solid var(--line-soft); border-radius:10px;
+    padding:7px 6px; text-align:center;
+  }
+  .mini-stat .n{ font-family:'Space Mono',monospace; font-size:15px; font-weight:700; }
+  .mini-stat .k{ font-size:8.5px; letter-spacing:0.1em; color:var(--text-faint); text-transform:uppercase; margin-top:2px;}
+  .mini-stat.pray .n{ color:var(--gold); }
+  .mini-stat.play .n{ color:var(--teal); }
+  .mini-stat.say .n{ color:var(--coral); }
+  .sb-today-progress{
+    margin-top:14px; position:relative; z-index:1;
+  }
+  .sb-today-progress .bar{
+    height:6px; border-radius:4px; background: var(--bg-elev-2); overflow:hidden; display:flex;
+  }
+  .sb-today-progress .bar .seg{ flex:1; background: var(--line-soft); }
+  .sb-today-progress .bar .seg.on.pray{ background: var(--gold); }
+  .sb-today-progress .bar .seg.on.play{ background: var(--teal); }
+  .sb-today-progress .bar .seg.on.say{ background: var(--coral); }
+  .sb-today-progress .cap{ font-size:10px; color:var(--text-faint); margin-top:6px; letter-spacing:0.04em; }
+  /* ===== CONTENT ===== */
+  #content{
+    flex:1; padding: 18px 18px 100px;
+    overflow-y:auto;
+  }
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;
+  }
+  .section-head h1{
+    font-family:'Anton',sans-serif; font-size:24px; margin:0; letter-spacing:0.01em;
+  }
+  .section-head .sub{ font-size:12px; color:var(--text-dim); margin-top:2px; }
+  .eyebrow{
+    font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-faint); margin-bottom:4px; display:block;
+  }
+  /* ===== CHALLENGE CARDS ===== */
+  .challenge-stack{ display:flex; flex-direction:column; gap:12px; }
+  .ccard{
+    border-radius: var(--radius);
+    border:1px solid var(--line);
+    background: var(--bg-elev);
+    padding: 16px 16px 14px;
+    position:relative;
+    overflow:hidden;
+    transition: transform .15s ease;
+  }
+  .ccard::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+  }
+  .ccard.pray::before{ background: var(--gold); }
+  .ccard.play::before{ background: var(--teal); }
+  .ccard.say::before{ background: var(--coral); }
+  .ccard.done{ opacity:0.55; }
+  .ccard .row1{ display:flex; align-items:center; justify-content:space-between; }
+  .tag{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:11px; letter-spacing:0.14em;
+    padding:4px 9px; border-radius:20px; text-transform:uppercase;
+  }
+  .tag.pray{ background:var(--gold-soft); color:var(--gold); }
+  .tag.play{ background:var(--teal-soft); color:var(--teal); }
+  .tag.say{ background:var(--coral-soft); color:var(--coral); }
+  .ccard .num{ font-family:'Space Mono',monospace; font-size:11px; color:var(--text-faint); }
+  .ccard .ctext{ font-size:16.5px; line-height:1.35; margin:12px 0 14px; font-weight:500; }
+  .ccard .verse{ font-size:11.5px; color:var(--text-faint); margin-bottom:12px; font-style:italic; }
+  .btn{
+    border:none; border-radius:10px; padding:11px 16px; font-weight:700; font-size:13.5px;
+    cursor:pointer; letter-spacing:0.02em; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    transition: transform .08s ease, opacity .15s ease;
+    font-family:'Work Sans',sans-serif;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn-block{ width:100%; }
+  .btn-pray{ background:var(--gold); color:#241802; }
+  .btn-play{ background:var(--teal); color:#04211D; }
+  .btn-say{ background:var(--coral); color:#2B0B08; }
+  .btn-ghost{ background: var(--bg-elev-2); color:var(--text); border:1px solid var(--line); }
+  .btn-done{ background: var(--bg-elev-2); color:var(--text-dim); border:1px solid var(--line); }
+  .btn:disabled{ opacity:0.6; cursor:default; }
+  .all-done-banner{
+    margin-top:14px; padding:16px; border-radius: var(--radius); text-align:center;
+    background: linear-gradient(135deg, var(--gold-soft), var(--teal-soft));
+    border:1px solid var(--line);
+  }
+  .all-done-banner .big{ font-family:'Anton',sans-serif; font-size:19px; margin-bottom:3px;}
+  .all-done-banner .small{ font-size:12px; color:var(--text-dim); }
+  /* ===== NAV ===== */
+  #navbar{
+    position: sticky; bottom:0; left:0; right:0;
+    max-width:480px; margin:0 auto;
+    background: rgba(11,18,32,0.92); backdrop-filter: blur(10px);
+    border-top:1px solid var(--line);
+    display:flex;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    z-index:20;
+  }
+  .navbtn{
+    flex:1; background:none; border:none; color:var(--text-faint);
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:8px 1px 6px; cursor:pointer; font-family:'Work Sans',sans-serif;
+    border-radius:10px; min-width:0;
+  }
+  .navbtn .ic{ font-size:16px; line-height:1;}
+  .navbtn .lb{ font-size:8.6px; letter-spacing:0.03em; text-transform:uppercase; font-weight:600;}
+  .navbtn.active{ color:var(--text); background: var(--bg-elev-2); }
+  .navbtn .dot{
+    position:absolute; margin-left:14px; margin-top:-2px; width:6px; height:6px; border-radius:50%; background:var(--coral);
+  }
+  /* ===== GENERIC CARDS ===== */
+  .card{
+    background: var(--bg-elev); border:1px solid var(--line); border-radius: var(--radius);
+    padding:16px; margin-bottom:12px;
+  }
+  .card h3{ font-family:'Anton',sans-serif; font-size:17px; margin:0 0 6px; letter-spacing:0.01em; font-weight:400;}
+  .card p{ font-size:13.5px; color:var(--text-dim); line-height:1.5; margin:0 0 10px;}
+  textarea, input[type=text]{
+    width:100%; background: var(--bg-elev-2); border:1px solid var(--line); border-radius:10px;
+    color:var(--text); font-family:'Work Sans',sans-serif; font-size:13.5px; padding:11px 12px;
+    resize:vertical; margin-bottom:10px;
+  }
+  textarea:focus, input[type=text]:focus{ outline:2px solid var(--teal); outline-offset:1px; }
+  label.flabel{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); display:block; margin-bottom:6px;}
+  /* Journal entries */
+  .jentry{
+    border-left:3px solid var(--line); padding: 4px 0 4px 12px; margin-bottom:14px;
+  }
+  .jentry .jdate{ font-family:'Space Mono',monospace; font-size:10.5px; color:var(--text-faint); margin-bottom:4px;}
+  .jentry .jrow{ margin-bottom:6px; font-size:13px; line-height:1.4; }
+  .jentry .jrow b{ color: var(--text-dim); font-weight:700; margin-right:4px;}
+  .jbadges{ display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;}
+  .jbadge{ font-size:9.5px; padding:3px 8px; border-radius:20px; background:var(--bg-elev-2); border:1px solid var(--line); color:var(--text-dim); }
+  .del-link{ font-size:11px; color:var(--text-faint); background:none; border:none; cursor:pointer; text-decoration:underline; margin-top:4px; padding:0;}
+  /* Stories */
+  .story-card{
+    display:flex; gap:12px; align-items:center; cursor:pointer;
+  }
+  .story-ic{
+    width:44px; height:44px; border-radius:12px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:20px;
+    background: var(--bg-elev-2); border:1px solid var(--line);
+  }
+  .story-meta{ flex:1; }
+  .story-meta .st{ font-size:14.5px; font-weight:700; margin-bottom:2px;}
+  .story-meta .sd{ font-size:12px; color:var(--text-dim); }
+  .story-arrow{ color:var(--text-faint); font-size:18px; }
+  .story-scene{ }
+  .story-scene .scene-eyebrow{ font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color: var(--text-faint); margin-bottom:8px;}
+  .story-scene .scene-text{ font-size:15.5px; line-height:1.55; margin-bottom:16px; }
+  .choice-btn{
+    display:block; width:100%; text-align:left; background: var(--bg-elev-2); border:1px solid var(--line);
+    color:var(--text); padding:13px 14px; border-radius:12px; margin-bottom:10px; font-size:13.5px; cursor:pointer;
+    font-family:'Work Sans',sans-serif; line-height:1.4;
+  }
+  .choice-btn:active{ transform: scale(0.98); }
+  .choice-btn .cletter{ font-family:'Space Mono',monospace; color:var(--text-faint); margin-right:8px; }
+  .end-badge{ display:inline-block; font-size:10.5px; padding:4px 10px; border-radius:20px; margin-bottom:12px; font-weight:700; letter-spacing:0.04em;}
+  .end-badge.pray{ background:var(--gold-soft); color:var(--gold); }
+  .end-badge.play{ background:var(--teal-soft); color:var(--teal); }
+  .end-badge.say{ background:var(--coral-soft); color:var(--coral); }
+  /* Missions */
+  .mission-hero{
+    background: linear-gradient(135deg, #16223A, #101929);
+    border:1px solid var(--line); border-radius: var(--radius); padding:18px; margin-bottom:14px;
+  }
+  .mission-week{ font-family:'Space Mono',monospace; font-size:11px; color:var(--text-faint); margin-bottom:6px;}
+  .mission-hero h2{ font-family:'Anton',sans-serif; font-size:20px; margin:0 0 10px; font-weight:400;}
+  .mtask{ display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; padding:10px; border-radius:10px; background: rgba(255,255,255,0.02); }
+  .mtask .mtag{ flex-shrink:0; }
+  .mtask .mtext{ font-size:13px; line-height:1.4; }
+  /* Progress / badges */
+  .streak-hero{
+    text-align:center; padding: 26px 16px; border-radius: var(--radius);
+    background: radial-gradient(120% 100% at 50% 0%, #1B2A44 0%, #101929 70%);
+    border:1px solid var(--line); margin-bottom:16px;
+  }
+  .streak-hero .n{ font-family:'Anton',sans-serif; font-size:64px; line-height:1; background:linear-gradient(180deg,#fff,#C9CEDA); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .streak-hero .l{ font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-dim); margin-top:6px;}
+  .streak-hero .best{ margin-top:12px; font-size:11.5px; color:var(--text-faint);}
+  .badge-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:16px;}
+  .badge{
+    background: var(--bg-elev); border:1px solid var(--line); border-radius:14px; padding:12px 8px;
+    text-align:center; opacity:0.35;
+  }
+  .badge.unlocked{ opacity:1; border-color: rgba(232,178,61,0.4); box-shadow: 0 0 0 1px rgba(232,178,61,0.08) inset;}
+  .badge .bic{ font-size:22px; margin-bottom:6px; }
+  .badge .bn{ font-size:10px; font-weight:700; line-height:1.25;}
+  .badge .bd{ font-size:8.5px; color:var(--text-faint); margin-top:3px; line-height:1.3;}
+  .cert-wrap{ text-align:center; }
+  canvas#certCanvas{ width:100%; border-radius:12px; border:1px solid var(--line); margin-bottom:12px; }
+  /* Onboarding modal */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(5,8,14,0.75); backdrop-filter: blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal{
+    background: var(--bg-elev); border:1px solid var(--line); border-radius: var(--radius);
+    padding:24px; max-width:380px; width:100%; box-shadow: var(--shadow);
+  }
+  .modal h2{ font-family:'Anton',sans-serif; font-size:22px; margin:0 0 8px; font-weight:400;}
+  .modal p{ font-size:13px; color:var(--text-dim); line-height:1.5; margin:0 0 16px;}
+  .toast{
+    position:fixed; left:50%; bottom:90px; transform:translateX(-50%);
+    background: var(--bg-elev-2); border:1px solid var(--line); padding:10px 18px; border-radius:30px;
+    font-size:12.5px; z-index:60; box-shadow: var(--shadow); opacity:0; pointer-events:none; transition: opacity .25s ease, transform .25s ease;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(-6px); }
+  ::-webkit-scrollbar{ width:0; height:0; }
+  a{ color: var(--teal); }
+  .empty-state{ text-align:center; padding: 40px 16px; color: var(--text-faint); }
+  .empty-state .ic{ font-size:30px; margin-bottom:10px; }
+  .empty-state .t{ font-size:13px; }
+  .footnote{ font-size:10.5px; color:var(--text-faint); text-align:center; margin-top:18px; line-height:1.5;}
+  /* ===== TRAINING / BIBLE DISCOVERY ===== */
+  .tdots{ display:flex; gap:6px; margin-bottom:16px; }
+  .tdot{ flex:1; height:4px; border-radius:3px; background: var(--line-soft); }
+  .tdot.on{ background: var(--gold); }
+  .tdot.past{ background: var(--text-faint); }
+  .train-hero{
+    padding:22px 18px; border-radius: var(--radius); margin-bottom:14px;
+    background: radial-gradient(120% 100% at 50% 0%, #1B2A44 0%, #101929 70%);
+    border:1px solid var(--line);
+  }
+  .train-hero .kicker{ font-size:10.5px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-faint); margin-bottom:8px;}
+  .train-hero h2{ font-family:'Anton',sans-serif; font-size:24px; margin:0 0 10px; font-weight:400; line-height:1.15;}
+  .train-hero p{ font-size:13.5px; color:var(--text-dim); line-height:1.55; margin:0;}
+  .passage-box{
+    background: var(--bg-elev-2); border-left:3px solid var(--gold); border-radius:10px;
+    padding:14px 15px; margin: 14px 0; font-size:14px; line-height:1.6; font-style:italic; color: var(--text);
+  }
+  .passage-box.play{ border-left-color: var(--teal); }
+  .passage-box.say{ border-left-color: var(--coral); }
+  .passage-ref{ font-style:normal; font-family:'Space Mono',monospace; font-size:10.5px; color:var(--text-faint); display:block; margin-top:8px; letter-spacing:0.04em;}
+  .discover-q{ font-size:14.5px; font-weight:700; margin: 4px 0 10px; line-height:1.4; }
+  .reveal-box{
+    background: rgba(255,255,255,0.03); border:1px dashed var(--line); border-radius:10px; padding:13px 14px;
+    font-size:13.5px; line-height:1.55; color: var(--text-dim); margin-top:10px; display:none;
+  }
+  .reveal-box.shown{ display:block; }
+  .reveal-box b{ color: var(--text); }
+  .example-box{
+    margin-top:12px; padding:13px 14px; border-radius:10px;
+    background: var(--gold-soft); border:1px solid rgba(232,178,61,0.25);
+  }
+  .example-box.play{ background: var(--teal-soft); border-color: rgba(47,182,165,0.25); }
+  .example-box.say{ background: var(--coral-soft); border-color: rgba(232,93,78,0.25); }
+  .example-box .exlbl{ font-size:10px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700; margin-bottom:5px; }
+  .example-box.pray .exlbl{ color: var(--gold); }
+  .example-box.play .exlbl{ color: var(--teal); }
+  .example-box.say .exlbl{ color: var(--coral); }
+  .example-box .extext{ font-size:13px; line-height:1.5; color: var(--text); }
+  .tnav{ display:flex; gap:10px; margin-top:18px; }
+  .tnav .btn{ flex:1; }
+  .quiz-progress{ font-family:'Space Mono',monospace; font-size:11px; color:var(--text-faint); margin-bottom:10px; text-align:center;}
+  .quiz-q{ font-size:16px; font-weight:700; line-height:1.4; margin-bottom:16px; }
+  .quiz-opt{
+    display:block; width:100%; text-align:left; background: var(--bg-elev-2); border:1px solid var(--line);
+    color:var(--text); padding:13px 14px; border-radius:12px; margin-bottom:10px; font-size:13.5px; cursor:pointer;
+    font-family:'Work Sans',sans-serif; line-height:1.4;
+  }
+  .quiz-opt.correct{ border-color: var(--teal); background: var(--teal-soft); }
+  .quiz-opt.incorrect{ border-color: var(--coral); background: var(--coral-soft); }
+  .quiz-opt:disabled{ cursor:default; }
+  .quiz-explain{
+    background: rgba(255,255,255,0.03); border-radius:10px; padding:13px 14px; font-size:13px;
+    line-height:1.5; color: var(--text-dim); margin: 6px 0 4px;
+  }
+  .quiz-explain b{ color: var(--text); }
+  .score-hero{ text-align:center; padding: 30px 16px; }
+  .score-ring{
+    width:120px; height:120px; border-radius:50%; margin:0 auto 16px;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    background: conic-gradient(var(--gold) calc(var(--pct)*1%), var(--line-soft) 0);
+  }
+  .score-ring::before{
+    content:""; position:absolute; inset:8px; border-radius:50%; background: var(--bg);
+  }
+  .score-ring span{ position:relative; z-index:1; font-family:'Anton',sans-serif; font-size:26px; }
+  .score-msg{ font-size:14px; color:var(--text-dim); margin-bottom:20px; line-height:1.5; }
+  .recap-row{ display:flex; align-items:center; gap:12px; cursor:pointer; }
+  .recap-ic{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; background: var(--bg-elev-2); border:1px solid var(--line); flex-shrink:0;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="scoreboard">
+    <div class="sb-top">
+      <div class="sb-brand">
+        <div class="sb-crest">PPS</div>
+        <div class="sb-brand-text">
+          <div class="l1">Matchday</div>
+          <div class="l2">Pray · Play · Say</div>
+        </div>
+      </div>
+      <button class="sb-name-pill" id="nameBtn">Player</button>
+    </div>
+    <div class="sb-main">
+      <div class="sb-streak">
+        <div class="digits" id="streakDigits"><span class="digit"><b>0</b></span><span class="digit"><b>0</b></span></div>
+        <div class="lbl">Day Streak</div>
+      </div>
+      <div class="sb-mini-stats">
+        <div class="mini-stat pray"><div class="n" id="statPray">0</div><div class="k">Pray</div></div>
+        <div class="mini-stat play"><div class="n" id="statPlay">0</div><div class="k">Play</div></div>
+        <div class="mini-stat say"><div class="n" id="statSay">0</div><div class="k">Say</div></div>
+      </div>
+    </div>
+    <div class="sb-today-progress">
+      <div class="bar" id="todayBar">
+        <div class="seg" data-k="pray"></div>
+        <div class="seg" data-k="play"></div>
+        <div class="seg" data-k="say"></div>
+      </div>
+      <div class="cap" id="todayCap">0 of 3 done today</div>
+    </div>
+  </div>
+  <div id="content"></div>
+  <div id="navbar">
+    <button class="navbtn" data-view="training"><span class="ic">📖</span><span class="lb">Learn</span></button>
+    <button class="navbtn" data-view="today"><span class="ic">🎮</span><span class="lb">Today</span></button>
+    <button class="navbtn" data-view="journal"><span class="ic">🏅</span><span class="lb">Journal</span></button>
+    <button class="navbtn" data-view="stories"><span class="ic">🎧</span><span class="lb">Stories</span></button>
+    <button class="navbtn" data-view="missions"><span class="ic">🏃</span><span class="lb">Missions</span></button>
+    <button class="navbtn" data-view="progress"><span class="ic">📊</span><span class="lb">Progress</span></button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+/* =========================================================
+   Storage
+   ---------------------------------------------------------
+   The app was written against a `window.storage` API that does
+   not exist in a browser, and every call to it sits inside a
+   try/catch — so nothing was ever written, every read came back
+   empty, and the streak, journal, badges, missions and stories
+   all reset on reload without any visible error.
+
+   This backs the exact same shape with real localStorage, so
+   the rest of the code below is untouched. Everything stays on
+   the device; nothing is sent anywhere.
+   ========================================================= */
+window.storage = window.storage || (function(){
+  const P = 'pray-play-say-v1:';
+  return {
+    async get(key){
+      try{
+        const v = localStorage.getItem(P + key);
+        return v === null ? null : { value: v };
+      }catch(e){ return null; }
+    },
+    async set(key, value){
+      try{ localStorage.setItem(P + key, value); }catch(e){}
+    },
+    async delete(key){
+      try{ localStorage.removeItem(P + key); }catch(e){}
+    }
+  };
+})();
+/* =========================================================
+   PRAY | PLAY | SAY — content data
+   Grounded in Colossians 4:2-6
+   ========================================================= */
+const PRAY_PROMPTS = [
+  "Pray for one teammate by name before training today.",
+  "Thank God for one specific thing about your sport this week.",
+  "Ask God for boldness to speak about Jesus with your team.",
+  "Pray for your coach — for wisdom and for their walk with God.",
+  "Pray for a teammate who seems to be having a hard time.",
+  "Pray for the team you're playing against this week.",
+  "Ask God to open a door for a real conversation today.",
+  "Pray for patience before your next training or match.",
+  "Pray by name for a teammate who doesn't know Jesus yet.",
+  "Thank God simply for your ability to move and play.",
+  "Pray for unity in your team, on and off the field.",
+  "Before you train or play, ask God to use today for something good.",
+  "Pray for courage to be different when it's not easy.",
+  "Pray one short line over your day: \"Use me today.\""
+];
+const PLAY_PROMPTS = [
+  "Choose one moment today to show patience under pressure.",
+  "Encourage a teammate who's struggling — say it out loud.",
+  "Thank the ref or umpire at the end, win or lose.",
+  "Pass to someone who doesn't usually get the ball.",
+  "Stay calm the next time a call goes against you.",
+  "Compliment an opponent on a genuinely good play.",
+  "Show up early and help set up without being asked.",
+  "Choose humility if today goes well for you.",
+  "Build a teammate up instead of trash talk — even in your head.",
+  "Push through the hard rep today with a good attitude.",
+  "Help a teammate up when they fall or mess up.",
+  "Give full effort in a moment nobody else is watching.",
+  "Include someone who's often left out of the group.",
+  "Celebrate a teammate's win like it's your own."
+];
+const SAY_PROMPTS = [
+  "Ask one teammate how they're really doing — and wait for the real answer.",
+  "Tell a teammate one specific thing you appreciate about them.",
+  "If someone asks why you're different, be ready to answer honestly.",
+  "Tell a friend one thing you're thankful to God for.",
+  "Invite a teammate to something — youth group, church, or just hanging out.",
+  "Ask a teammate what's going on for them outside of sport.",
+  "Share a short verse or truth that's helped you with someone.",
+  "Tell someone about a time God answered a prayer for you.",
+  "Gently ask a teammate what they think happens after we die.",
+  "Say something true and kind to someone having a rough day.",
+  "Explain to a friend why your faith matters to how you play.",
+  "Thank a teammate out loud, in front of others, for something they did.",
+  "Ask a struggling teammate if you can pray for them.",
+  "Tell someone one way your faith shapes how you compete."
+];
+const STORIES = [
+  {
+    id: "ref",
+    icon: "🟥",
+    title: "The Ref Blow-Up",
+    desc: "A teammate loses it after a bad call.",
+    start: "n1",
+    nodes: {
+      n1: {
+        text: "Your teammate just screamed at the ref after a bad call. Everyone on both sides is watching, and the ref is reaching for a card. What do you do?",
+        choices: [
+          { label: "Step in and calmly pull them back", next: "n2a" },
+          { label: "Stay out of it — not your problem", next: "n2b" }
+        ]
+      },
+      n2a: {
+        text: "You get close and say quietly, \"Hey — let it go, we need you in this game.\" Your teammate breathes, nods, and backs off. After the final whistle, they ask you: \"How are you always so calm about stuff like that?\"",
+        choices: [
+          { label: "Tell them honestly: \"My faith helps me let things go\"", next: "end_say" },
+          { label: "Just shrug it off and change the subject", next: "end_missed" }
+        ]
+      },
+      n2b: {
+        text: "The ref cards your teammate and your team plays a half short. In the changing room afterward, your coach asks what happened. Your teammate looks embarrassed and won't meet anyone's eyes.",
+        choices: [
+          { label: "Check in with them privately after training", next: "end_play" },
+          { label: "Say nothing and move on with your day", next: "end_missed2" }
+        ]
+      },
+      end_say: {
+        type: "end", tag: "say",
+        title: "An Open Door",
+        text: "You gave a real, honest answer — the kind of everyday conversation Paul describes in Colossians 4:6: full of grace and ready with an answer. You didn't preach. You just told the truth about where your calm comes from. That's a seed planted.",
+        prompt: "Who in your life might ask you a question like that this week — and would you be ready to answer?"
+      },
+      end_play: {
+        type: "end", tag: "play",
+        title: "Wise With an Outsider",
+        text: "You didn't fix it in the moment, but you didn't ignore it either. Checking in afterward is exactly the kind of quiet, patient care Colossians 4:5 calls \"wise\" — making the most of the opportunity in front of you, even a small one.",
+        prompt: "Is there someone you should check in with today, even briefly?"
+      },
+      end_missed: {
+        type: "end", tag: "pray",
+        title: "A Door You Can Still Open",
+        text: "You had the moment and let it pass. That happens to everyone — it doesn't mean the door is shut for good. Sometimes the best move is simply to pray for another chance, and to be a little more ready next time.",
+        prompt: "Pray for one more opportunity with this person — and for the courage to take it."
+      },
+      end_missed2: {
+        type: "end", tag: "pray",
+        title: "A Door You Can Still Open",
+        text: "You let the moment go by without stepping toward your teammate. That's normal — but it's worth noticing. Colossians 4:2 starts with prayer before anything else: watchful, ready, looking for the next opening.",
+        prompt: "Pray for this teammate by name tonight, and for a fresh opportunity to check in."
+      }
+    }
+  },
+  {
+    id: "bench",
+    icon: "🟦",
+    title: "Benched Unfairly",
+    desc: "You're sat out and it doesn't feel right.",
+    start: "n1",
+    nodes: {
+      n1: {
+        text: "You get benched for the biggest game of the season, and you're pretty sure it's not fair. You're angry, and it shows on your face as you sit down. What now?",
+        choices: [
+          { label: "Sulk on the bench, arms crossed, checked out", next: "n2a" },
+          { label: "Take a breath and decide to be a teammate anyway", next: "n2b" }
+        ]
+      },
+      n2a: {
+        text: "You spend the whole game staring at your boots. Your team wins, but nobody comes to celebrate with you — you weren't really there with them, even sitting right next to them.",
+        choices: [
+          { label: "Apologize to the team after and own it", next: "end_play2" },
+          { label: "Say nothing — it wasn't that big a deal", next: "end_missed3" }
+        ]
+      },
+      n2b: {
+        text: "You start cheering loudly for whoever's on in your position. Your energy is real, not fake. A teammate on the bench next to you says, \"Man, I'd be so mad right now. How are you not?\"",
+        choices: [
+          { label: "Be honest: \"I am mad. I'm just choosing to not let it run the day\"", next: "end_say2" },
+          { label: "Play it cool: \"It's fine, whatever\"", next: "end_missed4" }
+        ]
+      },
+      end_play2: {
+        type: "end", tag: "play",
+        title: "A Real Reset",
+        text: "Owning it after the fact isn't the same as getting it right in the moment — but it's real, wise, redeeming-the-time stuff. Colossians 4:5 is about how outsiders read your life. Your team noticed the apology as much as the sulking.",
+        prompt: "Is there a moment this week you need to go back and own, even a small one?"
+      },
+      end_missed3: {
+        type: "end", tag: "pray",
+        title: "Worth Praying Into",
+        text: "It might not have felt like a big deal — but how we handle disappointment says a lot about what's actually steering us. That's not a reason for guilt, just something worth bringing to God honestly.",
+        prompt: "Pray honestly: \"God, help me actually mean it next time, not just look okay.\""
+      },
+      end_say2: {
+        type: "end", tag: "say",
+        title: "Grace-Filled Honesty",
+        text: "That's exactly the kind of \"seasoned with salt\" answer Colossians 4:6 talks about — honest, not fake, and pointing to something bigger than good luck or a good mood. You didn't pretend to be fine; you showed what actually kept you steady.",
+        prompt: "What's one honest sentence you could say to a teammate this week about why you handle setbacks the way you do?"
+      },
+      end_missed4: {
+        type: "end", tag: "pray",
+        title: "A Quiet Moment, Still Worth Something",
+        text: "Playing it cool kept the moment small — but the door didn't close, it just stayed shut for now. Pray for another chance to be honest with that teammate about what actually gets you through hard calls.",
+        prompt: "Pray for boldness before the next moment like this one shows up."
+      }
+    }
+  },
+  {
+    id: "different",
+    icon: "🟨",
+    title: "\"Why Are You Different?\"",
+    desc: "A friend asks the question, straight up.",
+    start: "n1",
+    nodes: {
+      n1: {
+        text: "After training, a friend says, \"Okay, I have to ask — why are you so different? You don't lose your head, you're not out here trying to make everyone else look bad. What's that about?\" They're actually asking, not joking around.",
+        choices: [
+          { label: "Take the question seriously and answer honestly", next: "n2a" },
+          { label: "Laugh it off — \"I don't know, just wired that way\"", next: "n2b" }
+        ]
+      },
+      n2a: {
+        text: "You tell them straight: \"Honestly, it's my faith — following Jesus changes how I see all this. I'm not perfect at it, but that's the real reason.\" Your friend goes quiet for a second, then says, \"Huh. I didn't know that about you.\"",
+        choices: [
+          { label: "Invite them to something — church, youth group, a chat over food", next: "end_pray2" },
+          { label: "Leave it there for now and let it sit with them", next: "end_play3" }
+        ]
+      },
+      n2b: {
+        text: "It's an easy exit and the conversation moves on. Later that night, you think about the question again — it keeps nagging at you a little.",
+        choices: [
+          { label: "Message them and give the real answer this time", next: "end_say3" },
+          { label: "Let it go — maybe next time", next: "end_missed5" }
+        ]
+      },
+      end_pray2: {
+        type: "end", tag: "pray",
+        title: "A Real Next Step",
+        text: "You answered honestly and then made the most of the opening — Colossians 4:3 is literally a prayer for open doors like this one. However they respond, the invitation itself was faithful.",
+        prompt: "Pray by name for this friend tonight, and for whatever comes of the invitation."
+      },
+      end_play3: {
+        type: "end", tag: "play",
+        title: "Let It Sit",
+        text: "Not every open door needs to be walked through immediately. Sometimes the wisest move is letting an honest answer breathe, and letting your life keep backing it up — that's the \"wise toward outsiders\" side of Colossians 4:5.",
+        prompt: "What's one way your actions this week could quietly back up what you said?"
+      },
+      end_say3: {
+        type: "end", tag: "say",
+        title: "Second Chance, Taken",
+        text: "Going back and telling the truth after brushing it off the first time takes real courage — and it's exactly the kind of clear, gracious answer Colossians 4:6 describes. The first instinct isn't the last word.",
+        prompt: "Who else have you brushed off a question from? Consider going back to them too."
+      },
+      end_missed5: {
+        type: "end", tag: "pray",
+        title: "Still an Open Door",
+        text: "The question hasn't gone away just because you didn't answer it yet. That's worth bringing to God — for another opening, and for the readiness to take it when it comes.",
+        prompt: "Pray: \"God, give me another shot at this conversation, and the words when it comes.\""
+      }
+    }
+  }
+];
+const WEEKLY_MISSIONS = [
+  {
+    title: "Two Names, One Week",
+    pray: "Pray for two teammates by name before training this week.",
+    play: "Show generosity in one competitive moment — pass, credit, or encouragement instead of glory.",
+    say: "Share one encouraging verse or truth with a teammate."
+  },
+  {
+    title: "Full-Time Whistle",
+    pray: "Pray for your whole team before your next match, out loud if you can.",
+    play: "Be the first to congratulate the other team, win or lose.",
+    say: "Ask one teammate what's really going on in their life this week."
+  },
+  {
+    title: "Open Door Week",
+    pray: "Ask God every day this week for one open door to talk about Him.",
+    play: "Choose humility in one moment where you'd normally want the credit.",
+    say: "Tell one teammate a specific way your faith shapes how you play."
+  },
+  {
+    title: "Iron Sharpens Iron",
+    pray: "Pray for your coach and for one person on the opposing team.",
+    play: "Help a struggling teammate improve at something, patiently.",
+    say: "Invite a teammate to something outside of sport — church, youth group, or just hanging out."
+  },
+  {
+    title: "Salt & Light",
+    pray: "Pray for boldness and grace before every training session this week.",
+    play: "Keep your composure through one moment that would normally set you off.",
+    say: "Explain to someone, in your own words, why sport matters to your faith."
+  },
+  {
+    title: "Every Opportunity",
+    pray: "Thank God specifically after every training or game this week.",
+    play: "Include someone who's often on the outside of the group.",
+    say: "Ask a teammate if you can pray for them — then actually do it."
+  }
+];
+/* =========================================================
+   TRAINING — Bible Discovery: Pray | Play | Say
+   Based on Colossians 4:2-6 (paraphrased, not quoted from
+   any single translation)
+   ========================================================= */
+const DISCOVERY = {
+  pray: {
+    label: "Pray",
+    tag: "pray",
+    icon: "🙏",
+    heading: "Discover: PRAY",
+    passage: "Paul tells the believers to keep on praying, staying alert and thankful as they do it. Then he gets specific: he asks them to pray that God would open a door for the message about Jesus — so it can be explained clearly, the way it should be.",
+    ref: "Based on Colossians 4:2–4",
+    question: "Look closely — Paul doesn't just say \"pray more.\" What three things does he actually bring into prayer here?",
+    answer: "Watchfulness (staying alert, not going through the motions), thankfulness, and one very specific ask — an open door to explain the good news about Jesus clearly.",
+    example: "Before a match, instead of only praying \"help us win,\" a teen prays: \"God, keep me alert to how I treat people today. Thank you for this team. And give me one chance to talk about you with someone.\"",
+    connect: "That's exactly what today's PRAY challenge cards do — one specific, name-it prayer at a time, instead of a vague \"bless everyone.\""
+  },
+  play: {
+    label: "Play",
+    tag: "play",
+    icon: "🏃",
+    heading: "Discover: PLAY",
+    passage: "Paul says to be wise in how you live around people who don't yet follow Jesus, and to make the most of every opportunity you get. Ordinary, everyday actions are being watched — and they either open doors or quietly close them.",
+    ref: "Based on Colossians 4:5",
+    question: "According to this verse, who is Paul specifically talking about how we act toward — and what does he pair \"wise\" with?",
+    answer: "\"Outsiders\" — people who don't follow Jesus yet. And \"wise\" is paired with \"opportunity\": how you act creates chances to be a witness, or wastes them.",
+    example: "A player gets benched unfairly. Instead of sulking, they keep cheering their team on. Nobody preaches a word — but teammates notice, and that's wisdom quietly opening a door.",
+    connect: "Today's PLAY challenges are single, small moments of wise action — patience, generosity, encouragement — right in the middle of a game or training session."
+  },
+  say: {
+    label: "Say",
+    tag: "say",
+    icon: "💬",
+    heading: "Discover: SAY",
+    passage: "Paul says our everyday conversation should always be full of grace, and \"seasoned with salt\" — thoughtful and flavorful, never bland or harsh. He adds the reason: so you'll know how to answer everyone, whatever they ask.",
+    ref: "Based on Colossians 4:6",
+    question: "What two qualities does Paul use to describe how we should talk to people — and what's the actual goal?",
+    answer: "\"Full of grace\" and \"seasoned with salt\" — kind and gracious, but never watered-down or preachy. And the goal isn't forcing a conversation, it's being ready to answer when someone actually asks.",
+    example: "A friend asks, \"Why are you so different?\" The SAY move isn't a sermon — it's an honest, gracious answer, ready the moment the door opens.",
+    connect: "Today's SAY challenges are about real conversations — asking real questions, giving honest answers, offering real encouragement."
+  }
+};
+const QUIZ = [
+  {
+    q: "In Colossians 4, what three things does Paul link together as he talks about prayer?",
+    options: [
+      "Loud voice, long prayers, and public prayer",
+      "Watchfulness, thankfulness, and asking for open doors",
+      "Fasting, kneeling, and silence",
+      "Praying only right before a match"
+    ],
+    correct: 1,
+    explain: "Paul asks believers to stay alert and thankful in prayer, and to specifically pray for an open door to explain the gospel clearly."
+  },
+  {
+    q: "Who does Paul say to be \"wise\" toward in Colossians 4:5?",
+    options: [
+      "Your coach only",
+      "Outsiders — people who don't yet follow Jesus",
+      "Referees only",
+      "Other believers on your team"
+    ],
+    correct: 1,
+    explain: "Being wise toward outsiders means everyday actions around people who don't follow Jesus matter — they either open or close doors."
+  },
+  {
+    q: "What does PLAY mean in this framework?",
+    options: [
+      "Playing your best to win at all costs",
+      "Avoiding people who don't share your faith",
+      "Making the most of everyday moments through wise, godly actions",
+      "Only playing on a team of believers"
+    ],
+    correct: 2,
+    explain: "PLAY is about living wisely and making the most of every opportunity — on and off the field."
+  },
+  {
+    q: "How does Paul describe the way we should talk to people, in Colossians 4:6?",
+    options: [
+      "Full of grace, seasoned with salt",
+      "Loud and persuasive",
+      "Formal and religious-sounding",
+      "Brief, and avoiding all tough topics"
+    ],
+    correct: 0,
+    explain: "Gracious and thoughtful conversation, never bland or harsh — so you're ready with an answer for anyone who asks."
+  },
+  {
+    q: "Why does SAY usually come after PRAY and PLAY in this framework?",
+    options: [
+      "Because talking is the least important part",
+      "Because prayer and a wise life open the doors that SAY then walks through",
+      "Because you should never talk about faith until you're an adult",
+      "There's no real order — they're unrelated"
+    ],
+    correct: 1,
+    explain: "Pray asks God for the opportunity, Play creates it through a wise life, and Say is when you actually explain the good news once the door is open."
+  }
+];
+let trainingStep = 0; // 0 intro, 1 pray, 2 play, 3 say, 4 quiz, 5 results
+let quizIndex = 0;
+let quizAnswers = [];
+let quizAnswered = false;
+let revealedKeys = {};
+const BADGE_DEFS = [
+  { id:"playbook_complete", ic:"📖", name:"Playbook Complete", desc:"Finished Pray Play Say training", check: s => s.trainingDone },
+  { id:"prayer_warrior", ic:"🙏", name:"Prayer Warrior", desc:"10 Pray tasks done", check: s => s.counts.pray >= 10 },
+  { id:"peacemaker", ic:"🕊️", name:"Peacemaker", desc:"10 Play tasks done", check: s => s.counts.play >= 10 },
+  { id:"door_spotter", ic:"🚪", name:"Open Door Spotter", desc:"10 Say tasks done", check: s => s.counts.say >= 10 },
+  { id:"encourager", ic:"📣", name:"Encourager", desc:"5 journal entries logged", check: s => s.journalCount >= 5 },
+  { id:"hat_trick", ic:"🎩", name:"Hat Trick", desc:"5 full days (Pray+Play+Say)", check: s => s.fullDays >= 5 },
+  { id:"season_starter", ic:"🌱", name:"Season Starter", desc:"7 total active days", check: s => s.activeDays >= 7 },
+  { id:"iron_streak_7", ic:"🔥", name:"Iron Streak", desc:"7-day streak", check: s => s.longestStreak >= 7 },
+  { id:"iron_streak_30", ic:"🏆", name:"Full Season", desc:"30-day streak", check: s => s.longestStreak >= 30 },
+  { id:"mission_first", ic:"🎯", name:"Mission Complete", desc:"1 weekly mission finished", check: s => s.missionsDone >= 1 },
+  { id:"mission_streak", ic:"⚡", name:"Mission Crew", desc:"4 weekly missions finished", check: s => s.missionsDone >= 4 },
+  { id:"storyteller", ic:"🎧", name:"Path Walker", desc:"All 3 story paths explored", check: s => s.storiesDone >= 3 },
+  { id:"full_squad", ic:"⭐", name:"Full Squad", desc:"All other badges unlocked", check: s => s.otherUnlocked >= 12 }
+];
+/* =========================================================
+   State + storage
+   ========================================================= */
+const todayStr = () => fmtDate(new Date());
+function fmtDate(d){
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function dayOfYear(d){
+  const start = new Date(d.getFullYear(),0,0);
+  return Math.floor((d - start) / 86400000);
+}
+let profile = { name: "", trainingDone: false, quizScore: null };
+let dailyLog = {};      // { "2026-08-25": {pray:true, play:false, say:false} }
+let journal = [];       // [{date, honored, conversation, prayer}]
+let missions = {};      // { weekKey: {reflection, done, doneAt} }
+let storiesSeen = {};   // { storyId: true }
+let currentView = "today";
+let onboarded = false;
+async function loadState(){
+  try{
+    const p = await window.storage.get('profile');
+    if(p && p.value) profile = JSON.parse(p.value);
+  }catch(e){}
+  try{
+    const d = await window.storage.get('daily-log');
+    if(d && d.value) dailyLog = JSON.parse(d.value);
+  }catch(e){}
+  try{
+    const j = await window.storage.get('journal');
+    if(j && j.value) journal = JSON.parse(j.value);
+  }catch(e){}
+  try{
+    const m = await window.storage.get('missions');
+    if(m && m.value) missions = JSON.parse(m.value);
+  }catch(e){}
+  try{
+    const s = await window.storage.get('stories-seen');
+    if(s && s.value) storiesSeen = JSON.parse(s.value);
+  }catch(e){}
+  onboarded = !!(profile && profile.name);
+}
+async function saveProfile(){ try{ await window.storage.set('profile', JSON.stringify(profile), false); }catch(e){} }
+async function saveDailyLog(){ try{ await window.storage.set('daily-log', JSON.stringify(dailyLog), false); }catch(e){} }
+async function saveJournal(){ try{ await window.storage.set('journal', JSON.stringify(journal), false); }catch(e){} }
+async function saveMissions(){ try{ await window.storage.set('missions', JSON.stringify(missions), false); }catch(e){} }
+async function saveStoriesSeen(){ try{ await window.storage.set('stories-seen', JSON.stringify(storiesSeen), false); }catch(e){} }
+function getDay(dateStr){
+  if(!dailyLog[dateStr]) dailyLog[dateStr] = { pray:false, play:false, say:false };
+  return dailyLog[dateStr];
+}
+function isFullDay(dateStr){
+  const d = dailyLog[dateStr];
+  return !!(d && d.pray && d.play && d.say);
+}
+function computeStreak(){
+  let streak = 0;
+  let cursor = new Date();
+  if(!isFullDay(fmtDate(cursor))){
+    cursor.setDate(cursor.getDate()-1);
+  }
+  while(isFullDay(fmtDate(cursor))){
+    streak++;
+    cursor.setDate(cursor.getDate()-1);
+  }
+  return streak;
+}
+function computeLongestStreak(){
+  const dates = Object.keys(dailyLog).filter(isFullDay).sort();
+  if(dates.length === 0) return 0;
+  let longest = 1, run = 1;
+  for(let i=1;i<dates.length;i++){
+    const prev = new Date(dates[i-1]);
+    const cur = new Date(dates[i]);
+    const diff = Math.round((cur-prev)/86400000);
+    if(diff === 1){ run++; } else { run = 1; }
+    longest = Math.max(longest, run);
+  }
+  return Math.max(longest, computeStreak());
+}
+function computeCounts(){
+  let pray=0, play=0, say=0, fullDays=0, activeDays=0;
+  Object.values(dailyLog).forEach(d=>{
+    if(d.pray) pray++;
+    if(d.play) play++;
+    if(d.say) say++;
+    if(d.pray || d.play || d.say) activeDays++;
+    if(d.pray && d.play && d.say) fullDays++;
+  });
+  return { pray, play, say, fullDays, activeDays };
+}
+function missionsDoneCount(){
+  return Object.values(missions).filter(m=>m.done).length;
+}
+function computeBadgeState(){
+  const counts = computeCounts();
+  const s = {
+    counts,
+    journalCount: journal.length,
+    fullDays: counts.fullDays,
+    activeDays: counts.activeDays,
+    longestStreak: computeLongestStreak(),
+    missionsDone: missionsDoneCount(),
+    storiesDone: Object.keys(storiesSeen).length,
+    trainingDone: !!(profile && profile.trainingDone),
+    otherUnlocked: 0
+  };
+  let unlockedIds = [];
+  BADGE_DEFS.forEach(b=>{
+    if(b.id === "full_squad") return;
+    if(b.check(s)) unlockedIds.push(b.id);
+  });
+  s.otherUnlocked = unlockedIds.length;
+  if(BADGE_DEFS.find(b=>b.id==="full_squad").check(s)) unlockedIds.push("full_squad");
+  return { s, unlockedIds };
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+/* =========================================================
+   Rendering — header
+   ========================================================= */
+function renderHeader(){
+  const streak = computeStreak();
+  const padded = String(streak).padStart(2,"0");
+  document.getElementById('streakDigits').innerHTML =
+    padded.split("").map(c=>`<span class="digit"><b>${c}</b></span>`).join("");
+  const c = computeCounts();
+  document.getElementById('statPray').textContent = c.pray;
+  document.getElementById('statPlay').textContent = c.play;
+  document.getElementById('statSay').textContent = c.say;
+  const day = getDay(todayStr());
+  const doneCount = ["pray","play","say"].filter(k=>day[k]).length;
+  document.querySelectorAll('#todayBar .seg').forEach(seg=>{
+    const k = seg.getAttribute('data-k');
+    seg.classList.toggle('on', !!day[k]);
+    seg.classList.toggle(k, !!day[k]);
+  });
+  document.getElementById('todayCap').textContent = `${doneCount} of 3 done today`;
+  document.getElementById('nameBtn').textContent = profile.name ? profile.name : "Set name";
+}
+/* =========================================================
+   Views
+   ========================================================= */
+function render(){
+  renderHeader();
+  const el = document.getElementById('content');
+  document.querySelectorAll('.navbtn').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-view') === currentView);
+  });
+  if(currentView === 'training') return renderTraining(el);
+  if(currentView === 'today') return renderToday(el);
+  if(currentView === 'journal') return renderJournal(el);
+  if(currentView === 'stories') return renderStories(el);
+  if(currentView === 'missions') return renderMissions(el);
+  if(currentView === 'progress') return renderProgress(el);
+}
+/* =========================================================
+   TRAINING VIEW — Bible Discovery + Quiz
+   ========================================================= */
+function renderTraining(el){
+  // Returning, already-trained users land on a recap screen unless
+  // they're mid-way through a fresh run (trainingStep > 0).
+  if(profile.trainingDone && trainingStep === 0){
+    return renderTrainingRecap(el);
+  }
+  if(trainingStep === 0) return renderTrainingIntro(el);
+  if(trainingStep === 1) return renderDiscovery(el, 'pray', 2);
+  if(trainingStep === 2) return renderDiscovery(el, 'play', 3);
+  if(trainingStep === 3) return renderDiscovery(el, 'say', 4);
+  if(trainingStep === 4) return renderQuizQuestion(el);
+  if(trainingStep === 5) return renderQuizResults(el);
+}
+function trainingDots(activeIndex, total){
+  let dots = '';
+  for(let i=0;i<total;i++){
+    const cls = i < activeIndex ? 'past' : (i === activeIndex ? 'on' : '');
+    dots += `<div class="tdot ${cls}"></div>`;
+  }
+  return `<div class="tdots">${dots}</div>`;
+}
+function renderTrainingIntro(el){
+  el.innerHTML = `
+    ${trainingDots(0,6)}
+    <div class="section-head">
+      <div><span class="eyebrow">Bible Discovery</span><h1>The Playbook</h1></div>
+    </div>
+    <div class="train-hero">
+      <div class="kicker">Where This Comes From</div>
+      <h2>Colossians 4:2–6</h2>
+      <p>Paul wrote this letter from prison, coaching a young church on how to live and speak among people who didn't yet follow Jesus. Near the end, he lays out a simple sequence: keep praying, live wisely, then be ready to talk when the moment comes.</p>
+    </div>
+    <div class="card">
+      <h3>Pray → Play → Say</h3>
+      <p style="margin-bottom:0;">Three short chapters, one framework. <b style="color:var(--text);">PRAY</b> asks God for the opportunity. <b style="color:var(--text);">PLAY</b> — how you live and compete — creates the opportunity. <b style="color:var(--text);">SAY</b> is what you do when the opportunity actually shows up. Over the next few screens you'll dig into each one for yourself, see a real example, then take a short quiz to lock it in.</p>
+    </div>
+    <div class="tnav">
+      <button class="btn btn-block btn-pray" id="tStart">Start Discovery</button>
+    </div>
+  `;
+  document.getElementById('tStart').addEventListener('click', ()=>{
+    trainingStep = 1;
+    render();
+  });
+}
+function renderDiscovery(el, key, dotIndex){
+  const d = DISCOVERY[key];
+  const revealed = !!revealedKeys[key];
+  el.innerHTML = `
+    ${trainingDots(dotIndex-1,6)}
+    <div class="section-head">
+      <div><span class="eyebrow">Bible Discovery</span><h1 style="font-size:22px;">${d.heading}</h1></div>
+      <span class="tag ${d.tag}">${d.icon} ${d.label}</span>
+    </div>
+    <div class="card">
+      <p style="margin-bottom:0;color:var(--text);">Read this slowly — then dig in below.</p>
+      <div class="passage-box ${d.tag}">
+        ${d.passage}
+        <span class="passage-ref">${d.ref}</span>
+      </div>
+      <div class="discover-q">🔎 ${d.question}</div>
+      <button class="btn btn-ghost" id="revealBtn">${revealed ? 'Hide answer' : 'Reveal the answer'}</button>
+      <div class="reveal-box ${revealed ? 'shown' : ''}" id="revealBox"><b>Here's what's there:</b> ${d.answer}</div>
+      <div class="example-box ${d.tag}">
+        <div class="exlbl">Sport Example</div>
+        <div class="extext">${d.example}</div>
+      </div>
+      <div class="example-box ${d.tag}" style="margin-top:8px;">
+        <div class="exlbl">In This App</div>
+        <div class="extext">${d.connect}</div>
+      </div>
+    </div>
+    <div class="tnav">
+      <button class="btn btn-ghost" id="tBack">Back</button>
+      <button class="btn btn-block btn-${d.tag}" id="tNext">Continue</button>
+    </div>
+  `;
+  document.getElementById('revealBtn').addEventListener('click', ()=>{
+    revealedKeys[key] = !revealedKeys[key];
+    renderDiscovery(el, key, dotIndex);
+  });
+  document.getElementById('tBack').addEventListener('click', ()=>{
+    trainingStep -= 1;
+    render();
+  });
+  document.getElementById('tNext').addEventListener('click', ()=>{
+    trainingStep += 1;
+    render();
+  });
+}
+function renderQuizQuestion(el){
+  if(quizIndex === 0 && quizAnswers.length === 0){ /* fresh start, nothing to reset here */ }
+  const total = QUIZ.length;
+  const q = QUIZ[quizIndex];
+  const answeredAlready = quizAnswers[quizIndex] !== undefined;
+  el.innerHTML = `
+    ${trainingDots(4,6)}
+    <div class="section-head">
+      <div><span class="eyebrow">Quick Quiz</span><h1 style="font-size:22px;">Lock It In</h1></div>
+    </div>
+    <div class="quiz-progress">QUESTION ${quizIndex+1} OF ${total}</div>
+    <div class="card">
+      <div class="quiz-q">${q.q}</div>
+      <div id="quizOpts">
+        ${q.options.map((opt,i)=>`<button class="quiz-opt" data-i="${i}">${opt}</button>`).join('')}
+      </div>
+      <div id="quizFeedback"></div>
+    </div>
+    <div class="tnav" id="quizNavRow" style="display:none;">
+      <button class="btn btn-block btn-say" id="quizNext">${quizIndex === total-1 ? 'See My Score' : 'Next Question'}</button>
+    </div>
+  `;
+  function showFeedback(selectedIndex){
+    const opts = el.querySelectorAll('.quiz-opt');
+    opts.forEach((btn,i)=>{
+      btn.disabled = true;
+      if(i === q.correct) btn.classList.add('correct');
+      else if(i === selectedIndex) btn.classList.add('incorrect');
+    });
+    document.getElementById('quizFeedback').innerHTML = `
+      <div class="quiz-explain"><b>${selectedIndex === q.correct ? "That's it. " : "Not quite — "}</b>${q.explain}</div>
+    `;
+    document.getElementById('quizNavRow').style.display = 'flex';
+  }
+  if(answeredAlready){
+    showFeedback(quizAnswers[quizIndex]);
+  } else {
+    el.querySelectorAll('.quiz-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = parseInt(btn.getAttribute('data-i'),10);
+        quizAnswers[quizIndex] = i;
+        showFeedback(i);
+      });
+    });
+  }
+  document.getElementById('quizNext').addEventListener('click', ()=>{
+    if(quizIndex < total-1){
+      quizIndex += 1;
+      render();
+    } else {
+      trainingStep = 5;
+      render();
+    }
+  });
+}
+async function renderQuizResults(el){
+  const total = QUIZ.length;
+  const correctCount = quizAnswers.filter((a,i)=>a===QUIZ[i].correct).length;
+  const pct = Math.round((correctCount/total)*100);
+  profile.trainingDone = true;
+  profile.quizScore = correctCount;
+  await saveProfile();
+  await checkNewBadges();
+  const msg = correctCount === total
+    ? "Perfect score. You've got Pray, Play, and Say down cold."
+    : correctCount >= Math.ceil(total*0.6)
+      ? "Solid! You've got the core idea — feel free to revisit any part."
+      : "Good starting point — consider a quick replay of the discovery pages.";
+  el.innerHTML = `
+    ${trainingDots(5,6)}
+    <div class="section-head">
+      <div><span class="eyebrow">Training Complete</span><h1 style="font-size:22px;">Your Score</h1></div>
+    </div>
+    <div class="card score-hero">
+      <div class="score-ring" style="--pct:${pct};"><span>${correctCount}/${total}</span></div>
+      <div class="score-msg">${msg}</div>
+      <div class="badge unlocked" style="display:inline-block;width:auto;padding:12px 18px;margin-bottom:6px;">
+        <div class="bic">📖</div>
+        <div class="bn">Playbook Complete</div>
+      </div>
+    </div>
+    <div class="tnav">
+      <button class="btn btn-ghost" id="tRetake">Retake Quiz</button>
+      <button class="btn btn-block btn-pray" id="tFinish">Go to Today's Challenge</button>
+    </div>
+  `;
+  document.getElementById('tRetake').addEventListener('click', ()=>{
+    quizIndex = 0;
+    quizAnswers = [];
+    trainingStep = 4;
+    render();
+  });
+  document.getElementById('tFinish').addEventListener('click', ()=>{
+    trainingStep = 0;
+    currentView = 'today';
+    render();
+  });
+}
+function renderTrainingRecap(el){
+  el.innerHTML = `
+    <div class="section-head">
+      <div><span class="eyebrow">Bible Discovery</span><h1>The Playbook</h1></div>
+    </div>
+    <div class="train-hero">
+      <div class="kicker">Colossians 4:2–6</div>
+      <h2>Pray → Play → Say</h2>
+      <p>You've completed the training${profile.quizScore !== null && profile.quizScore !== undefined ? ` — last quiz score: <b style="color:var(--text);">${profile.quizScore}/${QUIZ.length}</b>` : ''}. Revisit any section below, or retake the quiz any time.</p>
+    </div>
+    <div class="card recap-row" data-goto="1"><div class="recap-ic">🙏</div><div style="flex:1;"><h3 style="margin-bottom:2px;">Pray</h3><p style="margin:0;">Watchful, thankful, and asking for open doors.</p></div><span class="story-arrow">›</span></div>
+    <div class="card recap-row" data-goto="2"><div class="recap-ic">🏃</div><div style="flex:1;"><h3 style="margin-bottom:2px;">Play</h3><p style="margin:0;">Wise, everyday actions that open doors.</p></div><span class="story-arrow">›</span></div>
+    <div class="card recap-row" data-goto="3"><div class="recap-ic">💬</div><div style="flex:1;"><h3 style="margin-bottom:2px;">Say</h3><p style="margin:0;">Gracious, ready answers when asked.</p></div><span class="story-arrow">›</span></div>
+    <div class="tnav">
+      <button class="btn btn-block btn-say" id="tRetakeRecap">Retake the Quiz</button>
+    </div>
+    <button class="btn btn-block btn-ghost" style="margin-top:10px;" id="tReplayAll">Replay Full Training</button>
+  `;
+  el.querySelectorAll('[data-goto]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      trainingStep = parseInt(card.getAttribute('data-goto'),10);
+      render();
+    });
+  });
+  document.getElementById('tRetakeRecap').addEventListener('click', ()=>{
+    quizIndex = 0;
+    quizAnswers = [];
+    trainingStep = 4;
+    render();
+  });
+  document.getElementById('tReplayAll').addEventListener('click', ()=>{
+    revealedKeys = {};
+    quizIndex = 0;
+    quizAnswers = [];
+    trainingStep = 0;
+    profile.trainingDone = false; // temporarily so intro shows; restored on completion
+    render();
+  });
+}
+function renderToday(el){
+  const doy = dayOfYear(new Date());
+  const idxPray = doy % PRAY_PROMPTS.length;
+  const idxPlay = doy % PLAY_PROMPTS.length;
+  const idxSay = doy % SAY_PROMPTS.length;
+  const day = getDay(todayStr());
+  const cards = [
+    { key:'pray', label:'Pray', text: PRAY_PROMPTS[idxPray], verse: "Colossians 4:2 — devote yourselves to prayer.", num: idxPray+1, total: PRAY_PROMPTS.length },
+    { key:'play', label:'Play', text: PLAY_PROMPTS[idxPlay], verse: "Colossians 4:5 — be wise in how you act.", num: idxPlay+1, total: PLAY_PROMPTS.length },
+    { key:'say', label:'Say', text: SAY_PROMPTS[idxSay], verse: "Colossians 4:6 — let your speech be gracious.", num: idxSay+1, total: SAY_PROMPTS.length }
+  ];
+  const allDone = day.pray && day.play && day.say;
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Daily Challenge Cards</span>
+        <h1>Today's Set</h1>
+      </div>
+    </div>
+    <div class="challenge-stack">
+      ${cards.map(c => `
+        <div class="ccard ${c.key} ${day[c.key] ? 'done' : ''}">
+          <div class="row1">
+            <span class="tag ${c.key}">${c.label}</span>
+            <span class="num">${c.num}/${c.total}</span>
+          </div>
+          <div class="ctext">${c.text}</div>
+          <div class="verse">${c.verse}</div>
+          <button class="btn btn-block ${day[c.key] ? 'btn-done' : 'btn-'+c.key}" data-done="${c.key}" ${day[c.key] ? 'disabled' : ''}>
+            ${day[c.key] ? '✓ Done today' : 'Mark Done'}
+          </button>
+        </div>
+      `).join('')}
+    </div>
+    ${allDone ? `
+      <div class="all-done-banner">
+        <div class="big">🔥 Full Day Complete</div>
+        <div class="small">Pray, Play, and Say — all logged. Your streak keeps rolling.</div>
+      </div>
+    ` : ''}
+    <p class="footnote">New challenges roll over every day. Miss a day? No shame — just pick back up tomorrow.</p>
+  `;
+  el.querySelectorAll('[data-done]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const key = btn.getAttribute('data-done');
+      const d = getDay(todayStr());
+      if(d[key]) return;
+      d[key] = true;
+      await saveDailyLog();
+      toast(key === 'pray' ? '🙏 Prayer logged' : key === 'play' ? '🏃 Play logged' : '💬 Conversation logged');
+      await checkNewBadges();
+      render();
+    });
+  });
+}
+function renderJournal(el){
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Sport Moments Journal</span>
+        <h1>Log a Moment</h1>
+      </div>
+    </div>
+    <div class="card">
+      <label class="flabel">A moment I honored God in play</label>
+      <textarea id="jHonored" rows="2" placeholder="e.g. I stayed calm when a call went against us..."></textarea>
+      <label class="flabel">A conversation I had</label>
+      <textarea id="jConvo" rows="2" placeholder="e.g. I asked a teammate how they were really doing..."></textarea>
+      <label class="flabel">A prayer I prayed</label>
+      <textarea id="jPrayer" rows="2" placeholder="e.g. I prayed for our coach before the match..."></textarea>
+      <button class="btn btn-block btn-play" id="jSave">Save Entry</button>
+    </div>
+    <div class="section-head" style="margin-top:22px;">
+      <div><span class="eyebrow">Your Entries</span><h1 style="font-size:19px;">History</h1></div>
+      <div class="mono" style="font-size:11px;color:var(--text-faint);">${journal.length} logged</div>
+    </div>
+    <div id="jList"></div>
+  `;
+  const list = document.getElementById('jList');
+  if(journal.length === 0){
+    list.innerHTML = `<div class="empty-state"><div class="ic">🏅</div><div class="t">No entries yet — your first one earns progress toward the Encourager badge.</div></div>`;
+  } else {
+    list.innerHTML = journal.slice().reverse().map((j, revIdx) => {
+      const idx = journal.length - 1 - revIdx;
+      const tags = [];
+      if(j.honored) tags.push('Peacemaker moment');
+      if(j.conversation) tags.push('Open Door Spotter');
+      if(j.prayer) tags.push('Prayer Warrior');
+      return `
+      <div class="jentry">
+        <div class="jdate mono">${j.date}</div>
+        ${j.honored ? `<div class="jrow"><b>Play</b>${escapeHtml(j.honored)}</div>` : ''}
+        ${j.conversation ? `<div class="jrow"><b>Say</b>${escapeHtml(j.conversation)}</div>` : ''}
+        ${j.prayer ? `<div class="jrow"><b>Pray</b>${escapeHtml(j.prayer)}</div>` : ''}
+        <div class="jbadges">${tags.map(t=>`<span class="jbadge">${t}</span>`).join('')}</div>
+        <button class="del-link" data-del="${idx}">Delete entry</button>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('[data-del]').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        const i = parseInt(b.getAttribute('data-del'),10);
+        journal.splice(i,1);
+        await saveJournal();
+        render();
+      });
+    });
+  }
+  document.getElementById('jSave').addEventListener('click', async ()=>{
+    const honored = document.getElementById('jHonored').value.trim();
+    const convo = document.getElementById('jConvo').value.trim();
+    const prayer = document.getElementById('jPrayer').value.trim();
+    if(!honored && !convo && !prayer){
+      toast('Add at least one line first');
+      return;
+    }
+    journal.push({ date: todayStr(), honored, conversation: convo, prayer });
+    await saveJournal();
+    toast('Entry saved to your journal');
+    await checkNewBadges();
+    render();
+  });
+}
+function renderStories(el){
+  el.innerHTML = `
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Interactive Story Paths</span>
+        <h1>Choose Your Path</h1>
+      </div>
+    </div>
+    <div id="storyList"></div>
+  `;
+  const list = document.getElementById('storyList');
+  list.innerHTML = STORIES.map(s => `
+    <div class="card story-card" data-story="${s.id}">
+      <div class="story-ic">${s.icon}</div>
+      <div class="story-meta">
+        <div class="st">${s.title} ${storiesSeen[s.id] ? '✓' : ''}</div>
+        <div class="sd">${s.desc}</div>
+      </div>
+      <div class="story-arrow">›</div>
+    </div>
+  `).join('');
+  list.querySelectorAll('[data-story]').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      openStory(c.getAttribute('data-story'));
+    });
+  });
+}
+function openStory(storyId){
+  const story = STORIES.find(s=>s.id===storyId);
+  renderStoryNode(story, story.start);
+}
+function renderStoryNode(story, nodeId){
+  const node = story.nodes[nodeId];
+  const el = document.getElementById('content');
+  if(node.type === 'end'){
+    el.innerHTML = `
+      <div class="section-head">
+        <div><span class="eyebrow">${story.title}</span><h1 style="font-size:20px;">Ending</h1></div>
+      </div>
+      <div class="card story-scene">
+        <span class="end-badge ${node.tag}">${node.tag.toUpperCase()} MOMENT</span>
+        <div class="scene-text" style="font-weight:700;margin-bottom:8px;">${node.title}</div>
+        <div class="scene-text">${node.text}</div>
+        <div class="card" style="background:var(--bg-elev-2);margin-bottom:0;">
+          <p style="margin:0;color:var(--text);"><b style="color:var(--text-dim);">Think about it:</b> ${node.prompt}</p>
+        </div>
+      </div>
+      <button class="btn btn-block btn-ghost" id="storyBack">Back to Stories</button>
+    `;
+    document.getElementById('storyBack').addEventListener('click', async ()=>{
+      storiesSeen[story.id] = true;
+      await saveStoriesSeen();
+      await checkNewBadges();
+      currentView = 'stories';
+      render();
+    });
+    return;
+  }
+  el.innerHTML = `
+    <div class="section-head">
+      <div><span class="eyebrow">${story.title}</span><h1 style="font-size:20px;">${story.icon} Scene</h1></div>
+    </div>
+    <div class="card story-scene">
+      <div class="scene-text">${node.text}</div>
+      ${node.choices.map((c,i)=>`
+        <button class="choice-btn" data-next="${c.next}"><span class="cletter">${String.fromCharCode(65+i)}.</span>${c.label}</button>
+      `).join('')}
+    </div>
+    <button class="btn btn-block btn-ghost" id="storyExit">Exit to Stories</button>
+  `;
+  el.querySelectorAll('[data-next]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      renderStoryNode(story, b.getAttribute('data-next'));
+    });
+  });
+  document.getElementById('storyExit').addEventListener('click', ()=>{
+    currentView = 'stories';
+    render();
+  });
+}
+function weekKey(){
+  const d = new Date();
+  const onejan = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7);
+  return d.getFullYear() + "-W" + week;
+}
+function renderMissions(el){
+  const wk = weekKey();
+  const doy = dayOfYear(new Date());
+  const weekNum = Math.floor(doy/7) % WEEKLY_MISSIONS.length;
+  const mission = WEEKLY_MISSIONS[weekNum];
+  if(!missions[wk]) missions[wk] = { reflection:"", done:false, doneAt:null, title: mission.title };
+  const state = missions[wk];
+  const pastWeeks = Object.keys(missions).filter(k=>k!==wk && missions[k].done).sort().reverse();
+  el.innerHTML = `
+    <div class="section-head">
+      <div><span class="eyebrow">Weekly Mission Quest</span><h1>This Week</h1></div>
+    </div>
+    <div class="mission-hero">
+      <div class="mission-week mono">${wk}</div>
+      <h2>${mission.title}</h2>
+      <div class="mtask"><span class="mtag tag pray">Pray</span><span class="mtext">${mission.pray}</span></div>
+      <div class="mtask"><span class="mtag tag play">Play</span><span class="mtext">${mission.play}</span></div>
+      <div class="mtask"><span class="mtag tag say">Say</span><span class="mtext">${mission.say}</span></div>
+    </div>
+    <div class="card">
+      <label class="flabel">Reflection — text or describe your video</label>
+      <textarea id="missionReflect" rows="4" placeholder="What happened when you tried this mission? (A file picker below lets you preview a video on this device — it isn't uploaded or saved.)">${state.reflection || ''}</textarea>
+      <input type="file" id="missionVideo" accept="video/*" style="margin-bottom:10px;font-size:11px;color:var(--text-faint);">
+      <video id="missionVideoPreview" style="width:100%;border-radius:10px;display:none;margin-bottom:10px;" controls></video>
+      ${state.done
+        ? `<button class="btn btn-block btn-done" disabled>✓ Mission Complete</button>`
+        : `<button class="btn btn-block btn-say" id="missionSubmit">Mark Mission Complete</button>`
+      }
+    </div>
+    ${pastWeeks.length ? `
+      <div class="section-head" style="margin-top:22px;"><div><span class="eyebrow">Completed</span><h1 style="font-size:19px;">Past Missions</h1></div></div>
+      ${pastWeeks.map(k=>`
+        <div class="card">
+          <div class="mono" style="font-size:10.5px;color:var(--text-faint);margin-bottom:4px;">${k}</div>
+          <h3 style="font-size:14.5px;">${missions[k].title}</h3>
+          <p style="margin:0;">${escapeHtml(missions[k].reflection || 'No reflection written.')}</p>
+        </div>
+      `).join('')}
+    ` : ''}
+  `;
+  const videoInput = document.getElementById('missionVideo');
+  const preview = document.getElementById('missionVideoPreview');
+  videoInput.addEventListener('change', ()=>{
+    if(videoInput.files && videoInput.files[0]){
+      preview.src = URL.createObjectURL(videoInput.files[0]);
+      preview.style.display = 'block';
+    }
+  });
+  const submitBtn = document.getElementById('missionSubmit');
+  if(submitBtn){
+    submitBtn.addEventListener('click', async ()=>{
+      const text = document.getElementById('missionReflect').value.trim();
+      missions[wk].reflection = text;
+      missions[wk].done = true;
+      missions[wk].doneAt = todayStr();
+      missions[wk].title = mission.title;
+      await saveMissions();
+      toast('Weekly mission complete 🎯');
+      await checkNewBadges();
+      render();
+    });
+  }
+}
+function renderProgress(el){
+  const { s, unlockedIds } = computeBadgeState();
+  const streak = computeStreak();
+  const longest = computeLongestStreak();
+  el.innerHTML = `
+    <div class="section-head">
+      <div><span class="eyebrow">Your Progress</span><h1>Scoreboard</h1></div>
+    </div>
+    <div class="streak-hero">
+      <div class="n">${streak}</div>
+      <div class="l">Current Day Streak</div>
+      <div class="best">Longest streak: <b class="mono" style="color:var(--text);">${longest} days</b></div>
+    </div>
+    <div class="section-head"><div><span class="eyebrow">${unlockedIds.length}/${BADGE_DEFS.length} Unlocked</span><h1 style="font-size:19px;">Badges</h1></div></div>
+    <div class="badge-grid">
+      ${BADGE_DEFS.map(b=>`
+        <div class="badge ${unlockedIds.includes(b.id) ? 'unlocked' : ''}">
+          <div class="bic">${b.ic}</div>
+          <div class="bn">${b.name}</div>
+          <div class="bd">${b.desc}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="section-head"><div><span class="eyebrow">Milestone</span><h1 style="font-size:19px;">Certificate</h1></div></div>
+    <div class="card cert-wrap">
+      <p>Generate a certificate for your current streak or badge count — download it to share or print.</p>
+      <canvas id="certCanvas" width="900" height="620"></canvas>
+      <button class="btn btn-block btn-pray" id="certDownload">Download Certificate</button>
+    </div>
+  `;
+  drawCertificate(document.getElementById('certCanvas'), profile.name || 'Player', longest, unlockedIds.length);
+  document.getElementById('certDownload').addEventListener('click', ()=>{
+    const canvas = document.getElementById('certCanvas');
+    const link = document.createElement('a');
+    link.download = 'pray-play-say-certificate.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+function drawCertificate(canvas, name, longestStreak, badgeCount){
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const grad = ctx.createLinearGradient(0,0,w,h);
+  grad.addColorStop(0, '#0E1727');
+  grad.addColorStop(1, '#0B1220');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle = '#E8B23D';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(24,24,w-48,h-48);
+  ctx.strokeStyle = '#253248';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(38,38,w-76,h-76);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#8B96AC';
+  ctx.font = '20px "Space Mono", monospace';
+  ctx.fillText('PRAY · PLAY · SAY · TOGETHER', w/2, 100);
+  ctx.fillStyle = '#EDEFF4';
+  ctx.font = '54px Anton, sans-serif';
+  ctx.fillText('CERTIFICATE OF FAITHFULNESS', w/2, 170);
+  ctx.fillStyle = '#8B96AC';
+  ctx.font = '18px "Work Sans", sans-serif';
+  ctx.fillText('This certifies that', w/2, 240);
+  ctx.fillStyle = '#E8B23D';
+  ctx.font = '46px Anton, sans-serif';
+  ctx.fillText(name.toUpperCase(), w/2, 305);
+  ctx.fillStyle = '#C9CEDA';
+  ctx.font = '18px "Work Sans", sans-serif';
+  ctx.fillText('has trained faithfully in prayer, play, and speech,', w/2, 350);
+  ctx.fillText('honoring Colossians 4:2–6 on and off the field.', w/2, 376);
+  ctx.font = '16px "Space Mono", monospace';
+  ctx.fillStyle = '#2FB6A5';
+  ctx.fillText(`LONGEST STREAK: ${longestStreak} DAYS      BADGES UNLOCKED: ${badgeCount}`, w/2, 430);
+  ctx.fillStyle = '#5B6579';
+  ctx.font = '13px "Space Mono", monospace';
+  ctx.fillText(new Date().toDateString(), w/2, 560);
+  ctx.font = '30px sans-serif';
+  ctx.fillText('🏅', w/2 - 200, 500);
+  ctx.fillText('🙏', w/2, 500);
+  ctx.fillText('🏃', w/2 + 200, 500);
+}
+async function checkNewBadges(){
+  // recompute silently; toasts for streak milestones are handled elsewhere.
+  const { unlockedIds } = computeBadgeState();
+  let prevUnlocked = [];
+  try{
+    const p = await window.storage.get('badges-cache');
+    if(p && p.value) prevUnlocked = JSON.parse(p.value);
+  }catch(e){}
+  const newOnes = unlockedIds.filter(id => !prevUnlocked.includes(id));
+  if(newOnes.length){
+    const def = BADGE_DEFS.find(b=>b.id===newOnes[0]);
+    toast(`🏅 New badge: ${def.name}`);
+  }
+  try{ await window.storage.set('badges-cache', JSON.stringify(unlockedIds), false); }catch(e){}
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+/* =========================================================
+   Onboarding
+   ========================================================= */
+function showOnboarding(){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal">
+      <h2>Welcome to the Squad</h2>
+      <p>Pray | Play | Say helps you connect your faith with your sport — one day at a time. What should we call you on your certificates and badges?</p>
+      <input type="text" id="onName" placeholder="Your first name" maxlength="24">
+      <button class="btn btn-block btn-pray" id="onSave">Start Training</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  document.getElementById('onSave').addEventListener('click', async ()=>{
+    const val = document.getElementById('onName').value.trim();
+    profile.name = val || 'Player';
+    await saveProfile();
+    document.body.removeChild(backdrop);
+    currentView = 'training';
+    trainingStep = 0;
+    render();
+  });
+}
+function showNamePrompt(){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal">
+      <h2>Update Name</h2>
+      <p>This shows on your certificate and around the app.</p>
+      <input type="text" id="onName2" placeholder="Your first name" maxlength="24" value="${profile.name || ''}">
+      <button class="btn btn-block btn-pray" id="onSave2">Save</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  document.getElementById('onSave2').addEventListener('click', async ()=>{
+    const val = document.getElementById('onName2').value.trim();
+    profile.name = val || 'Player';
+    await saveProfile();
+    document.body.removeChild(backdrop);
+    render();
+  });
+}
+/* =========================================================
+   Init
+   ========================================================= */
+document.querySelectorAll('.navbtn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    currentView = b.getAttribute('data-view');
+    render();
+  });
+});
+document.getElementById('nameBtn').addEventListener('click', showNamePrompt);
+(async function init(){
+  await loadState();
+  if(onboarded && !profile.trainingDone){
+    currentView = 'training';
+  }
+  render();
+  if(!onboarded){ showOnboarding(); }
+})();
+</script>
+</body>
+</html>

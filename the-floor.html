@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="dark">
+<title>THE FLOOR — Heat 01: Jive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --stage:#0D0A14;        /* stage black, violet undertone */
+    --floor:#161022;
+    --magenta:#FF2E88;      /* comp-floor spot */
+    --tangerine:#FF7A1A;    /* second spot */
+    --uv:#8B5CF6;           /* UV wash */
+    --chalk:#FFF6EC;        /* scoreboard white */
+    --dim:#9A8FB8;
+    --display:'Bricolage Grotesque','Arial Narrow',Impact,sans-serif;
+    --body:'Space Grotesk',system-ui,sans-serif;
+    --mono:'Space Mono',ui-monospace,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:#0B0B0C}
+  body{
+    color:var(--chalk);
+    font-family:var(--body);
+    user-select:none;-webkit-user-select:none;
+    touch-action:manipulation;
+    /* industrial concrete wall: mottled greys + poured-slab shadow */
+    background:
+      radial-gradient(120vmax 80vmax at 30% 20%, rgba(255,255,255,.045), transparent 55%),
+      radial-gradient(100vmax 70vmax at 80% 70%, rgba(0,0,0,.5), transparent 60%),
+      linear-gradient(175deg, #1A1A1D 0%, #121214 45%, #0B0B0C 100%);
+  }
+  /* concrete grain — SVG noise, no image assets */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:.09;mix-blend-mode:overlay;
+  }
+  /* timber dance floor rising from the bottom, with steel skirting + neon spill */
+  body::after{
+    content:"";position:fixed;left:0;right:0;bottom:0;height:34%;
+    pointer-events:none;z-index:0;
+    background:
+      /* neon spot spill on the boards */
+      radial-gradient(70vmax 30vmax at 50% 0%, rgba(255,46,136,.10), transparent 60%),
+      radial-gradient(60vmax 26vmax at 80% 10%, rgba(255,122,26,.08), transparent 60%),
+      /* wood grain streaks */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='140'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.28' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E"),
+      /* plank seams */
+      repeating-linear-gradient(90deg,
+        #2A1C12 0px, #33231636 2px,
+        transparent 2px, transparent 96px,
+        rgba(0,0,0,.55) 96px, rgba(0,0,0,.55) 98px),
+      /* board colour: dark stained oak */
+      linear-gradient(180deg, #3A2818 0%, #2C1E12 40%, #1E140C 100%);
+    background-blend-mode:normal, normal, soft-light, normal, normal;
+    border-top:2px solid #3a3d42;               /* steel skirting strip */
+    box-shadow:0 -1px 0 rgba(255,255,255,.08), 0 -18px 40px rgba(0,0,0,.55);
+  }
+  #stage{position:fixed;inset:0;z-index:1}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+
+  .screen{
+    position:fixed;inset:0;z-index:3;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px;text-align:center;
+    transition:opacity .35s ease, visibility .35s;
+  }
+  .screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+
+  /* ------- TITLE ------- */
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.35em;
+    color:var(--tangerine);text-transform:uppercase;margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:800;font-stretch:96%;
+    font-size:clamp(64px,20vw,180px);
+    line-height:.86;letter-spacing:-.02em;text-transform:uppercase;
+    background:linear-gradient(120deg,var(--chalk) 30%,var(--magenta) 65%,var(--tangerine));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:breathe 1.36s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{transform:scaleY(1)}
+    50%{transform:scaleY(1.045)}
+  }
+  .heat-tag{
+    margin-top:20px;display:inline-block;
+    font-family:var(--mono);font-size:13px;letter-spacing:.18em;
+    padding:8px 16px;border:1.5px solid var(--uv);border-radius:999px;
+    color:var(--chalk);background:rgba(139,92,246,.12);
+    transform:rotate(-1.5deg);
+  }
+  .verse-chip{
+    margin-top:28px;max-width:340px;
+    background:var(--chalk);color:var(--stage);
+    padding:16px 20px 14px;
+    clip-path:polygon(1% 4%, 99% 0%, 100% 92%, 96% 100%, 2% 97%);
+    transform:rotate(1.2deg);
+    font-size:15px;line-height:1.4;
+  }
+  .verse-chip strong{font-family:var(--display);font-weight:800;display:block;font-size:17px}
+  .verse-ref{font-family:var(--mono);font-size:11px;letter-spacing:.2em;margin-top:6px;color:#6b21a8}
+  .btn{
+    margin-top:34px;
+    font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--stage);
+    background:linear-gradient(100deg,var(--magenta),var(--tangerine));
+    border:none;border-radius:999px;padding:18px 46px;cursor:pointer;
+    box-shadow:0 0 0 0 rgba(255,46,136,.5);
+    animation:pulseBtn 1.36s ease-in-out infinite;
+  }
+  @keyframes pulseBtn{
+    0%,100%{box-shadow:0 0 0 0 rgba(255,46,136,.45);transform:scale(1)}
+    50%{box-shadow:0 0 34px 4px rgba(255,46,136,.35);transform:scale(1.03)}
+  }
+  .btn:focus-visible{outline:3px solid var(--chalk);outline-offset:3px}
+  .hint{margin-top:16px;font-size:13px;color:var(--dim)}
+
+  /* ------- PLAY HUD ------- */
+  #hud{
+    position:fixed;top:0;left:0;right:0;z-index:4;
+    display:flex;justify-content:space-between;align-items:flex-start;
+    padding:18px 20px;pointer-events:none;
+  }
+  .hud-block{font-family:var(--mono)}
+  .hud-label{font-size:10px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase}
+  #scoreVal,#comboVal{font-size:28px;font-weight:700;line-height:1.1}
+  #comboVal{color:var(--tangerine);text-align:right}
+  #comboVal.hot{color:var(--magenta)}
+
+  #countin{
+    position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;font-family:var(--display);font-weight:800;
+    font-size:clamp(90px,32vw,240px);color:var(--chalk);opacity:0;
+  }
+  #hype{
+    position:fixed;left:0;right:0;top:22%;z-index:5;text-align:center;pointer-events:none;
+    font-family:var(--display);font-weight:800;text-transform:uppercase;
+    font-size:clamp(30px,9vw,64px);letter-spacing:-.01em;
+    color:var(--magenta);opacity:0;transform:rotate(-2deg);
+  }
+  #judgeWord{
+    position:fixed;left:0;right:0;bottom:18%;z-index:5;text-align:center;pointer-events:none;
+    font-family:var(--display);font-weight:800;font-size:clamp(22px,6vw,40px);
+    text-transform:uppercase;opacity:0;
+  }
+
+  /* ------- RESULTS ------- */
+  #results .eyebrow{color:var(--magenta)}
+  .paddles{display:flex;gap:14px;margin:26px 0 8px}
+  .paddle{
+    width:88px;height:112px;border-radius:14px 14px 46px 46px;
+    background:linear-gradient(160deg,#241a3a,#160f26);
+    border:1.5px solid rgba(139,92,246,.5);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    transform:rotateX(90deg);opacity:0;
+    transition:transform .5s cubic-bezier(.2,1.4,.4,1), opacity .3s;
+  }
+  .paddle.flip{transform:rotateX(0deg);opacity:1}
+  .paddle .num{font-family:var(--display);font-weight:800;font-size:40px;color:var(--chalk)}
+  .paddle .who{font-family:var(--mono);font-size:9px;letter-spacing:.25em;color:var(--dim);text-transform:uppercase;margin-top:4px}
+  .final-card{
+    margin-top:22px;max-width:360px;width:100%;
+    background:var(--chalk);color:var(--stage);
+    padding:26px 24px 22px;
+    clip-path:polygon(0% 3%, 98% 0%, 100% 96%, 3% 100%);
+    transform:rotate(-1.2deg);
+  }
+  .final-card .big{
+    font-family:var(--display);font-weight:800;font-size:52px;line-height:1;
+    background:linear-gradient(100deg,var(--magenta),var(--tangerine));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .final-card .title-line{font-family:var(--display);font-weight:800;font-size:20px;text-transform:uppercase;margin-top:4px}
+  .final-card .verse{font-size:14px;line-height:1.45;margin-top:14px}
+  .stat-row{display:flex;justify-content:center;gap:18px;margin-top:14px;font-family:var(--mono);font-size:12px}
+  .stat-row b{color:#6b21a8}
+  .again{margin-top:26px}
+
+  @media (prefers-reduced-motion: reduce){
+    h1,.btn{animation:none}
+    .paddle{transition:opacity .3s}
+  }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv"></canvas></div>
+
+<div id="hud" class="hidden" style="opacity:0">
+  <div class="hud-block"><div class="hud-label">Score</div><div id="scoreVal">0</div></div>
+  <div class="hud-block"><div class="hud-label" style="text-align:right">Combo</div><div id="comboVal">0</div></div>
+</div>
+<div id="countin"></div>
+<div id="hype"></div>
+<div id="judgeWord"></div>
+
+<!-- TITLE -->
+<div class="screen" id="title">
+  <div class="eyebrow">Joy // Dance Sport // Heat 01</div>
+  <h1>The<br>Floor</h1>
+  <div class="heat-tag">STYLE: JIVE &middot; 176 BPM FEEL</div>
+  <div class="verse-chip">
+    <strong>"David danced for the LORD with all his might."</strong>
+    <div class="verse-ref">2 SAMUEL 6:14 &middot; CEV</div>
+  </div>
+  <button class="btn" id="startBtn">Take the floor</button>
+  <div class="hint">Tap anywhere when the ring locks in. Sound on. 🎧</div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen hidden" id="results">
+  <div class="eyebrow">Judges' Scores</div>
+  <div class="paddles">
+    <div class="paddle" id="p1"><div class="num">–</div><div class="who">Timing</div></div>
+    <div class="paddle" id="p2"><div class="num">–</div><div class="who">Energy</div></div>
+    <div class="paddle" id="p3"><div class="num">–</div><div class="who">Joy</div></div>
+  </div>
+  <div class="final-card">
+    <div class="big" id="finalScore">0</div>
+    <div class="title-line" id="finalTitle">—</div>
+    <div class="verse">Danced with everything you've got — that's the whole point. Joy isn't a bonus round. It's the brief.</div>
+    <div class="stat-row">
+      <span>PERFECT <b id="stPerfect">0</b></span>
+      <span>GREAT <b id="stGreat">0</b></span>
+      <span>MISSED <b id="stMiss">0</b></span>
+    </div>
+  </div>
+  <button class="btn again" id="againBtn">Dance it again</button>
+</div>
+
+<script>
+(() => {
+"use strict";
+// ------------------------------------------------------------------
+// THE FLOOR — Heat 01: Jive. Prototype rhythm heat.
+// Single tap target, approach rings, WebAudio-synthesised jive beat.
+// ------------------------------------------------------------------
+const $ = id => document.getElementById(id);
+const cv = $("cv"), ctx = cv.getContext("2d");
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+let W = 0, H = 0, DPR = 1, CX = 0, CY = 0, R = 0;
+function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  CX = W / 2; CY = H * 0.56;
+  R = Math.min(W, H) * 0.16;
+}
+window.addEventListener("resize", resize); resize();
+
+// ---------------- Audio (all synthesised — no assets) ----------------
+let AC = null, masterGain = null;
+function audioInit(){
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = AC.createGain();
+  masterGain.gain.value = 0.85;
+  masterGain.connect(AC.destination);
+}
+function kick(t){
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = "sine";
+  o.frequency.setValueAtTime(150, t);
+  o.frequency.exponentialRampToValueAtTime(48, t + 0.11);
+  g.gain.setValueAtTime(0.9, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+  o.connect(g); g.connect(masterGain);
+  o.start(t); o.stop(t + 0.2);
+}
+function hat(t, open){
+  const len = open ? 0.14 : 0.05;
+  const buf = AC.createBuffer(1, AC.sampleRate * len, AC.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+  const s = AC.createBufferSource(); s.buffer = buf;
+  const f = AC.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 6800;
+  const g = AC.createGain(); g.gain.value = open ? 0.22 : 0.16;
+  s.connect(f); f.connect(g); g.connect(masterGain);
+  s.start(t);
+}
+function stab(t, semis){
+  // little brass-ish jive stab
+  const g = AC.createGain();
+  g.gain.setValueAtTime(0.14, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+  g.connect(masterGain);
+  [0, 4, 7].forEach(iv => {
+    const o = AC.createOscillator();
+    o.type = "sawtooth";
+    o.frequency.value = 220 * Math.pow(2, (semis + iv) / 12);
+    o.connect(g); o.start(t); o.stop(t + 0.24);
+  });
+}
+function hitSound(kind){
+  if (!AC) return;
+  const t = AC.currentTime;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = "triangle";
+  o.frequency.setValueAtTime(kind === "perfect" ? 880 : 620, t);
+  o.frequency.exponentialRampToValueAtTime(kind === "perfect" ? 1320 : 700, t + 0.07);
+  g.gain.setValueAtTime(0.28, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+  o.connect(g); g.connect(masterGain);
+  o.start(t); o.stop(t + 0.16);
+}
+
+// ---------------- Beatmap ----------------
+// Jive is felt at 176; we tap the half-time pulse at 88 so thumbs keep up.
+const BPM = 88, BEAT = 60 / BPM;
+const APPROACH = 1.15;              // seconds a ring is visible before its hit time
+const COUNT_IN = 4;                 // "5, 6, 7, 8!"
+// 32-target map in beats (0 = first beat after count-in). Mostly on the pulse,
+// with a few off-beat kicks in the back half so it builds.
+const MAP_BEATS = [
+  0,1,2,3, 4,5,6,7,
+  8,9,10,11, 12,13,14,15,
+  16,16.5,17,18, 19,20,20.5,21,
+  22,23,24,24.5, 25,26,27,28
+];
+const TOTAL = MAP_BEATS.length;
+
+// ---------------- Game state ----------------
+let running = false, songStart = 0, targets = [], particles = [], burstWords = [];
+let score = 0, combo = 0, bestCombo = 0, counts = { perfect:0, great:0, off:0, miss:0 };
+let scheduledUpTo = 0, endAt = 0, ended = false;
+
+const HYPE = { 8: "CLEAN!", 16: "FLYING!", 24: "FULL SEND!", 32: "GOLD STANDARD!" };
+
+function startGame(){
+  audioInit();
+  if (AC.state === "suspended") AC.resume();
+  $("title").classList.add("hidden");
+  $("results").classList.add("hidden");
+  const hud = $("hud"); hud.classList.remove("hidden"); hud.style.opacity = 1;
+  score = 0; combo = 0; bestCombo = 0;
+  counts = { perfect:0, great:0, off:0, miss:0 };
+  updateHUD();
+  particles = []; burstWords = []; ended = false;
+  const now = AC.currentTime + 0.15;
+  songStart = now + COUNT_IN * BEAT;
+  targets = MAP_BEATS.map(b => ({ t: songStart + b * BEAT, hit:false, judged:false, kind:null }));
+  endAt = targets[targets.length - 1].t + 1.4;
+  scheduledUpTo = AC.currentTime;
+  // count-in visuals
+  const words = ["5","6","7","8!"];
+  words.forEach((w, i) => {
+    setTimeout(() => flashCountIn(w), Math.max(0, (now + i * BEAT - AC.currentTime) * 1000));
+  });
+  running = true;
+  requestAnimationFrame(loop);
+}
+
+function flashCountIn(w){
+  const el = $("countin");
+  el.textContent = w;
+  el.style.transition = "none";
+  el.style.opacity = 1;
+  el.style.transform = "scale(1.15)";
+  requestAnimationFrame(() => {
+    el.style.transition = "opacity .5s ease, transform .5s ease";
+    el.style.opacity = 0;
+    el.style.transform = "scale(0.9)";
+  });
+}
+
+// schedule audio slightly ahead
+function scheduleAudio(){
+  const ahead = AC.currentTime + 0.6;
+  while (scheduledUpTo < Math.min(ahead, endAt + 0.5)){
+    // grid runs in 8ths from count-in start
+    const gridStart = songStart - COUNT_IN * BEAT;
+    const eighth = BEAT / 2;
+    let n = Math.ceil((scheduledUpTo - gridStart) / eighth);
+    const t = gridStart + n * eighth;
+    if (t > ahead) break;
+    const beatPos = (t - gridStart) / BEAT;         // in beats from count-in
+    const inSong = t >= songStart - 0.001;
+    const isBeat = Math.abs(beatPos - Math.round(beatPos)) < 0.01;
+    if (isBeat) kick(t);
+    hat(t, !isBeat && inSong);
+    if (inSong){
+      const songBeat = Math.round((t - songStart) / eighth) / 2;
+      if (songBeat % 8 === 4) stab(t, 0);
+      if (songBeat % 8 === 7) stab(t, 5);
+    }
+    scheduledUpTo = t + 0.001;
+  }
+}
+
+// ---------------- Input ----------------
+function judge(){
+  if (!running || !AC) return;
+  const now = AC.currentTime;
+  if (now < songStart - 0.25) return;   // still counting in
+  let best = null, bestDelta = 1e9;
+  for (const tg of targets){
+    if (tg.judged) continue;
+    const d = now - tg.t;
+    if (Math.abs(d) < Math.abs(bestDelta) && Math.abs(d) <= 0.26){ best = tg; bestDelta = d; }
+  }
+  if (!best) return;
+  best.judged = true; best.hit = true;
+  const a = Math.abs(bestDelta);
+  let kind, pts;
+  if (a <= 0.07){ kind = "perfect"; pts = 100; }
+  else if (a <= 0.15){ kind = "great"; pts = 60; }
+  else { kind = "off"; pts = 20; }
+  best.kind = kind;
+  counts[kind]++;
+  if (kind === "off"){ combo = 0; } else { combo++; bestCombo = Math.max(bestCombo, combo); }
+  score += pts + (kind !== "off" ? combo * 2 : 0);
+  hitSound(kind);
+  spawnBurst(kind);
+  showJudgeWord(kind, bestDelta);
+  if (HYPE[combo]) showHype(HYPE[combo]);
+  updateHUD();
+}
+window.addEventListener("pointerdown", e => {
+  if (!$("title").classList.contains("hidden")) return;
+  if (!$("results").classList.contains("hidden")) return;
+  judge();
+});
+window.addEventListener("keydown", e => {
+  if (e.code === "Space"){ e.preventDefault(); judge(); }
+});
+
+function updateHUD(){
+  $("scoreVal").textContent = score;
+  const cEl = $("comboVal");
+  cEl.textContent = combo;
+  cEl.classList.toggle("hot", combo >= 8);
+}
+function showJudgeWord(kind, delta){
+  const el = $("judgeWord");
+  const label = kind === "perfect" ? "PERFECT" : kind === "great" ? "GREAT" : (delta < 0 ? "EARLY" : "LATE");
+  el.textContent = label;
+  el.style.color = kind === "perfect" ? "var(--tangerine)" : kind === "great" ? "var(--chalk)" : "var(--dim)";
+  el.style.transition = "none"; el.style.opacity = 1;
+  requestAnimationFrame(() => { el.style.transition = "opacity .45s ease"; el.style.opacity = 0; });
+}
+function showHype(word){
+  const el = $("hype");
+  el.textContent = word;
+  el.style.transition = "none";
+  el.style.opacity = 1;
+  el.style.transform = "rotate(-2deg) scale(1.1)";
+  setTimeout(() => {
+    el.style.transition = "opacity .7s ease, transform .7s ease";
+    el.style.opacity = 0;
+    el.style.transform = "rotate(-2deg) scale(0.95)";
+  }, 350);
+}
+
+// ---------------- Particles ----------------
+function spawnBurst(kind){
+  if (reduceMotion) return;
+  const n = kind === "perfect" ? 26 : kind === "great" ? 16 : 6;
+  const colours = kind === "perfect" ? ["#FF2E88","#FF7A1A","#FFF6EC"] :
+                  kind === "great" ? ["#FF7A1A","#8B5CF6"] : ["#4a3f66"];
+  for (let i = 0; i < n; i++){
+    const a = Math.random() * Math.PI * 2;
+    const sp = (kind === "perfect" ? 260 : 170) * (0.4 + Math.random() * 0.8);
+    particles.push({
+      x: CX, y: CY,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 0.6 + Math.random() * 0.3, age: 0,
+      c: colours[(Math.random() * colours.length) | 0],
+      s: 2 + Math.random() * 3.5
+    });
+  }
+}
+function confetti(){
+  if (reduceMotion) return;
+  for (let i = 0; i < 120; i++){
+    particles.push({
+      x: Math.random() * W, y: -20 - Math.random() * H * 0.4,
+      vx: (Math.random() - 0.5) * 60, vy: 120 + Math.random() * 160,
+      life: 2.4 + Math.random(), age: 0,
+      c: ["#FF2E88","#FF7A1A","#8B5CF6","#FFF6EC"][(Math.random()*4)|0],
+      s: 3 + Math.random() * 4, conf: true
+    });
+  }
+}
+
+// ---------------- Render loop ----------------
+let lastT = 0;
+function loop(ts){
+  const dt = Math.min(0.05, (ts - lastT) / 1000 || 0.016);
+  lastT = ts;
+  if (AC && running) scheduleAudio();
+  ctx.clearRect(0, 0, W, H);
+
+  const now = AC ? AC.currentTime : 0;
+
+  // beat pulse on floor
+  if (running && !reduceMotion){
+    const phase = ((now - songStart) / BEAT) % 1;
+    const glow = phase >= 0 ? Math.max(0, 1 - phase * 2.4) : 0;
+    if (glow > 0){
+      const grd = ctx.createRadialGradient(CX, CY, R * 0.2, CX, CY, R * 4);
+      grd.addColorStop(0, `rgba(255,46,136,${0.10 * glow})`);
+      grd.addColorStop(1, "rgba(255,46,136,0)");
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  if (running){
+    // target ring
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(255,246,236,.9)";
+    ctx.beginPath(); ctx.arc(CX, CY, R, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = "rgba(139,92,246,.35)";
+    ctx.beginPath(); ctx.arc(CX, CY, R + 7, 0, Math.PI * 2); ctx.stroke();
+
+    // approach rings
+    for (const tg of targets){
+      const dt2 = tg.t - now;
+      if (tg.judged || dt2 > APPROACH || dt2 < -0.26) {
+        // late-miss check
+        if (!tg.judged && dt2 < -0.26){
+          tg.judged = true; tg.kind = "miss"; counts.miss++; combo = 0; updateHUD();
+          showJudgeWord("off", 1);
+        }
+        continue;
+      }
+      const p = Math.max(0, dt2 / APPROACH);           // 1 far → 0 hit
+      const rr = R + p * R * 2.6;
+      const alpha = 0.25 + (1 - p) * 0.75;
+      ctx.lineWidth = 3 + (1 - p) * 3;
+      ctx.strokeStyle = `rgba(255,122,26,${alpha})`;
+      ctx.beginPath(); ctx.arc(CX, CY, rr, 0, Math.PI * 2); ctx.stroke();
+      // motion trail arcs — the jive kick
+      if (!reduceMotion){
+        ctx.strokeStyle = `rgba(255,46,136,${alpha * 0.5})`;
+        ctx.lineWidth = 2;
+        const wob = Math.sin(now * 9 + tg.t) * 0.4;
+        ctx.beginPath(); ctx.arc(CX, CY, rr + 8, wob, wob + 1.2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(CX, CY, rr + 8, wob + Math.PI, wob + Math.PI + 1.2); ctx.stroke();
+      }
+    }
+    if (!ended && now > endAt){ ended = true; running = false; finish(); }
+  }
+
+  // particles
+  for (let i = particles.length - 1; i >= 0; i--){
+    const p = particles[i];
+    p.age += dt;
+    if (p.age > p.life){ particles.splice(i, 1); continue; }
+    p.vy += (p.conf ? 60 : 380) * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    ctx.globalAlpha = 1 - p.age / p.life;
+    ctx.fillStyle = p.c;
+    if (p.conf){
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.age * 6 + p.x);
+      ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6); ctx.restore();
+    } else {
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ---------------- Results ----------------
+function finish(){
+  $("hud").style.opacity = 0;
+  const hitScore = counts.perfect * 1 + counts.great * 0.72 + counts.off * 0.3;
+  const acc = hitScore / TOTAL;                    // 0..1
+  const base = 5.4 + acc * 4.6;                    // judges are generous at a heat
+  const js = [0, 1, 2].map(i => Math.min(10, Math.max(4, base + (Math.random() - 0.5) * 0.5)));
+  const titles =
+    acc >= 0.92 ? "GOLD STANDARD" :
+    acc >= 0.78 ? "FINALS MATERIAL" :
+    acc >= 0.6  ? "CROWD FAVOURITE" :
+    acc >= 0.4  ? "WARMING UP" : "FIRST HEAT NERVES";
+  $("finalScore").textContent = score;
+  $("finalTitle").textContent = titles;
+  $("stPerfect").textContent = counts.perfect;
+  $("stGreat").textContent = counts.great;
+  $("stMiss").textContent = counts.miss + counts.off;
+  $("results").classList.remove("hidden");
+  ["p1","p2","p3"].forEach((id, i) => {
+    const el = $(id);
+    el.classList.remove("flip");
+    setTimeout(() => {
+      el.querySelector(".num").textContent = js[i].toFixed(1);
+      el.classList.add("flip");
+      hitSound(i === 2 ? "perfect" : "great");
+    }, 500 + i * 550);
+  });
+  if (acc >= 0.6) setTimeout(confetti, 2300);
+}
+
+$("startBtn").addEventListener("click", startGame);
+$("againBtn").addEventListener("click", startGame);
+})();
+</script>
+</body>
+</html>

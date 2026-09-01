@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>YSB Experiments · The Deep Till</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:dark;
+    --bg:#16110D; --bg2:#1E1813; --panel:#241C16; --panel2:#2C2218;
+    --line:rgba(244,236,225,.10); --line2:rgba(244,236,225,.18);
+    --ink:#F4ECE1; --dim:#B7A897; --faint:#80735F;
+    --amber:#F2A93B; --amber-g:#FFC76B;
+    --teal:#54B8B2; --sage:#9CC081; --sky:#5BA9E6;
+    --maxw:760px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(242,169,59,.06), transparent 60%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.6;
+    -webkit-font-smoothing:antialiased;min-height:100dvh}
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:4px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 18px}
+  .mono{font-family:'JetBrains Mono',monospace}
+
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:10px;padding:11px 18px;background:rgba(22,17,13,.86);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase}
+  .topbar a.brand{color:var(--dim);text-decoration:none}
+  .topbar a.brand:hover{color:var(--ink)}
+  .topbar .here{color:var(--teal)}
+
+  main{padding:30px 0 70px}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--teal)}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,8vw,44px);
+    line-height:1.05;letter-spacing:-.01em;margin:8px 0 8px}
+  .lede{color:var(--dim);font-size:15px;max-width:56ch}
+
+  .res-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--faint);margin:34px 0 10px;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+  .sorts{display:flex;flex-wrap:wrap;gap:6px}
+  .sort{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--faint);background:transparent;cursor:pointer;
+    border:1px solid var(--line);border-radius:999px;padding:6px 12px;
+    transition:color .2s,border-color .2s,background .2s}
+  .sort:hover{color:var(--dim);border-color:var(--line2)}
+  .sort[aria-pressed="true"]{color:var(--teal);border-color:rgba(84,184,178,.45);
+    background:var(--panel)}
+
+  /* Subheading above each block when the list is grouped by type. */
+  .group{display:flex;align-items:center;gap:12px;margin:22px 0 -2px;
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--teal)}
+  .group:first-child{margin-top:0}
+  .group .n{color:var(--faint);letter-spacing:.06em}
+  .group::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .cards{display:flex;flex-direction:column;gap:12px}
+  .card{display:flex;align-items:center;gap:15px;padding:14px;border-radius:15px;
+    background:var(--panel);border:1px solid var(--line);text-decoration:none;color:inherit;
+    transition:border-color .2s,transform .2s,background .2s}
+  .card:hover{border-color:var(--ac,var(--teal));transform:translateX(2px);background:var(--panel2)}
+
+  .card .shot{position:relative;flex:0 0 auto;align-self:flex-start;
+    width:152px;height:95px;border-radius:10px;overflow:hidden;background:var(--panel2);
+    border:1px solid var(--line);display:block}
+  .card .shot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .card:hover .shot{border-color:var(--line2)}
+  .card .shot.noimg::after{content:attr(data-label);position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--faint);line-height:1.5}
+
+  .card .meta{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+  .card .kind{align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:9px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--ac,var(--teal));
+    border:1px solid var(--line2);border-radius:6px;padding:4px 8px;margin-bottom:8px}
+  .card .meta .t{display:block;font-weight:600;font-size:15px;line-height:1.3}
+  .card .meta .d{display:block;font-size:13px;color:var(--dim);margin-top:4px;line-height:1.5}
+  .card .meta .stamp{display:block;margin-top:7px;font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.03em;color:var(--faint)}
+  .card .arr{flex:0 0 auto;color:var(--faint);font-family:'JetBrains Mono',monospace;
+    align-self:center;font-size:12px;white-space:nowrap}
+  .card:hover .arr{color:var(--ac,var(--teal))}
+  .card.ext{--ac:var(--amber-g)}
+  .card.ext .kind{border-color:rgba(255,199,107,.4)}
+
+  @media(max-width:620px){
+    .card{flex-wrap:wrap;align-items:flex-start}
+    .card .shot{width:100%;height:auto;aspect-ratio:16/10;align-self:auto}
+    .card .meta{flex:1 1 100%}
+    .card .arr{width:100%;text-align:right}
+  }
+
+  .note{margin-top:26px;padding:15px 16px;border-radius:12px;border:1px dashed var(--line2);
+    color:var(--dim);font-size:13px;line-height:1.6}
+  .note b{color:var(--ink)}
+  .foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--faint)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../../farmhouse.html">◇ Deep Till · Farm House</a>
+  <span class="here">YSB Experiments</span>
+</div>
+
+<main class="wrap">
+  <div class="kicker">Youth Sports Bible</div>
+  <h1><span id="count"></span>YSB Experiments</h1>
+  <p class="lede">Prototypes and page tests for the Youth Sports Bible — trying out how a page could read, look and behave before anything is committed to.</p>
+
+  <div class="res-label">
+    <span>Experiments</span>
+    <span class="sorts" role="group" aria-label="Sort the list">
+      <button type="button" class="sort" data-sort="latest" aria-pressed="false">By latest</button>
+      <button type="button" class="sort" data-sort="alpha"  aria-pressed="false">Alphabetical</button>
+      <button type="button" class="sort" data-sort="type"   aria-pressed="true">By type</button>
+    </span>
+  </div>
+  <div class="cards" id="cards"></div>
+
+  <div class="note">
+    <b>Adding another?</b> Drop the HTML file into this folder and add one line to the
+    <span class="mono">EXPERIMENTS</span> list at the bottom of this page — the number in the
+    heading counts the list, so it looks after itself. For the thumbnail,
+    save a 480&times;300 JPEG into <span class="mono">thumbs/</span> named after the page
+    (<span class="mono">the-floor.html</span> &rarr; <span class="mono">thumbs/the-floor.jpg</span>).
+    Miss it out and the card shows a plain label instead.
+    The <span class="mono">kind</span> on each entry is what <b>By type</b> groups on, so spell it
+    the same as the others to join a group — or spell it differently and it starts its own,
+    slotting in where the <span class="mono">*</span> sits in <span class="mono">TYPE_ORDER</span>.
+  </div>
+
+  <div class="foot">DEEP TILL · YSB EXPERIMENTS</div>
+</main>
+
+<script>
+/* Add new experiments here — newest first. */
+const EXPERIMENTS=[
+ {kind:"Reading Plan Ideas", t:"Pray Play Say", f:"pray-play-say.html",
+  d:"A matchday app built on Colossians 4:2-6, where the three words are a sequence: Pray asks God for the opening, Play — how you train and compete — creates it, and Say is what you do once it's there. Six screens behind a scoreboard: a Bible discovery walkthrough with a reveal-the-answer question per word and a five-question quiz; three challenge cards a day that roll over on their own; a journal for the moment you kept your head or asked a teammate how they really were; three branching story paths where every ending lands on Pray, Play or Say rather than right or wrong; a weekly mission; and thirteen badges with a certificate you can draw and download.",
+  stamp:"Added Sep 2026"},
+ {kind:"Interactive Ideas", t:"The Body of Christ", url:"https://dulcet-kringle-83887e.netlify.app/",
+  shot:"thumbs/body-of-christ.jpg",
+  d:"Two phones, two people, and half a message each — “you cannot do this alone”. One of you takes “I am the head” and the other “I am the feet”, and the phones pair by sound rather than by network: a 17-19 kHz tone the room can't really hear, passing between the two speakers and microphones. Nothing is recorded, nothing leaves the device, and there is no server involved at all. Hold them within about two metres, one pair at a time, and 1 Corinthians 12:21 does the rest — the eye cannot say to the hand, I don't need you. A test tone checks the phones can hear each other first, and a typed code stands in if they can't.",
+  stamp:"Lives on its own site"},
+ {kind:"Page Examples", t:"The Locker Room", f:"locker-room.html",
+  d:"A closed door marked “Stadium this way”, and no words at all to begin with. Knock on it and Matthew 7 arrives a paragraph at a time — ask and you will receive, search and you will find, knock and the door will be opened for you. The third knock brings the last line, the camera pushes in and the light peaks, and then the room quietly sets itself back the way it started, so it can be shown again without a reload. Stall for five seconds and a nudge appears under the exit sign; the exit sign itself gives a thank-you card.",
+  stamp:"Added Aug 2026"},
+ {kind:"Page Examples", t:"The Tunnel", f:"tunnel-walk.html",
+  d:"A stadium tunnel with seven athlete pages hung down its length as banners — Baba, Alo, Yazi, Jessica, Samara, Sean and Ernest, a different sport each. Walk on and the next banner is already in view further down, smaller and dimmer, which is what makes you tap again; tap one and you read that athlete's page in full. The far end is the stadium mouth, barely there at the start and filling the frame by the end. A list view is there if you would rather just pick.",
+  stamp:"Added Aug 2026"},
+ {kind:"Page Examples", t:"Baba — Attitude of Gratitude", f:"baba-page.html",
+  d:"Baba's printed page lying on a dark table with every panel still blank. A camera tours the collage and the words fade up a block at a time, so the page fills in as you read, a pool of warm light following whatever is being read. The sketch, the feet and the heart each react to a touch. At the answer where Baba says the world does not see us, there is an invitation to close your eyes: a ball circles you in stereo on bells — which is what a blind soccer ball has inside it — and you tap when it sounds straight ahead.",
+  stamp:"Added Aug 2026"},
+ {kind:"Video Testimony", t:"Grant", url:"https://youtu.be/wE7yI-Bzvos",
+  shot:"https://i.ytimg.com/vi/wE7yI-Bzvos/hqdefault.jpg", shot2:"thumbs/rsg-grant.jpg",
+  d:"The first of three short films from ReadySetGo WORLD, each titled with a person’s name. The channel calls itself the great commission — Matthew 28:18-20 — for sports people: Ready is gathering people to make disciples in sport, Set is preparing the disciple-makers, Go is the strategy for doing it. Opens on YouTube.",
+  stamp:"Added Aug 2026"},
+ {kind:"Video Testimony", t:"Mafe", url:"https://youtu.be/FW5-RPCXJIE",
+  shot:"https://i.ytimg.com/vi/FW5-RPCXJIE/hqdefault.jpg", shot2:"thumbs/rsg-mafe.jpg",
+  d:"The second of the three ReadySetGo WORLD films. Same shape as Grant and Namu — a name for a title, and the story behind it. Opens on YouTube.",
+  stamp:"Added Aug 2026"},
+ {kind:"Video Testimony", t:"Namu", url:"https://youtu.be/qsPo3_Sdyv0",
+  shot:"https://i.ytimg.com/vi/qsPo3_Sdyv0/hqdefault.jpg", shot2:"thumbs/rsg-namu.jpg",
+  d:"The third of the three ReadySetGo WORLD films, alongside Grant and Mafe. Opens on YouTube.",
+  stamp:"Added Aug 2026"},
+ {kind:"Game", t:"Verse Strike", f:"verse-strike.html",
+  d:"A free kick in an empty stadium, with Philippians 4:13 sitting blurred on the scoreboard behind the goal. Drag to swing the aim line, scroll to move the ball back, then tap it and tap again to strike — top of the ball for a low drive, bottom for a lofted one, sides to curl it. Eight goals brings the verse all the way into focus, the readout stopping down f/5.6 a little at a time. The keeper reads you, so a shot that worked twice stops working.",
+  stamp:"Added Aug 2026"},
+ {kind:"Game", t:"Verse Shot", f:"verse-shot.html",
+  d:"The same idea in a dark gym with a hoop. Proverbs 3:5-6 hangs blurred under the backboard — “Trust in the Lord with all your heart, and don’t rely on your own understanding” — and eight made shots sharpen it. Tap the ball, then tap again to shoot; the quicker the second tap the more power, and going off-centre curves it wide. Green for a swish, orange for a shot that came off the board.",
+  stamp:"Added Aug 2026"},
+ {kind:"Visual Experiments", t:"Bible Book Title Ideas", f:"bible-book-title-ideas.html",
+  d:"Two title treatments for books of the Bible, torn out of paper rather than set in a typeface. Exodus is strata of orange, ochre and rust over cream with a band of water cutting back up through the letters; Joshua is one strip of pitch green with the name filled with texture and black cut-out athletes leaping clean across it. Tap either to see it full size, or take the PNG.",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Build the Ultimate Teammate", url:"https://buildteammate.netlify.app/",
+  shot:"thumbs/build-teammate.jpg",
+  d:"Pick the three things that make someone great to play with, out of ten — trust, effort, skill, loyalty, encouragement, discipline, humility, courage, honesty, forgiveness. Five other players lock in their three, the squad’s totals go up as a chart, and then it points at the row nobody chose. It doesn’t tell you that you were wrong; it hands you a real situation — the final is tomorrow and the group chat is blowing up — and pushes back on whichever answer you give.",
+  stamp:"Lives on its own site"},
+ {kind:"Animated Experiments", t:"Ball Studio", f:"ball-studio.html",
+  d:"Ten balls at their real size and weight, scanned and lit like a product shot — a FIFA size 5 at 22 cm and 430 g, a golf ball at 4.3 cm and 46 g, the rugby ball, the cricket ball, the 623 g basketball. Pick one up and throw it, drop the lot, wind gravity up or down, and each bounces to its own coefficient. Switch to inches if that’s the language you think in.",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Run the Race", f:"run-the-race.html",
+  d:"Hebrews 12:1 on a neon track under a night skyline. “We must get rid of everything that slows us down” — so swipe up and the words of the verse load onto the runner as weight, swipe down and they come off, and her speed answers. Two runners, with the stride angle and the drive off the line yours to push.",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Bible Sizes", f:"bible-sizes.html",
+  d:"How big is that, really? Noah’s Ark, the tabernacle court, Solomon’s temple and the Temple Mount laid next to a soccer pitch, a 50 m pool or a cricket oval — or switch to Overlay and the pitches tile onto the floor itself, twenty-one of them across the Temple Mount. Then the Emmaus road against a marathon, and Goliath against Wembanyama with the rim marked. A cubit was a forearm and was never standardised, so you pick 17.5, 18 or 20.6 inches and watch every figure move.",
+  stamp:"Added Aug 2026"},
+ {kind:"Page Examples", t:"Jessica — Audience of One", f:"jessica-audience-of-one.html",
+  d:"The printed Sports 23 cricket spread, arriving one torn piece at a time onto a patterned rug — the title banner with its helmet and bat, a polaroid that drops on its tape and starts playing, a sticky, two notes, the ball rolling in, the think box. Because the printed body type is far too small to read on a phone, a nav bar then rises and you go through the six pieces one at a time, each zoomed to fit. “I play for an audience of one.”",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Word Ball", f:"word-ball.html",
+  d:"Words of Life, but on a real ball. Thirty-two words printed onto stitched leather panels — Hope, Pressure, Worthless, Belonging, Courage — heavy ones on the dark panels, light ones on the white. Spin it and let it come to rest, or press and hold a panel, and the word lifts off the ball with its verse. Switch between a football and a volleyball.",
+  stamp:"Added Aug 2026"},
+ {kind:"Animated Experiments", t:"City on a Hill", url:"https://imaginative-ganache-f5007c.netlify.app/",
+  shot:"thumbs/city-on-a-hill.jpg",
+  d:"A night stadium, empty and dark. Start the show and the crowd’s lights come up one by one across the stands, lift off, drift into the air and spell out MATTHEW 5:14 above the pitch — “You are the light for the whole world. A city built on top of a hill cannot be hidden.” Drag to look around it.",
+  stamp:"Lives on its own site"},
+ {kind:"Tool", t:"Tear Lab", f:"tear-lab.html",
+  d:"Rough-torn paper edges around any design. Drop in your own image or use the samples, then choose whether the tear follows the artwork or runs straight-ish, and push the margin, roughness, fibres and lift until it looks hand-done. Drag across it to rip, draw a loop to tear a piece out, and save the result as a PNG.",
+  stamp:"Added Aug 2026"},
+ {kind:"Page Examples", t:"Baba — the page tears itself", f:"baba-tear.html",
+  d:"Baba’s blind-soccer page arriving one torn scrap at a time. Each block of type rips itself free and settles onto the cloth, the paper edge ragged and lifting at the corners, with the rip synthesised as sound. “The ball has bells in it. You play with your ears. When the crowd goes quiet, that quiet is for us.”",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"RONDO", f:"rondo.html",
+  d:"Named after the drill where a team keeps the ball moving in a circle — here every touch is a reflection. The captain picks a passage, the ball lands with someone, and they answer it in text, a photo, a drawing or a voice note before passing on. Pass to someone who has already gone and the ball bounces back, showing you what they said. Nobody sees the whole feed until the circle closes.",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Route-Drawing Workouts", url:"https://claude.ai/public/artifacts/e4f5e566-dc9f-40f9-a575-c74f50f58642",
+  shot:"thumbs/route-drawing-workouts.jpg",
+  d:"“Walk a verse. Draw its shape.” Pick a passage — Isaiah 55:8–9, Galatians 6:14, Matthew 2:9–10, Psalm 121:1 and Matthew 7:24–25 are on the list — and each hides a different silhouette, traced in one continuous route with a few exercises along the way. Your phone buzzes when you’ve gone the right distance, and the shape stays hidden until you finish. Needs GPS and open ground.",
+  stamp:"Claude artifact · needs GPS"},
+ {kind:"Reading Plan Ideas", t:"Daily Workouts — Scripture Training", f:"scripture-training.html",
+  d:"Two four-week plans built like gym programmes, each on one passage. Body is Romans 12:1–2, living the Word; Mind is Philippians 4:4–9, studying it — an easy read, an observation walk, a word study, and rest days that say so. Beginner or Advanced, ten minutes a day, a filling ring per week. Ticked sessions are remembered, and the streak counts real days.",
+  stamp:"Added Aug 2026"},
+ {kind:"Game", t:"No. 1", url:"https://strong-malabi-63d187.netlify.app/", shot:"thumbs/no-1.jpg",
+  d:"“A game about Jesus · 12 minutes.” You’re the keeper, and the job is a clean sheet — “not ‘concede fewer than most people’, not ‘have a decent game’. Zero.” The screen is your goal and you tap the ball away, and then it comes again, and again. Says up front that you can stop at any point and that nothing you type leaves your phone; the pause screen carries Kids Helpline.",
+  stamp:"Lives on its own site"},
+ {kind:"Interactive Ideas", t:"Words of Life", f:"words-of-life.html",
+  d:"Thirty-two words a teenager might actually be carrying — Anxiety, Shame, Tired, Forgiven, New Start — wrapped onto a spinning globe, warm colours for the light ones and deep cool ones for the heavy. Fling it and whichever word it stops on opens with a verse; or press and hold the one you came for.",
+  stamp:"Added Aug 2026"},
+ {kind:"Animated Experiments", t:"Bible Question Sphere", f:"bible-question-sphere.html",
+  d:"Forty-eight questions you can ask of any passage, on tiles you spin through — what happens here, what surprised you, who was this first written for, what would you have done. Nothing to set up and no right answers: spin it, read whatever lands in front of you, and start there.",
+  stamp:"Added Aug 2026"},
+ {kind:"Animated Experiments", t:"Image Sphere", f:"image-sphere.html",
+  d:"The mechanism on its own, with 260 generated tiles standing in for photographs — a test of whether a globe of images is a good way to browse a lot of things at once. Drag it and it keeps spinning; let go and it eases back to a slow drift.",
+  stamp:"Added Aug 2026"},
+ {kind:"Animated Experiments", t:"Out of Egypt", f:"exodus-journey.html",
+  d:"Scroll and the people of Israel walk — out past the pyramids, between the standing walls of the sea, on through the desert as day turns to night and the pillar of cloud becomes a pillar of fire, until the palms of the promised land come into view. Five verses arrive as you reach them.",
+  stamp:"Added Aug 2026"},
+ {kind:"Reading Plan Ideas", t:"Pause & Pray", f:"pause-and-pray.html",
+  d:"Five steps: shuffle a verse from the set of 46 or pick your own, pray and read it aloud, sit with five questions, then shuffle one of fifty small ways to live it out today — a voice prayer, a secret kindness, a walk. Ends with the whole thing on one card. The response list is here as a Word download too.",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Jesus's Classroom", f:"jesus-classroom.html",
+  d:"Teachable moments in three kinds — a Spark someone sets up, a Spotlight you open yourself, a Curveball life throws — then twenty-four places and objects Jesus taught with, from Jacob's well to a basin and towel. Journal a moment of your own and it asks questions back rather than answering, then points to where he faced something like it.",
+  stamp:"Added Aug 2026"},
+ {kind:"Reading Plan Ideas", t:"GO. — Mark 16-Day Challenge", f:"go-mark-challenge.html",
+  d:"Mark in sixteen days, one chapter at a time, each built as a workout: warm-up, the key verse, a WOD named for it — Storm / Still, Carry the Weight, Eyes Open — then reflection and stretch. Solo, Body Double or Squad changes every drill, and Go Light or Go Deeper changes what happens after. Your ticked days are remembered.",
+  stamp:"Added Aug 2026"},
+ {kind:"Visual Experiments", t:"CapCut Overlay", f:"capcut-overlay.html",
+  d:"A digital layer over a real printed page. Handheld on an open Bible at Mark 1, with a highlight sitting on “the Son of God, as is written in Isaiah the prophet” — tracked to the words, so it holds its place on the line while the book moves. Fourteen seconds, sound on.",
+  stamp:"Added Aug 2026"},
+ {kind:"Visual Experiments", t:"Design Ideas", f:"design-ideas.pdf", shot:"thumbs/design-ideas.jpg",
+  d:"Four pages working out one loop: read a passage with a progress bar running along the top, answer a question about it, and unlock an illustrated “I am” card into a personal gallery — Bread of Life, Light of the World, with the Good Shepherd still greyed out. The last page is the notebook it came from, where the same idea is a football goal you shoot at by typing the answer.",
+  stamp:"PDF · Added Aug 2026"},
+ {kind:"Tool", t:"Timelines", f:"timelines.html",
+  d:"Build a timeline and pin moments along it. Each event takes a date, a title, a note and a colour-coded category, and sorts itself into order as you go — the spine ticks off the years down the left. Build as many separate timelines as you like: the life of Paul, a term’s plan, a family’s history. Everything stays on the device.",
+  stamp:"Added Aug 2026"},
+ {kind:"Reading Plan Ideas", t:"Pause on a Word", url:"https://claude.ai/public/artifacts/cb23510f-145d-49cf-9f93-924d648b0c4b",
+  shot:"thumbs/pause-on-a-word.jpg",
+  d:"“A quiet moment, one word at a time.” Three short passages — Courage from Joshua 1:9, Identity from Psalm 139:13–14, Peace from Philippians 4:6–7 — each with eight tappable words. Tap one and it opens out: what it means, where else it appears, something to picture, something to sit with, and a way to pray it back.",
+  stamp:"Claude artifact"},
+ {kind:"Visual Experiments", t:"YSB Drawings", f:"ysb-drawings.pdf", shot:"thumbs/ysb-drawings.jpg",
+  d:"Four athletes torn out of printed pages and drawn back over in black marker — a volley, a figure with arms flung wide, a press-up, someone sitting cross-legged reading. The paper they’re cut from is still legible in places: “Is there a Bible verse that has helped you?” Five pages, the whole set and then each figure on its own.",
+  stamp:"PDF · Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Bible Story Location Finder", f:"biblestorylocationfinder.html",
+  d:"124 stories, each pinned to where it happened — or honestly marked as unlocated. Search a passage, a place or a name; filter by testament or by how solid the identification is. 79 are established, 33 debated, and 12 nobody can place at all.",
+  stamp:"Added Aug 2026"},
+ {kind:"Reference Ideas", t:"Interactivity Via the Phone Itself", f:"interactivity-via-phone.html",
+  d:"Twenty concepts where the phone stops being a window and becomes an instrument — battery level as lamp oil for the ten virgins, a storm that only calms when your real room goes quiet, a dawn locked to your actual sunrise, phones laid edge-to-edge to assemble one body. Readable on a phone, with the PDF to download.",
+  stamp:"Added Aug 2026"},
+ {kind:"Visual Experiments", t:"The Sower", f:"thesowerbooklet.html",
+  d:"The parable of the sower told as a hand-drawn picture booklet — eleven pages of seed characters, birds, rocky ground and thorns. Tap or swipe your way through.",
+  stamp:"Added Aug 2026"},
+ {kind:"Animated Experiments", t:"BibleBricks", f:"biblebricks.html",
+  d:"Brickfolk’s sibling, building scenes instead of characters. Pick Eden, sheep, a house, a boat — or one object drawn from Jesus’ parables, a coin, a lamp, a pearl. Every roll arranges the scene differently, brick by brick.",
+  stamp:"Added Aug 2026"},
+ {kind:"Reference Ideas", t:"Interactive Bible Ideas", f:"InteractiveBibleIdeas.pdf", shot:"thumbs/InteractiveBibleIdeas.jpg",
+  d:"Twenty-one pages of divergent thinking on what digital faith experiences could be — story spheres you navigate from the inside, prophecy that sculpts itself from particles, an Armor of God inventory, a Temple sandbox. An idea bank rather than a spec.",
+  stamp:"PDF · Added Aug 2026"},
+ {kind:"Animated Experiments", t:"Brickfolk", f:"brickfolk.html",
+  d:"A brick-built character generator in 3D. Hit space and a new folk or critter snaps together brick by brick, with its own name and quirk. Slide toward wild for lopsided ears and spare-bin colours, or toward complex for slopes, cones and fancier hats — then drag to walk around it. It watches you.",
+  stamp:"Added Aug 2026"},
+ {kind:"Visual Experiments", t:"Bible Reading Bookmarks", f:"bible-bookmarks.html",
+  d:"Nine designs carrying the same four reading questions — blossom, still water, moonlit peaks, forest, leopards, cats, castle, graffiti, old country. Swipe between them front and back, or download the whole set as a print-ready PDF.",
+  stamp:"Added Aug 2026"},
+ {kind:"Reading Plan Ideas", t:"Simple Bible Study Discussion Questions", f:"bible-study-questions.html",
+  d:"Four moves for reading any passage — Warm Up, Training Drills, Refining My Technique, Cool Down. The same shape every time, on your own or with a group. Downloadable as a print-ready PDF or an editable Word doc.",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Wonder Trail", url:"https://wondertrail.netlify.app/", shot:"thumbs/wonder-trail.jpg",
+  d:"Pick somewhere to start and follow whatever looks interesting. Choose a dataset — Ephesians, Jesus, Physics — pitched at curious newcomers roughly 9 to 13, or drop in your own; it stays on your machine.",
+  stamp:"Lives on its own site"},
+ {kind:"Page Examples", t:"The Complex", url:"https://gilded-pastelito-9cc614.netlify.app/", shot:"thumbs/the-complex.jpg",
+  d:"The Youth Sports New Testament as nine themed rooms — Locker Room, Voices Wall, Trophy Room and more. Build a player card, read athlete stories, work through passages and track your own progress. No login; everything stays on the device.",
+  stamp:"Lives on its own site"},
+ {kind:"Page Examples", t:"Youth Sports Bible — Title Screen", f:"ysb-title.html",
+  d:"The opening screen. Torn-paper logo over a burst of colour, balls flying past — tap one to kick it off screen. Sound and music toggles bottom right.",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Parable Theatre", f:"parable-theatre.html",
+  d:"Build your own storyteller — hairstyle, hair colour, skin tone — then watch them play the lead in the parables. The Lost Sheep and the Prodigal Son, scene by illustrated scene.",
+  stamp:"Added Aug 2026"},
+ {kind:"Reading Plan Ideas", t:"One on One — Training Plan", f:"one-on-one.html",
+  d:"“Training, not watching.” A five-day plan on Jesus’ one-to-one encounters, where every day’s physical challenge reshapes itself around whether you’re solo, with a partner or a squad — and whether you’re in the same room or three time zones apart.",
+  stamp:"Added Aug 2026"},
+ {kind:"Page Examples", t:"The Big Story of the Bible", f:"big-story-journey.html",
+  d:"The whole Bible as a journey in 24 stops, Creation onward — swipe or tap your way from one to the next.",
+  stamp:"Added Aug 2026"},
+ {kind:"Interactive Ideas", t:"Parable Decoder", f:"parable-decoder.html",
+  d:"A gamified way into Jesus’ parables. Every card works like a parable itself — a plain surface you tap to uncover the hidden layer underneath. XP, badges and a story vault of eight parables.",
+  stamp:"Added Aug 2026"},
+ {kind:"Game", t:"The Floor — Heat 01: Jive", f:"the-floor.html",
+  d:"A rhythm heat built on “David danced for the LORD with all his might.” Tap on the beat, get judged on timing, energy and joy. Sound on.",
+  stamp:"Added Aug 2026"},
+ {kind:"Page Examples", t:"Page 10 Prototype", f:"page-10-prototype.html",
+  d:"“Does the New Testament say anything about … SPORTS?” — a single page built out to test tone, highlighting and how a young reader moves through it.",
+  stamp:"Added Aug 2026"},
+ {kind:"Page Examples", t:"Paul Challenge", f:"paul-challenge.html",
+  d:"A concept rather than a build. Connect a young athlete's real training schedule — the one they already follow — with an online challenge to be active over a longer stretch, perhaps a month. You set the schedule, read about Paul's missionary journeys, interact with the Bible as you go, and track your activity against the plan. Each journey pairs with a sport, measured in whatever unit that sport uses: the worked example is his final journey to Rome paired with a swimmer, read against Ephesians, Philippians, Colossians and Philemon. Finish and you earn a medal — or better, each section reveals one more part of it — and it lands in your Achievements rather than disappearing.",
+  stamp:"Added Sep 2026"}
+];
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* The count in the heading comes straight off the list, so adding an entry
+   below updates it on its own. */
+document.getElementById('count').textContent = EXPERIMENTS.length + ' ';
+
+function cardHTML(e){
+     const ext = !!e.url;
+     const href = ext ? e.url : e.f;
+     const doc = !ext && !/\.html?$/i.test(e.f || '');   // a local PDF etc — open in its own tab
+     const attrs = (ext || doc) ? ' target="_blank" rel="noopener"' : '';
+     const shot = e.shot || (e.f ? 'thumbs/' + e.f.replace(/\.html$/,'') + '.jpg' : '');
+     /* Some cards pull their still from the host the video lives on. If that host is
+        unreachable we fall back to a local tile once, and only then give up. */
+     const fb = e.shot2 ? ` data-fallback="${esc(e.shot2)}"` : '';
+     return `<a class="card${ext?' ext':''}" href="${esc(href)}"${attrs}>
+     <span class="shot" data-label="${esc(e.kind)}">
+       <img src="${esc(shot)}" alt="" loading="lazy"${fb}
+            onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.removeAttribute('data-fallback');return}this.parentNode.classList.add('noimg');this.remove()">
+     </span>
+     <span class="meta">
+       <span class="kind">${esc(e.kind)}</span>
+       <span class="t">${esc(e.t)}</span>
+       <span class="d">${esc(e.d)}</span>
+       ${e.stamp?`<span class="stamp">${esc(e.stamp)}</span>`:''}
+     </span>
+     <span class="arr">${ext?'open ↗':'open →'}</span></a>`;
+}
+
+/* ── Sorting ──────────────────────────────────────────────────────────
+   "By latest" is the order of the list above, which is kept newest-first
+   by hand. The other two are derived, so neither one can drift out of
+   step with the list — add an entry and all three modes pick it up. */
+
+/* The key carries a version. Bumping it retires everyone's saved choice once,
+   so a changed default actually reaches people who have been here before. */
+const KEY     = 'ysb-experiments-sort-v2';
+const DEFAULT = 'type';
+const MODES   = ['latest','alpha','type'];
+const byTitle = (a,b) => a.t.localeCompare(b.t,'en',{sensitivity:'base'});
+
+/* The running order of the headings under "By type". A type that isn't named
+   here lands where the "*" sits — after the main run, ahead of Tool and
+   Reference Ideas — so a new one never jumps to the top or drops off. */
+const TYPE_ORDER = [
+  'Page Examples',
+  'Reading Plan Ideas',
+  'Interactive Ideas',
+  'Game',
+  'Animated Experiments',
+  'Visual Experiments',
+  'Video Testimony',
+  '*',
+  'Tool',
+  'Reference Ideas',
+];
+const typeRank = k => {
+  const i = TYPE_ORDER.indexOf(k);
+  return i === -1 ? TYPE_ORDER.indexOf('*') : i;
+};
+
+function render(mode){
+  const el = document.getElementById('cards');
+
+  if(!EXPERIMENTS.length){
+    el.innerHTML = `<div class="note">Nothing here yet.</div>`;
+  } else if(mode === 'type'){
+    /* Group in the order the list already has, so within a type the newest
+       is still first. The headings run in TYPE_ORDER above. */
+    const by = new Map();
+    EXPERIMENTS.forEach(e=>{
+      if(!by.has(e.kind)) by.set(e.kind,[]);
+      by.get(e.kind).push(e);
+    });
+    el.innerHTML = [...by.entries()]
+      .sort((a,b)=> typeRank(a[0]) - typeRank(b[0]) || a[0].localeCompare(b[0],'en'))
+      .map(([kind,items]) =>
+        `<div class="group">${esc(kind)} <span class="n">${items.length}</span></div>`
+        + items.map(cardHTML).join(''))
+      .join('');
+  } else {
+    const list = mode === 'alpha' ? [...EXPERIMENTS].sort(byTitle) : EXPERIMENTS;
+    el.innerHTML = list.map(cardHTML).join('');
+  }
+
+  document.querySelectorAll('.sort').forEach(b=>
+    b.setAttribute('aria-pressed', String(b.dataset.sort === mode)));
+  try{ localStorage.setItem(KEY, mode); }catch(err){}
+}
+
+document.querySelectorAll('.sort').forEach(b=>
+  b.addEventListener('click', ()=> render(b.dataset.sort)));
+
+/* Opens grouped by type. Pick a different sort and the page remembers it. */
+let start = DEFAULT;
+try{
+  const saved = localStorage.getItem(KEY);
+  if(MODES.includes(saved)) start = saved;
+}catch(err){}
+render(start);
+</script>
+</body>
+</html>

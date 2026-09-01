@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>CapCut Overlay · YSB Experiments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:dark;
+    --bg:#16110D; --bg2:#1E1813; --panel:#241C16; --panel2:#2C2218;
+    --line:rgba(244,236,225,.10); --line2:rgba(244,236,225,.18);
+    --ink:#F4ECE1; --dim:#B7A897; --faint:#80735F;
+    --amber:#F2A93B; --amber-g:#FFC76B; --teal:#54B8B2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(242,169,59,.06), transparent 60%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.6;
+    -webkit-font-smoothing:antialiased;min-height:100dvh}
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:4px}
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px}
+  .mono{font-family:'JetBrains Mono',monospace}
+
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:10px;padding:11px 18px;background:rgba(22,17,13,.86);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase}
+  .topbar a{color:var(--dim);text-decoration:none}
+  .topbar a:hover{color:var(--ink)}
+  .topbar .here{color:var(--teal)}
+
+  main{padding:30px 0 70px}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--teal)}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(28px,7.4vw,42px);
+    line-height:1.06;letter-spacing:-.01em;margin:8px 0 10px}
+  .lede{color:var(--dim);font-size:15px;max-width:56ch}
+
+  .stage{margin:28px 0 0;display:flex;justify-content:center}
+  video{width:100%;max-width:330px;height:auto;display:block;border-radius:18px;
+    background:#000;border:1px solid var(--line2);
+    box-shadow:0 18px 50px rgba(0,0,0,.5)}
+
+  .meta{margin-top:14px;text-align:center;font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+
+  .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+  .act{display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+    font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;
+    font-size:11px;padding:11px 17px;border-radius:999px;
+    border:1px solid var(--line2);color:var(--dim);background:transparent;
+    transition:border-color .2s,color .2s,background .2s}
+  .act:hover{border-color:var(--amber);color:var(--amber-g);background:var(--panel)}
+
+  .notes{margin-top:36px;display:flex;flex-direction:column;gap:12px}
+  .note{padding:16px 18px;border-radius:14px;background:var(--panel);
+    border:1px solid var(--line)}
+  .note h2{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--teal);font-weight:500;margin-bottom:7px}
+  .note p{color:var(--dim);font-size:14px;line-height:1.62}
+  .note p + p{margin-top:9px}
+  .note b{color:var(--ink);font-weight:600}
+
+  .foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--faint)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html">◇ YSB Experiments</a>
+  <span class="here">CapCut Overlay</span>
+</div>
+
+<main class="wrap">
+  <div class="kicker">Youth Sports Bible</div>
+  <h1>CapCut Overlay</h1>
+  <p class="lede">A test of putting a digital layer over a real printed page. The camera is handheld on an open Bible at Mark 1, and a highlight sits on the opening verse — staying with the words as the page and the shot move.</p>
+
+  <div class="stage">
+    <video controls playsinline preload="metadata" poster="capcut-overlay-poster.jpg">
+      <source src="capcut-overlay.mp4" type="video/mp4">
+      <source src="capcut-overlay.webm" type="video/webm">
+      Your browser can’t play this video. You can
+      <a href="capcut-overlay.mp4" download>download the MP4</a> instead.
+    </video>
+  </div>
+  <div class="meta">14 seconds · sound on · portrait</div>
+
+  <div class="actions">
+    <a class="act" href="capcut-overlay.mp4" download>↓ Download the MP4</a>
+  </div>
+
+  <div class="notes">
+    <div class="note">
+      <h2>What it shows</h2>
+      <p>The highlighted phrase is <b>“the Son of God, as is written in Isaiah the prophet”</b> — Mark 1:1–2. The overlay is tracked to the text rather than pinned to the frame, so it holds its place on the printed line while the book is being held.</p>
+      <p>That is the thing worth testing: whether a physical Bible and a phone screen can be the same surface, so a printed page can carry the kind of marking, colour and motion a screen does.</p>
+    </div>
+    <div class="note">
+      <h2>Made in</h2>
+      <p>CapCut, on a phone. The last couple of seconds are the app’s own outro, left in as it came.</p>
+    </div>
+  </div>
+
+  <div class="foot">DEEP TILL · YSB EXPERIMENTS · CAPCUT OVERLAY</div>
+</main>
+
+</body>
+</html>
