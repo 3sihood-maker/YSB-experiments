@@ -708,7 +708,7 @@ function rot3(m,ax,ay,az,ang){
    Screen position works out to x = 0.4959 + 0.5*lx as a fraction of the width, which is
    what makes these easy to place. */
 var CAST=[
-  {k:'soccer',sy:0.660,dia:0.150,lx:-0.72,fl:0.44,at:5, side:-1,mat:[1,0,.040,1.00]},
+  {k:'soccer',sy:0.740,dia:0.150,lx:-0.55,fl:0.44,at:5, side:-1,mat:[1,0,.040,1.00]},
   {k:'tennis',sy:0.800,dia:0.082,lx: 0.62,fl:0.28,at:10,side: 1,mat:[.52,.46,.016,1.40]},
   {k:'basket',sy:0.880,dia:0.163,lx: 0.00,fl:0.47,at:15,drop:1, mat:[1,0,.040,1.00]}
 ];
@@ -1105,7 +1105,13 @@ function draw(){
   gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,TXP);
   gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,TXM);
   gl.uniform1i(UW.uPhoto,0);gl.uniform1i(UW.uMask,1);
-  gl.uniform2f(UW.uRes,W,H);
+  /* DEVICE pixels, not CSS pixels. gl_FragCoord is in device pixels, so handing the water
+     shader the CSS size squeezes the whole photograph into the left 1/DPR of the screen and
+     leaves the rest as clamp-to-edge streaks — 29% of the window at DPR 1.4, which is what
+     Windows at 125% or 150% scaling gives you. The ball and droplet programs were always
+     given cv.width/cv.height; this one was the odd man out, and it only ever looked right
+     because every test machine happened to be at DPR 1. */
+  gl.uniform2f(UW.uRes,cv.width,cv.height);
   gl.uniform1f(UW.uAsp,IMGH/IMGW);
   gl.uniform1f(UW.uTime,t);
   gl.uniform4fv(UW.uRip,RIP.subarray(0,24));
