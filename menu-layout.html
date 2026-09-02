@@ -36,7 +36,7 @@ body{
    beyond it; #near is the strip of ground at the very bottom of the same frame, pulled
    out and put back IN FRONT of the paper. The reader scrolls between them, which is what
    makes it read as depth rather than as a picture behind a page. */
-#far,#near{position:fixed;left:0;pointer-events:none;background-repeat:no-repeat}
+#far{position:fixed;left:0;pointer-events:none;background-repeat:no-repeat}
 /* Exactly one viewport tall, and the parallax comes from scaling it up and sliding it
    INSIDE its own overflow. A taller plate would seem simpler, but background-size:cover on
    a box twice the height of the window crops the photograph to a letterbox and throws the
@@ -56,28 +56,12 @@ body{
                     rgba(28,20,12,.10) 62%,rgba(24,16,10,.46) 100%),
     radial-gradient(120% 78% at 50% 34%,rgba(255,214,150,0) 40%,rgba(30,20,12,.34) 100%);
 }
-/* Short, and transparent for most of its own height. This is a menu, not a hero: cards
-   have to scroll past it, and a tall foreground plate dissolves whatever is behind it
-   halfway up the window. At this size a card slides UNDER the grass in the last inch of
-   the screen, which is the depth cue, and nothing you are trying to read is ever inside
-   it. */
-#near{
-  bottom:0;width:100%;height:19vh;z-index:6;
-  background-image:url(bg-court.webp);
-  background-size:cover;background-position:50% 100%;
-  transform:scale(1.14);transform-origin:50% 100%;
-  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.10) 42%,rgba(0,0,0,.72) 74%,#000 92%);
-  mask-image:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.10) 42%,rgba(0,0,0,.72) 74%,#000 92%);
-  will-change:transform;
-}
-@media (prefers-reduced-motion:reduce){ #far,#near{will-change:auto} }
+@media (prefers-reduced-motion:reduce){ #far{will-change:auto} }
 
 /* ---------------- the ball, on the court in front ---------------- */
-/* z-index 2: above the court, BELOW the paper. The ball is lying on the court, so a sheet
-   of paper dropped on the court covers it. */
-#courtfg{position:fixed;left:0;bottom:0;width:100%;height:19vh;z-index:2;pointer-events:none}
-/* on a small screen a fifth of the window is a lot of foreground to give away */
-@media (max-width:700px){ #near,#courtfg{height:15vh} }
+/* Full window, z-index 2: above the court, BELOW the paper. The ball is lying on the
+   court, so a sheet of paper dropped on the court covers it. */
+#courtfg{position:fixed;inset:0;z-index:2;pointer-events:none}
 #ball{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ballshadow{
   position:absolute;left:0;top:0;transform-origin:50% 50%;
@@ -95,8 +79,9 @@ body{
 #ballhint.gone{opacity:0}
 
 /* ---------------- the page ---------------- */
-#page{position:relative;z-index:3;max-width:1060px;margin:0 auto;
-  padding:clamp(26px,6vw,74px) clamp(14px,4vw,40px) 26vh}
+#page{--pad:clamp(18px,4.5vw,40px);
+  position:relative;z-index:3;max-width:1060px;margin:0 auto;
+  padding:clamp(26px,6vw,74px) var(--pad) 22vh}
 
 .crumb{display:inline-flex;align-items:center;gap:.55em;text-decoration:none;
   font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:800;
@@ -104,6 +89,21 @@ body{
   padding:8px 14px;border-radius:2px;backdrop-filter:blur(2px);
   transition:background .18s ease,color .18s ease}
 .crumb:hover{background:rgba(30,18,10,.66);color:#fff}
+
+/* A torn scrap of black paper at a quarter opacity, behind the title and the standfirst.
+   The photograph runs from a pale sky to dark trees straight through where the words sit,
+   so no single text colour holds up across it; a wash that travels with the type does. It
+   is torn by the same routine as the cards, at a bigger bite, so it belongs to the page
+   rather than looking like a UI panel. */
+.head{position:relative;max-width:min(100%,34em)}
+.headpaper{position:absolute;z-index:0;pointer-events:none;
+  /* the sideways reach is the page's own padding, so on a phone the scrap ends exactly at
+     the edge of the window instead of a few pixels past it and giving the document a
+     horizontal overflow nobody can see but every layout tool reports */
+  left:calc(var(--pad) * -1);right:calc(var(--pad) * -1);top:-44px;bottom:-40px;
+  background:rgba(0,0,0,.25);clip-path:polygon(0 0,0 0,0 0)}
+@media (max-width:640px){ .headpaper{top:-30px;bottom:-26px} }
+.head h1,.head .lede{position:relative;z-index:1}
 
 h1{margin:26px 0 0;font-weight:800;letter-spacing:-.018em;line-height:.94;
    font-size:clamp(38px,7.4vw,82px);color:#fff8ea;
@@ -178,8 +178,10 @@ h1{margin:26px 0 0;font-weight:800;letter-spacing:-.018em;line-height:.94;
   .scrap{flex-direction:column;align-items:stretch;--ovl:0px}
   .pol{align-self:flex-start;margin-bottom:-30px}
   .sheet{margin-left:0}
-  .feat .body{padding:56px 26px 28px 26px}
-  .rest .body{padding:50px 22px 24px 22px}
+  /* generous on a narrow screen: the deckle bites up to 9 px in, so the gap the eye sees
+     between the copy and the edge of the paper is a third less than the padding says */
+  .feat .body{padding:56px 34px 30px 34px}
+  .rest .body{padding:50px 30px 26px 30px}
 }
 
 /* ---------------- the polaroid ---------------- */
@@ -265,8 +267,11 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
 
 <main id="page">
   <a class="crumb" href="menu-pool.html">&#8592; All experiments</a>
-  <h1>Page Layout<br>Examples</h1>
-  <p class="lede">The following items are experiments in how to display the current Youth Sport NT content. None are perfect or fully polished, but do illustrate different techniques and possibilities that could be developed fully.</p>
+  <div class="head">
+    <div class="headpaper" id="headpaper"></div>
+    <h1>Page Layout<br>Examples</h1>
+    <p class="lede">The following items are experiments in how to display the current Youth Sport NT content. None are perfect or fully polished, but do illustrate different techniques and possibilities that could be developed fully.</p>
+  </div>
 
   <div class="rubric"><b>Start with these three</b><i></i></div>
   <div class="grid feat">
@@ -275,7 +280,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
     <span class="sheet">
       <span class="core"><span class="face"></span></span>
       <span class="body">
-        <span class="kicker">Start here</span>
         <h2>Jessica — Audience of One</h2>
         <p class="desc">One way to display the existing printed page testimony content.</p>
         <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -288,7 +292,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
     <span class="sheet">
       <span class="core"><span class="face"></span></span>
       <span class="body">
-        <span class="kicker">Start here</span>
         <h2>Page 10 Prototype</h2>
         <p class="desc">Another page demo with an animated drawing. Needs more visuals but demonstrates a walk-through-a-page approach.</p>
         <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -301,7 +304,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
     <span class="sheet">
       <span class="core"><span class="face"></span></span>
       <span class="body">
-        <span class="kicker">Start here</span>
         <h2>The Complex</h2>
         <p class="desc">This is an experiment in how all the different existing components could fit together in a visual menu. This includes an award/badge system, though we are not sure if this is a good idea.</p>
         <span class="go">Open on its own site <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -412,7 +414,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
   </div>
 </main>
 
-<div id="near"></div>
 <div id="courtfg">
   <div id="ballshadow"></div>
   <canvas id="ball"></canvas>
@@ -526,6 +527,19 @@ function tearAll(){
       ? {inset:15, rough:.66, step:9,  lipLo:2.6, lipHi:4.2}
       : {inset:12, rough:.58, step:8,  lipLo:2.0, lipHi:3.2});
   });
+  /* the scrap behind the title is torn the same way, just bigger and rougher */
+  var hp=document.getElementById('headpaper');
+  if(hp&&hp.offsetWidth>40){
+    /* a much bigger bite than the cards get: the amplitude is 2 + rough*7 px whatever
+       the shape's size, so the deckle that reads as hand-torn on a 200 px chip disappears
+       on a 600 px one */
+/* a smaller bite on a phone: there the scrap reaches only as far as the page padding,
+       so a 30 px inset would put the torn edge inside the words */
+    var big=innerWidth>=760;
+    var hpp=tornOutline(hp.offsetWidth,hp.offsetHeight,4242,
+                        big?30:12, big?3.2:1.2, big?20:13);
+    hp.style.clipPath=hpp?polyStr(hpp):'none';
+  }
   document.querySelectorAll('.num').forEach(function(el,i){
     /* the chip is small, so it wants a tighter bite or it eats its own numeral */
     var w=el.offsetWidth,h=el.offsetHeight;
@@ -556,7 +570,7 @@ document.querySelectorAll('.pol img').forEach(function(im){
    frame — and read once per frame off rAF rather than on the scroll event, so a fling on a
    phone does not queue up a hundred style writes. */
 (function(){
-  var far=document.getElementById('far'), near=document.getElementById('near');
+  var far=document.getElementById('far');
   if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
   var want=0, have=-1, tick=false;
   function apply(){
@@ -565,8 +579,6 @@ document.querySelectorAll('.pol img').forEach(function(im){
     have=want;
     var travel=innerHeight*0.20;
     far.style.transform='translate3d(0,'+((0.5-have)*travel).toFixed(1)+'px,0) scale(1.22)';
-    near.style.transform='translate3d(0,'+((have-0.5)*innerHeight*0.045).toFixed(1)+
-      'px,0) scale(1.14)';
   }
   function onScroll(){
     var max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
@@ -763,12 +775,25 @@ function resize(){
   gl.viewport(0,0,cv.width,cv.height);
   /* the ball is a fixed share of the window's width, floored so it stays hittable on a
      phone and capped so it does not become a beach ball on a wide monitor */
-  R=Math.max(24,Math.min(52,W*0.036));
-  /* Higher up the strip than you would put it if the ball were in front: it is behind the
-     near grass now, so a ground line near the bottom of the plate buries it. Sitting it in
-     the upper half of the strip puts it on the court with the grass crossing its foot. */
-  GY=Math.max(R+6,H*0.44);
-  if(!started){B.x=Math.max(R*2.0,W*0.14);B.y=GY;}
+  R=Math.max(22,Math.min(46,W*0.032));
+  /* The canvas is the whole window now, so the ground line has to be put where the court
+     actually is in the photograph. With the plate fitted to the width, the bottom of the
+     frame is the near kerb and the court surface runs up from about 86% of the window. */
+  GY=Math.max(R+6,H*0.86);
+  /* Now that it lies UNDER the paper it has to be parked where there is no paper. The
+     content column is a fixed max-width, so on a wide window there is clean court in the
+     margins either side of it and the ball goes in the wider one; on a narrow window there
+     are no margins at all and it sits behind the cards, which is the honest consequence of
+     putting it behind them — it shows through the gaps and below the last one. */
+  if(!started){
+    var pg=document.getElementById('page');
+    var pr=pg?pg.getBoundingClientRect():null;
+    var lm=pr?pr.left:0, rm=pr?W-pr.right:0;
+    if(rm>R*2.6)      B.x=pr.right+rm*0.5;
+    else if(lm>R*2.6) B.x=lm*0.5;
+    else              B.x=Math.max(R*2.0,W*0.22);
+    B.y=GY;
+  }
   B.x=Math.max(R,Math.min(W-R,B.x));
 }
 var started=false;
