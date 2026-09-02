@@ -65,9 +65,11 @@ body{
 #ball{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ballshadow{
   position:absolute;left:0;top:0;transform-origin:50% 50%;
-  background:radial-gradient(50% 50% at 50% 50%,rgba(40,18,8,.72) 0%,rgba(40,18,8,.34) 52%,
-             rgba(40,18,8,0) 100%);
-  filter:blur(2px);pointer-events:none;
+  /* Darkest towards the right-hand end, where the ball actually touches, and trailing off
+     to the left the way a shadow does at this hour. */
+  background:radial-gradient(50% 50% at 66% 50%,rgba(20,8,2,.97) 0%,rgba(20,8,2,.55) 44%,
+             rgba(24,10,3,0) 100%);
+  filter:blur(5px);pointer-events:none;
 }
 #ballhint{
   position:absolute;left:0;right:0;bottom:8px;text-align:center;
@@ -90,32 +92,25 @@ body{
   transition:background .18s ease,color .18s ease}
 .crumb:hover{background:rgba(30,18,10,.66);color:#fff}
 
-/* A torn scrap of black paper at a quarter opacity, behind the title and the standfirst.
+/* A soft dark wash behind the title and the standfirst, and nothing more.
    The photograph runs from a pale sky to dark trees straight through where the words sit,
-   so no single text colour holds up across it; a wash that travels with the type does. It
-   is torn by the same routine as the cards, at a bigger bite, so it belongs to the page
-   rather than looking like a UI panel. */
-/* fit-content, so the box is the width of the WORDS rather than of the column. The scrap
-   is then extended by the same amount on both sides and comes out centred on the text —
-   with a full-width box it was 74 px clear on the left and 170 on the right, because the
-   copy does not fill the column, and it read as shoved over. */
+   so no single text colour holds up across it; a wash that travels with the type does.
+   This was a torn black scrap for a while. It did not work: at any size that covered the
+   words it read as a shape in its own right — a hole in the photograph rather than shade
+   on it — and the eye went to the silhouette instead of the title. A radial gradient with
+   no edge anywhere does the same job and stays invisible.
+   fit-content, so the box is the width of the WORDS rather than of the column, which is
+   what keeps the wash centred on left-justified type. */
 .head{position:relative;width:fit-content;max-width:min(100%,34em)}
 .headpaper{position:absolute;z-index:0;pointer-events:none;
-  /* The sideways reach is the page's own padding, so on a phone the scrap ends exactly at
-     the edge of the window instead of a few pixels past it and giving the document a
-     horizontal overflow nobody can see but every layout tool reports. It runs a long way
-     PAST the bottom of the header on purpose, so the first card lands on top of it. */
-  left:calc(var(--pad) * -1);right:calc(var(--pad) * -1);top:-74px;bottom:-186px;
-  background:rgba(0,0,0,.23);clip-path:polygon(0 0,0 0,0 0)}
-/* A second ply behind the first, torn to a different pattern and much fainter, so the
-   edge is not one clean silhouette but a dark shape with a lighter ragged fringe hanging
-   off it — which is what a torn-through piece of cloth or paper actually looks like. */
-.headpaper::before{content:'';position:absolute;inset:var(--hpg,-20px);
-  background:rgba(0,0,0,.09);clip-path:var(--hp2,polygon(0 0,0 0,0 0))}
-/* Equal both sides. On a narrower desktop window that runs the left edge off the screen,
-   which is what was asked for and is what a torn scrap laid on a page actually does. */
-@media (min-width:760px){ .headpaper{left:-152px;right:-152px;top:-104px;bottom:-250px} }
-@media (max-width:640px){ .headpaper{top:-52px;bottom:-150px} }
+  /* The sideways reach is the page's own padding, so on a phone it ends exactly at the
+     edge of the window rather than a few pixels past it, which would give the document a
+     horizontal overflow nobody can see and every layout tool reports. */
+  left:calc(var(--pad) * -1);right:calc(var(--pad) * -1);top:-58px;bottom:-74px;
+  background:radial-gradient(64% 62% at 42% 50%,
+    rgba(5,3,1,.58) 0%, rgba(5,3,1,.38) 48%, rgba(5,3,1,.16) 68%, rgba(5,3,1,0) 82%)}
+@media (min-width:760px){ .headpaper{left:-92px;right:-112px;top:-74px;bottom:-96px} }
+@media (max-width:640px){ .headpaper{top:-42px;bottom:-58px} }
 .head h1,.head .lede{position:relative;z-index:1}
 
 h1{margin:26px 0 0;font-weight:800;letter-spacing:-.018em;line-height:.94;
@@ -478,66 +473,6 @@ function tornOutline(w,h,seed,inset,rough,step){
   return pts;
 }
 
-/* -------------------------------------------------------------------------
- * A rougher relative of tornOutline, for the big scrap behind the title.
- *
- * tornOutline is built for a small chip of paper: the bite is a fixed number of
- * pixels (2 + rough*7) whatever the shape's size, so a deckle that reads as
- * hand-torn at 200 px turns into a barely-wavy line at 900. Here the bite is a
- * MULTIPLE of a mean depth instead, so the edge stays as ragged as the scrap is
- * big, and it is built from four things at once, which is what separates cloth
- * torn across the grain from a wobbly line:
- *   a slow sweep     — whole sides pulled in or left long
- *   a middle wander  — the run of the tear
- *   per-point fray   — the frizz of loose fibres
- *   tear events      — a handful of deep notches and long tongues, where the
- *                      material let go all at once
- * The bite runs from nearly nothing to about 2.3x the mean, so some stretches
- * reach the very edge of the box and others are gouged a long way in.
- *
- * Near a corner the inward direction is turned towards the middle of the shape,
- * because with bites this deep two square-on edges would otherwise cross each
- * other and tie the polygon in a knot.
- * ---------------------------------------------------------------------- */
-function raggedOutline(w,h,seed,mean,step,jag){
-  jag=(jag===undefined)?1:jag;
-  if(w<48||h<48)return null;
-  mean=Math.max(3,Math.min(mean,Math.min(w,h)*0.22));
-  var per=2*(w+h), N=Math.max(56,Math.round(per/(step||10)));
-  var big=fbm1(seed,N,3), med=fbm1(seed+5501,N,6), fine=ringN(seed+911,N,N);
-  var rnd=mulberry32(seed+77), ev=new Float32Array(N), k, j;
-
-  var nev=Math.max(5,Math.round(N/30));
-  for(k=0;k<nev;k++){
-    var c=Math.floor(rnd()*N), half=2+Math.floor(rnd()*6), a=rnd()*2-1;
-    a=(a<0?-1:1)*(0.42+Math.abs(a)*0.80);         /* never a timid one */
-    for(j=-half;j<=half;j++){
-      var f=1-Math.abs(j)/(half+1);
-      ev[((c+j)%N+N)%N]+=a*f*f;
-    }
-  }
-
-  var cx=w/2, cy=h/2, pts=new Array(N), i;
-  for(i=0;i<N;i++){
-    var s=i/N*per,x,y,nx,ny,dc;
-    if(s<w){x=s;y=0;nx=0;ny=-1;dc=Math.min(s,w-s);}
-    else if((s-=w)<h){x=w;y=s;nx=1;ny=0;dc=Math.min(s,h-s);}
-    else if((s-=h)<w){x=w-s;y=h;nx=0;ny=1;dc=Math.min(s,w-s);}
-    else {s-=w;x=0;y=h-s;nx=-1;ny=0;dc=Math.min(s,h-s);}
-
-    var R=mean*2.2, t=dc<R?0.82*(1-dc/R):0;
-    var vx=cx-x, vy=cy-y, VL=Math.hypot(vx,vy)||1;
-    var ix=-nx*(1-t)+(vx/VL)*t, iy=-ny*(1-t)+(vy/VL)*t;
-    var IL=Math.hypot(ix,iy)||1; ix/=IL; iy/=IL;
-
-    var d=(sharpen(big[i])*0.80+med[i]*0.36+fine[i]*0.14+ev[i]*0.66)*jag;
-    if(d<-0.97)d=-0.97; if(d>1.30)d=1.30;
-    var b=mean*(1+d);
-    pts[i]={x:x+ix*b, y:y+iy*b};
-  }
-  return pts;
-}
-
 /* shrink a polygon inward to make the lip */
 function shrink(pts,seed,lo,hi){
   lo=(lo===undefined)?2.2:lo; hi=(hi===undefined)?3.4:hi;
@@ -589,23 +524,6 @@ function tearAll(){
       ? {inset:15, rough:.66, step:9,  lipLo:2.6, lipHi:4.2}
       : {inset:12, rough:.58, step:8,  lipLo:2.0, lipHi:3.2});
   });
-  /* the scrap behind the title gets the ragged tear, in two plies */
-  var hp=document.getElementById('headpaper');
-  if(hp&&hp.offsetWidth>40){
-    /* a shallower mean bite on a phone: there the scrap reaches only as far as the page
-       padding, so a deep one would pull the black in under the words */
-    var big=innerWidth>=760;
-    var mean=big?60:18, step=big?11:8, jag=big?1:0.86;
-    /* the fringe hangs out past the main ply — but never sideways on a phone, where the
-       scrap already ends at the window and one stray pixel gives the document a
-       horizontal scroll nobody can see and every layout tool complains about */
-    var gx=big?22:0, gy=big?22:10;
-    var p1=raggedOutline(hp.offsetWidth,hp.offsetHeight,4242,mean,step,jag);
-    hp.style.clipPath=p1?polyStr(p1):'none';
-    var p2=raggedOutline(hp.offsetWidth+gx*2,hp.offsetHeight+gy*2,9317,mean,step,jag);
-    hp.style.setProperty('--hpg',(-gy)+'px '+(-gx)+'px');
-    hp.style.setProperty('--hp2',p2?polyStr(p2):'none');
-  }
   document.querySelectorAll('.num').forEach(function(el,i){
     /* the chip is small, so it wants a tighter bite or it eats its own numeral */
     var w=el.offsetWidth,h=el.offsetHeight;
@@ -643,8 +561,10 @@ document.querySelectorAll('.pol img').forEach(function(im){
     tick=false;
     if(want===have)return;
     have=want;
-    var travel=innerHeight*0.20;
-    far.style.transform='translate3d(0,'+((0.5-have)*travel).toFixed(1)+'px,0) scale(1.22)';
+    var travel=innerHeight*0.20, y=(0.5-have)*travel;
+    /* published, so the ball can keep its feet on the court as the court slides */
+    window.__FARY=y;
+    far.style.transform='translate3d(0,'+y.toFixed(1)+'px,0) scale(1.22)';
   }
   function onScroll(){
     var max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
@@ -717,9 +637,14 @@ void main(){
 
   vec3 dirs[3]; dirs[0]=KEY; dirs[1]=GRND; dirs[2]=SKY;
   vec3 cols[3];
-  cols[0]=vec3(1.00,0.82,0.58)*3.10;   /* low sun, warm  */
-  cols[1]=vec3(0.68,0.36,0.26)*0.85;   /* court bounce    */
-  cols[2]=vec3(0.58,0.66,0.86)*0.70;   /* sky fill        */
+  /* In shade. The ball sits back on the part of the court the sun has already left, so
+     most of the direct key is gone and what is left is skylight from above and a warm
+     bounce up off the lit tarmac further out. Cutting the key from 3.10 to 0.98 is most of
+     the change: a ball in shade is not a darker lit ball, it is a differently lit one, and
+     the giveaway is the specular highlight — take the sun away and it goes with it. */
+  cols[0]=vec3(1.00,0.86,0.66)*0.98;   /* haze where the sun was */
+  cols[1]=vec3(0.74,0.44,0.32)*0.74;   /* warm bounce off the lit court */
+  cols[2]=vec3(0.60,0.68,0.88)*0.80;   /* sky, now doing most of the work */
   vec3 col=vec3(0.0);
   for(int i=0;i<3;i++){
     vec3 L=dirs[i];float NoL=max(dot(N,L),0.0);if(NoL<=0.0)continue;
@@ -729,10 +654,21 @@ void main(){
     vec3 F=F_S(f0,max(dot(V,H),0.0));
     col+=((1.0-F)*alb/PI+F*sp)*cols[i]*NoL;
   }
-  /* the felt catches the low sun round the rim, which is the whole look of a tennis ball
-     at this hour */
+  /* Occlusion from the ground. Without it the underside is lit by the bounce term and the
+     ball reads as hovering an inch above the court — the single most convincing thing
+     about an object sitting on a surface is that the surface takes its own light away
+     again underneath. */
+  float ao=clamp(0.5+0.5*N.y,0.0,1.0);
+  ao=0.40+0.60*ao*ao;
+  col*=ao;
+
+  /* a flat term for everything bouncing around under the fence, so the shadow side does
+     not fall away to black — in real shade nothing is unlit, it is just dim */
+  col+=alb*vec3(0.074,0.078,0.090)*ao;
+  /* the felt still catches a little light round the rim, but nothing like the sunlit
+     fringe it had */
   float rim=pow(1.0-NoV,2.6);
-  col+=alb*rim*vec3(1.00,0.78,0.50)*0.42;
+  col+=alb*rim*vec3(0.86,0.80,0.72)*0.10*ao;
 
   frag=vec4(pow(aces(col),vec3(1.0/2.2)),1.0);
 }
@@ -828,8 +764,31 @@ function rot3(m,ax,ay,az,ang){
   return o;
 }
 
-/* ---------- where the ground is ---------- */
-var W=0,H=0,DPR=1,R=34,GY=0,shadow=document.getElementById('ballshadow');
+/* ---------- where the ground is ----------
+ * Not a fraction of the window. The court is a place in a PHOTOGRAPH, and where that
+ * place lands on screen depends on how `cover` has cropped the plate, which depends on
+ * the window's aspect: the same 80%-down line is flat court on a laptop and the grass
+ * verge at the bottom of the frame on a wide, short one. So the ground line is worked
+ * out from the plate's own geometry — cover scale, the 42% vertical anchor, the 1.22
+ * blow-up and the parallax offset — from one number, BEDLINE, which is a height in the
+ * IMAGE. The ball then sits on the same patch of tarmac whatever the window is doing,
+ * and rides up and down with the court as the page scrolls. */
+var IW=1920, IH=1434, BEDLINE=0.60;
+var W=0,H=0,DPR=1,R=34,GY=0,roomy=false,shadow=document.getElementById('ballshadow');
+function courtY(){
+  var s=Math.max(W/IW,H/IH), dh=IH*s;
+  var y0=(H-dh)*0.42+BEDLINE*dh;              /* before the blow-up */
+  var y=H/2+(y0-H/2)*1.22+(window.__FARY||0); /* after it, and after the parallax */
+  /* Clamped, and by whether there is clear court to stand on rather than by the window's
+     size. With margins either side of the column the ball can take its proper place up the
+     court. Without them — a phone, or any window narrower than the column — that place is
+     halfway up the page behind the cards, where the ball is a green thing poking out from
+     under a button; there it is pinned low instead, into the clear court below the last
+     card. On a phone the plate is cropped so hard that everything from 60% down is flat
+     tarmac anyway, so low is still on the court. */
+  var lo=(roomy?0.50:0.84)*H, hi=(roomy?0.80:0.92)*H;
+  return Math.max(lo,Math.min(hi,y));
+}
 var B={x:0,y:0,vx:0,vy:0,om:0,R3:new Float32Array([1,0,0,0,1,0,0,0,1])};
 var E=rec.e||0.75, CRR=rec.crr||0.032;
 
@@ -840,21 +799,19 @@ function resize(){
   cv.height=Math.max(1,Math.round(H*DPR));
   gl.viewport(0,0,cv.width,cv.height);
   /* the ball is a fixed share of the window's width, floored so it stays hittable on a
-     phone and capped so it does not become a beach ball on a wide monitor */
-  R=Math.max(22,Math.min(46,W*0.032));
-  /* The canvas is the whole window now, so the ground line has to be put where the court
-     actually is in the photograph. With the plate fitted to the width, the bottom of the
-     frame is the near kerb and the court surface runs up from about 86% of the window. */
-  GY=Math.max(R+6,H*0.86);
+     phone and capped so it does not become a beach ball on a wide monitor. A little
+     smaller than it was, because it now sits further back up the court. */
+  R=Math.max(20,Math.min(38,W*0.026));
   /* Now that it lies UNDER the paper it has to be parked where there is no paper. The
      content column is a fixed max-width, so on a wide window there is clean court in the
      margins either side of it and the ball goes in the wider one; on a narrow window there
-     are no margins at all and it sits behind the cards, which is the honest consequence of
-     putting it behind them — it shows through the gaps and below the last one. */
+     are none, and the ball drops to the bottom of the page instead (see courtY). */
+  var pg=document.getElementById('page');
+  var pr=pg?pg.getBoundingClientRect():null;
+  var lm=pr?pr.left:0, rm=pr?W-pr.right:0;
+  roomy=Math.max(lm,rm)>R*2.6;
+  GY=Math.max(R+6,courtY()-R);
   if(!started){
-    var pg=document.getElementById('page');
-    var pr=pg?pg.getBoundingClientRect():null;
-    var lm=pr?pr.left:0, rm=pr?W-pr.right:0;
     if(rm>R*2.6)      B.x=pr.right+rm*0.5;
     else if(lm>R*2.6) B.x=lm*0.5;
     else              B.x=Math.max(R*2.0,W*0.22);
@@ -903,6 +860,12 @@ document.addEventListener('visibilitychange',function(){
   run=!document.hidden; if(run){last=0;requestAnimationFrame(frame);}
 });
 function step(dt){
+  /* the court slides under the ball as the page parallaxes, so the ground line is read
+     every frame and a ball at rest is carried with it rather than left hanging */
+  var resting=(B.vy===0&&Math.abs(B.y-GY)<0.6);
+  GY=Math.max(R+6,courtY()-R);
+  if(resting)B.y=GY;
+
   B.vy+=GRAV*dt;
   B.x+=B.vx*dt; B.y+=B.vy*dt;
   if(B.y>=GY){
@@ -923,12 +886,17 @@ function step(dt){
   if(Math.abs(B.om)>1e-4)B.R3=rot3(B.R3,0,0,1,-B.om*dt);
 
   if(shadow){
+    /* Thrown to the LEFT and sheared, because the sun in this photograph is low and off to
+       the right — the same direction the key light comes from in the shader. A round
+       shadow directly under the ball is the giveaway of a sprite pasted onto a photo. It
+       shrinks and fades as the ball goes up, which is the only cue for height there is. */
     var air=Math.max(0,GY-B.y)/(R*7);
-    var sc=1-Math.min(0.62,air*0.62);
-    shadow.style.transform='translate3d('+(B.x-R*1.5)+'px,'+(GY+R*0.80)+'px,0) scaleX('+
-      (sc*1.0).toFixed(3)+') scaleY('+(sc*0.9).toFixed(3)+')';
-    shadow.style.width=(R*3)+'px'; shadow.style.height=(R*0.9)+'px';
-    shadow.style.opacity=(0.42*(1-Math.min(0.75,air))).toFixed(3);
+    var sc=1-Math.min(0.60,air*0.60);
+    var sw=R*4.1, sh=R*1.18, cx=B.x-R*1.00, cy=GY+R*1.22;
+    shadow.style.width=sw+'px'; shadow.style.height=sh+'px';
+    shadow.style.transform='translate3d('+(cx-sw/2)+'px,'+(cy-sh/2)+'px,0) skewX(-16deg) scale('+
+      sc.toFixed(3)+','+(sc*0.9).toFixed(3)+')';
+    shadow.style.opacity=(0.90*(1-Math.min(0.78,air))).toFixed(3);
   }
 }
 function frame(t){
