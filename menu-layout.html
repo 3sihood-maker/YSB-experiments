@@ -92,32 +92,24 @@ body{
   transition:background .18s ease,color .18s ease}
 .crumb:hover{background:rgba(30,18,10,.66);color:#fff}
 
-/* A soft dark wash behind the title and the standfirst, and nothing more.
-   The photograph runs from a pale sky to dark trees straight through where the words sit,
-   so no single text colour holds up across it; a wash that travels with the type does.
-   This was a torn black scrap for a while. It did not work: at any size that covered the
-   words it read as a shape in its own right — a hole in the photograph rather than shade
-   on it — and the eye went to the silhouette instead of the title. A radial gradient with
-   no edge anywhere does the same job and stays invisible.
-   fit-content, so the box is the width of the WORDS rather than of the column, which is
-   what keeps the wash centred on left-justified type. */
-.head{position:relative;width:fit-content;max-width:min(100%,34em)}
-.headpaper{position:absolute;z-index:0;pointer-events:none;
-  /* The sideways reach is the page's own padding, so on a phone it ends exactly at the
-     edge of the window rather than a few pixels past it, which would give the document a
-     horizontal overflow nobody can see and every layout tool reports. */
-  left:calc(var(--pad) * -1);right:calc(var(--pad) * -1);top:-58px;bottom:-74px;
-  background:radial-gradient(64% 62% at 42% 50%,
-    rgba(5,3,1,.58) 0%, rgba(5,3,1,.38) 48%, rgba(5,3,1,.16) 68%, rgba(5,3,1,0) 82%)}
-@media (min-width:760px){ .headpaper{left:-92px;right:-112px;top:-74px;bottom:-96px} }
-@media (max-width:640px){ .headpaper{top:-42px;bottom:-58px} }
-.head h1,.head .lede{position:relative;z-index:1}
+/* Nothing behind the title at all. There was a torn black scrap here, then a bigger and
+   rougher one, then a soft radial wash — all three read as a panel laid over the
+   photograph, because a wash with any falloff at all still has a visible boundary
+   somewhere. The type carries itself instead: it is white, it is heavy, and the shadow
+   under it is doing the work a background was doing badly. */
+.head{position:relative;max-width:min(100%,34em)}
 
+/* Two shadows, not one: a wide soft pool that lifts the letters off whatever is behind
+   them, and a tight dark one right against the edges that keeps them crisp where the
+   photograph goes pale. */
 h1{margin:26px 0 0;font-weight:800;letter-spacing:-.018em;line-height:.94;
    font-size:clamp(38px,7.4vw,82px);color:#fff8ea;
-   text-shadow:0 3px 26px rgba(24,12,4,.62),0 1px 2px rgba(24,12,4,.5)}
+   text-shadow:0 4px 30px rgba(20,10,3,.80),0 2px 10px rgba(20,10,3,.55),
+               0 1px 2px rgba(20,10,3,.60)}
 .lede{max-width:44ch;margin:16px 0 0;font-size:clamp(15px,1.5vw,18px);line-height:1.55;
-  color:#f4e6cf;text-shadow:0 2px 14px rgba(24,12,4,.7)}
+  color:#f6ead6;
+  text-shadow:0 2px 18px rgba(20,10,3,.90),0 1px 6px rgba(20,10,3,.70),
+              0 1px 1px rgba(20,10,3,.55)}
 
 /* positioned, so it paints ABOVE the header scrap now that the scrap reaches down past it
    — an unpositioned block paints before every positioned one, whatever the source order */
@@ -275,7 +267,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
 <main id="page">
   <a class="crumb" href="menu-pool.html">&#8592; All experiments</a>
   <div class="head">
-    <div class="headpaper" id="headpaper"></div>
     <h1>Page Layout<br>Examples</h1>
     <p class="lede">The following items are experiments in how to display the current Youth Sport NT content. None are perfect or fully polished, but do illustrate different techniques and possibilities that could be developed fully.</p>
   </div>
