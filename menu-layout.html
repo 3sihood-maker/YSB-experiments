@@ -95,14 +95,27 @@ body{
    so no single text colour holds up across it; a wash that travels with the type does. It
    is torn by the same routine as the cards, at a bigger bite, so it belongs to the page
    rather than looking like a UI panel. */
-.head{position:relative;max-width:min(100%,34em)}
+/* fit-content, so the box is the width of the WORDS rather than of the column. The scrap
+   is then extended by the same amount on both sides and comes out centred on the text —
+   with a full-width box it was 74 px clear on the left and 170 on the right, because the
+   copy does not fill the column, and it read as shoved over. */
+.head{position:relative;width:fit-content;max-width:min(100%,34em)}
 .headpaper{position:absolute;z-index:0;pointer-events:none;
-  /* the sideways reach is the page's own padding, so on a phone the scrap ends exactly at
+  /* The sideways reach is the page's own padding, so on a phone the scrap ends exactly at
      the edge of the window instead of a few pixels past it and giving the document a
-     horizontal overflow nobody can see but every layout tool reports */
-  left:calc(var(--pad) * -1);right:calc(var(--pad) * -1);top:-44px;bottom:-40px;
-  background:rgba(0,0,0,.25);clip-path:polygon(0 0,0 0,0 0)}
-@media (max-width:640px){ .headpaper{top:-30px;bottom:-26px} }
+     horizontal overflow nobody can see but every layout tool reports. It runs a long way
+     PAST the bottom of the header on purpose, so the first card lands on top of it. */
+  left:calc(var(--pad) * -1);right:calc(var(--pad) * -1);top:-74px;bottom:-186px;
+  background:rgba(0,0,0,.23);clip-path:polygon(0 0,0 0,0 0)}
+/* A second ply behind the first, torn to a different pattern and much fainter, so the
+   edge is not one clean silhouette but a dark shape with a lighter ragged fringe hanging
+   off it — which is what a torn-through piece of cloth or paper actually looks like. */
+.headpaper::before{content:'';position:absolute;inset:var(--hpg,-20px);
+  background:rgba(0,0,0,.09);clip-path:var(--hp2,polygon(0 0,0 0,0 0))}
+/* Equal both sides. On a narrower desktop window that runs the left edge off the screen,
+   which is what was asked for and is what a torn scrap laid on a page actually does. */
+@media (min-width:760px){ .headpaper{left:-152px;right:-152px;top:-104px;bottom:-250px} }
+@media (max-width:640px){ .headpaper{top:-52px;bottom:-150px} }
 .head h1,.head .lede{position:relative;z-index:1}
 
 h1{margin:26px 0 0;font-weight:800;letter-spacing:-.018em;line-height:.94;
@@ -111,7 +124,10 @@ h1{margin:26px 0 0;font-weight:800;letter-spacing:-.018em;line-height:.94;
 .lede{max-width:44ch;margin:16px 0 0;font-size:clamp(15px,1.5vw,18px);line-height:1.55;
   color:#f4e6cf;text-shadow:0 2px 14px rgba(24,12,4,.7)}
 
-.rubric{display:flex;align-items:center;gap:14px;margin:clamp(34px,5vw,58px) 0 18px}
+/* positioned, so it paints ABOVE the header scrap now that the scrap reaches down past it
+   — an unpositioned block paints before every positioned one, whatever the source order */
+.rubric{position:relative;z-index:1;
+  display:flex;align-items:center;gap:14px;margin:clamp(34px,5vw,58px) 0 18px}
 .rubric b{font-weight:800;font-size:11px;letter-spacing:.26em;text-transform:uppercase;
   color:#ffe1a8;text-shadow:0 2px 10px rgba(24,12,4,.8)}
 .rubric i{flex:1;height:1px;background:linear-gradient(90deg,rgba(255,225,168,.5),rgba(255,225,168,0))}
@@ -221,12 +237,8 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
 .desc{margin:10px 0 0;color:var(--ink-soft);line-height:1.52}
 .feat .desc{font-size:clamp(14px,1.35vw,16.5px);max-width:54ch}
 .rest .desc{font-size:13.5px;max-width:42ch}
-.go{display:inline-flex;align-items:center;gap:.45em;margin-top:14px;
-  font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;
-  color:var(--clay);border-bottom:2px solid rgba(161,68,42,.34);padding-bottom:2px}
-.rest .go{margin-top:11px;font-size:10px}
-@media (hover:hover){ .scrap:hover .go{border-bottom-color:rgba(161,68,42,.85)} }
-.go svg{width:.95em;height:.95em;fill:none;stroke:currentColor;stroke-width:2.4}
+/* No "Open the example" line: the whole scrap is the link, and the lift on hover says so
+   without a second call to action under every card. */
 
 /* ---------------- the way out ---------------- */
 /* Buttons, not the breadcrumb the top of the page uses: this is the end of the road and
@@ -282,7 +294,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
       <span class="body">
         <h2>Jessica — Audience of One</h2>
         <p class="desc">One way to display the existing printed page testimony content.</p>
-        <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">01</span>
@@ -294,7 +305,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
       <span class="body">
         <h2>Page 10 Prototype</h2>
         <p class="desc">Another page demo with an animated drawing. Needs more visuals but demonstrates a walk-through-a-page approach.</p>
-        <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">02</span>
@@ -306,7 +316,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
       <span class="body">
         <h2>The Complex</h2>
         <p class="desc">This is an experiment in how all the different existing components could fit together in a visual menu. This includes an award/badge system, though we are not sure if this is a good idea.</p>
-        <span class="go">Open on its own site <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">03</span>
@@ -323,7 +332,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
         <span class="kicker">Example 04</span>
         <h2>Baba — the page tears itself</h2>
         <p class="desc">An automated torn page style for placing text. Text is just a placeholder.</p>
-        <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">04</span>
@@ -336,7 +344,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
         <span class="kicker">Example 05</span>
         <h2>The Big Story of the Bible</h2>
         <p class="desc">Playing with an existing graphic we made (for kids) of the big story of the Bible and how it could be animated. We would use new graphics for teenagers if this was worth pursuing.</p>
-        <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">05</span>
@@ -349,7 +356,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
         <span class="kicker">Example 06</span>
         <h2>Baba — Attitude of Gratitude</h2>
         <p class="desc">An earlier experiment of displaying an existing testimony page.</p>
-        <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">06</span>
@@ -362,7 +368,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
         <span class="kicker">Example 07</span>
         <h2>The Locker Room</h2>
         <p class="desc">Playing with ideas of how to use sports imagery.</p>
-        <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">07</span>
@@ -375,7 +380,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
         <span class="kicker">Example 08</span>
         <h2>The Tunnel</h2>
         <p class="desc">This is a very early menu idea using a sports tunnel into a stadium. Very rough and needs work.</p>
-        <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">08</span>
@@ -388,7 +392,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
         <span class="kicker">Example 09</span>
         <h2>Paul Challenge Idea</h2>
         <p class="desc">This is not a created prototype, but an idea we could pursue. It is a way to connect a young athlete’s training schedule (real, existing) with an online challenge to be active over a longer period (maybe a month). This way the users can set a training schedule, read about Paul’s missionary journeys, interact with the Bible and track their activity over the period. The goal is to receive a Medal that goes into their “Achievements” listing.</p>
-        <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">09</span>
@@ -401,7 +404,6 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
         <span class="kicker">Example 10</span>
         <h2>Youth Sports Bible — Title Screen</h2>
         <p class="desc">An experiment in visualizing the Cover of the Youth Sport Bible.</p>
-        <span class="go">Open the example <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </span>
     </span>
     <span class="num">10</span>
@@ -476,6 +478,66 @@ function tornOutline(w,h,seed,inset,rough,step){
   return pts;
 }
 
+/* -------------------------------------------------------------------------
+ * A rougher relative of tornOutline, for the big scrap behind the title.
+ *
+ * tornOutline is built for a small chip of paper: the bite is a fixed number of
+ * pixels (2 + rough*7) whatever the shape's size, so a deckle that reads as
+ * hand-torn at 200 px turns into a barely-wavy line at 900. Here the bite is a
+ * MULTIPLE of a mean depth instead, so the edge stays as ragged as the scrap is
+ * big, and it is built from four things at once, which is what separates cloth
+ * torn across the grain from a wobbly line:
+ *   a slow sweep     — whole sides pulled in or left long
+ *   a middle wander  — the run of the tear
+ *   per-point fray   — the frizz of loose fibres
+ *   tear events      — a handful of deep notches and long tongues, where the
+ *                      material let go all at once
+ * The bite runs from nearly nothing to about 2.3x the mean, so some stretches
+ * reach the very edge of the box and others are gouged a long way in.
+ *
+ * Near a corner the inward direction is turned towards the middle of the shape,
+ * because with bites this deep two square-on edges would otherwise cross each
+ * other and tie the polygon in a knot.
+ * ---------------------------------------------------------------------- */
+function raggedOutline(w,h,seed,mean,step,jag){
+  jag=(jag===undefined)?1:jag;
+  if(w<48||h<48)return null;
+  mean=Math.max(3,Math.min(mean,Math.min(w,h)*0.22));
+  var per=2*(w+h), N=Math.max(56,Math.round(per/(step||10)));
+  var big=fbm1(seed,N,3), med=fbm1(seed+5501,N,6), fine=ringN(seed+911,N,N);
+  var rnd=mulberry32(seed+77), ev=new Float32Array(N), k, j;
+
+  var nev=Math.max(5,Math.round(N/30));
+  for(k=0;k<nev;k++){
+    var c=Math.floor(rnd()*N), half=2+Math.floor(rnd()*6), a=rnd()*2-1;
+    a=(a<0?-1:1)*(0.42+Math.abs(a)*0.80);         /* never a timid one */
+    for(j=-half;j<=half;j++){
+      var f=1-Math.abs(j)/(half+1);
+      ev[((c+j)%N+N)%N]+=a*f*f;
+    }
+  }
+
+  var cx=w/2, cy=h/2, pts=new Array(N), i;
+  for(i=0;i<N;i++){
+    var s=i/N*per,x,y,nx,ny,dc;
+    if(s<w){x=s;y=0;nx=0;ny=-1;dc=Math.min(s,w-s);}
+    else if((s-=w)<h){x=w;y=s;nx=1;ny=0;dc=Math.min(s,h-s);}
+    else if((s-=h)<w){x=w-s;y=h;nx=0;ny=1;dc=Math.min(s,w-s);}
+    else {s-=w;x=0;y=h-s;nx=-1;ny=0;dc=Math.min(s,h-s);}
+
+    var R=mean*2.2, t=dc<R?0.82*(1-dc/R):0;
+    var vx=cx-x, vy=cy-y, VL=Math.hypot(vx,vy)||1;
+    var ix=-nx*(1-t)+(vx/VL)*t, iy=-ny*(1-t)+(vy/VL)*t;
+    var IL=Math.hypot(ix,iy)||1; ix/=IL; iy/=IL;
+
+    var d=(sharpen(big[i])*0.80+med[i]*0.36+fine[i]*0.14+ev[i]*0.66)*jag;
+    if(d<-0.97)d=-0.97; if(d>1.30)d=1.30;
+    var b=mean*(1+d);
+    pts[i]={x:x+ix*b, y:y+iy*b};
+  }
+  return pts;
+}
+
 /* shrink a polygon inward to make the lip */
 function shrink(pts,seed,lo,hi){
   lo=(lo===undefined)?2.2:lo; hi=(hi===undefined)?3.4:hi;
@@ -527,18 +589,22 @@ function tearAll(){
       ? {inset:15, rough:.66, step:9,  lipLo:2.6, lipHi:4.2}
       : {inset:12, rough:.58, step:8,  lipLo:2.0, lipHi:3.2});
   });
-  /* the scrap behind the title is torn the same way, just bigger and rougher */
+  /* the scrap behind the title gets the ragged tear, in two plies */
   var hp=document.getElementById('headpaper');
   if(hp&&hp.offsetWidth>40){
-    /* a much bigger bite than the cards get: the amplitude is 2 + rough*7 px whatever
-       the shape's size, so the deckle that reads as hand-torn on a 200 px chip disappears
-       on a 600 px one */
-/* a smaller bite on a phone: there the scrap reaches only as far as the page padding,
-       so a 30 px inset would put the torn edge inside the words */
+    /* a shallower mean bite on a phone: there the scrap reaches only as far as the page
+       padding, so a deep one would pull the black in under the words */
     var big=innerWidth>=760;
-    var hpp=tornOutline(hp.offsetWidth,hp.offsetHeight,4242,
-                        big?30:12, big?3.2:1.2, big?20:13);
-    hp.style.clipPath=hpp?polyStr(hpp):'none';
+    var mean=big?60:18, step=big?11:8, jag=big?1:0.86;
+    /* the fringe hangs out past the main ply — but never sideways on a phone, where the
+       scrap already ends at the window and one stray pixel gives the document a
+       horizontal scroll nobody can see and every layout tool complains about */
+    var gx=big?22:0, gy=big?22:10;
+    var p1=raggedOutline(hp.offsetWidth,hp.offsetHeight,4242,mean,step,jag);
+    hp.style.clipPath=p1?polyStr(p1):'none';
+    var p2=raggedOutline(hp.offsetWidth+gx*2,hp.offsetHeight+gy*2,9317,mean,step,jag);
+    hp.style.setProperty('--hpg',(-gy)+'px '+(-gx)+'px');
+    hp.style.setProperty('--hp2',p2?polyStr(p2):'none');
   }
   document.querySelectorAll('.num').forEach(function(el,i){
     /* the chip is small, so it wants a tighter bite or it eats its own numeral */
