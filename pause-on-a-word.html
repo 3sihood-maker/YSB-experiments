@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pause on a Word</title>
+<meta name="description" content="Read a short Bible passage, then tap any word that stands out and sit with it.">
+<meta name="theme-color" content="#12162B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #12162B;
+    --bg-raised: #1A2040;
+    --bg-card: #1D2447;
+    --line: #2C3260;
+    --gold: #E8B75D;
+    --gold-dim: #B8925280;
+    --coral: #E8917A;
+    --text: #F3F1E9;
+    --text-dim: #9599B8;
+    --text-faint: #6A6E92;
+    --shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(120% 100% at 50% -10%, #1B2148 0%, #12162B 55%, #0D1023 100%);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: 'Manrope', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* the sheet is fixed, so the page behind it must not scroll away underneath */
+  body.locked{ overflow: hidden; }
+  #app{
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 40px;
+  }
+  .screen{ display:none; animation: fadeIn .35s ease; }
+  .screen.active{ display:block; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){
+    .screen{ animation: none; }
+    *{ transition-duration: .01ms !important; }
+  }
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 22px 22px 6px;
+  }
+  .brand{
+    font-family:'Fraunces', serif; font-weight:500; font-size: 15px;
+    letter-spacing: 0.02em; color: var(--gold);
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand .dot{ width:6px; height:6px; border-radius:50%; background:var(--gold); box-shadow: 0 0 10px var(--gold);}
+  .icon-btn{
+    background:none; border:none; color: var(--text-dim); font-size:14px;
+    font-family:'Manrope',sans-serif; cursor:pointer; padding:8px; display:flex; align-items:center; gap:6px;
+  }
+  .icon-btn:hover{ color: var(--gold); }
+  /* ---------- Home ---------- */
+  .hero{ padding: 18px 24px 6px; }
+  .hero h1{
+    font-family:'Fraunces', serif; font-weight:500; font-size: 34px; line-height:1.15;
+    margin: 6px 0 8px; color: var(--text);
+  }
+  .hero h1 em{ font-style: italic; color: var(--gold); }
+  .hero p{ color: var(--text-dim); font-size: 15px; line-height:1.55; margin:0 0 26px; max-width: 38ch;}
+  .card-list{ padding: 0 22px; display:flex; flex-direction:column; gap:14px; }
+  .passage-card{
+    background: linear-gradient(155deg, var(--bg-card), var(--bg-raised));
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px 20px 18px;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    transition: transform .18s ease, border-color .18s ease;
+    text-align:left;
+    width:100%;
+    color:inherit;
+    font-family:inherit;
+  }
+  .passage-card:active{ transform: scale(0.98); }
+  .passage-card:hover{ border-color: var(--gold-dim); }
+  .passage-card::before{
+    content:''; position:absolute; top:-40%; right:-20%; width:160px; height:160px;
+    background: radial-gradient(circle, var(--gold-dim), transparent 70%);
+    opacity:.5; pointer-events:none;
+  }
+  .passage-tag{
+    display:inline-block; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    color: var(--gold); background: rgba(232,183,93,0.1); border:1px solid rgba(232,183,93,0.25);
+    padding: 4px 10px; border-radius:20px; margin-bottom: 12px; font-weight:700;
+  }
+  .passage-card h3{
+    font-family:'Fraunces', serif; font-weight:500; font-size:20px; margin:0 0 6px; color: var(--text);
+  }
+  .passage-card p{ margin:0; color: var(--text-dim); font-size:13.5px; line-height:1.5; }
+  .passage-meta{ display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
+  .word-count{ font-size:12px; color: var(--text-faint); }
+  .go-arrow{ color: var(--gold); font-size:18px; }
+  .journal-link{
+    margin: 26px 22px 0; padding: 16px 18px; border-radius:16px;
+    border: 1px dashed var(--line); display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer; color: var(--text-dim); font-size:13.5px; background: rgba(255,255,255,0.02);
+    width: calc(100% - 44px); font-family:inherit; text-align:left;
+  }
+  .journal-link b{ color: var(--text); font-weight:700; }
+  .journal-badge{
+    background: var(--coral); color:#241012; font-weight:800; font-size:11px;
+    border-radius: 20px; padding: 2px 9px; margin-left:8px;
+  }
+  /* ---------- Passage / reading screen ---------- */
+  .reading-header{ padding: 16px 22px 0; }
+  .back-btn{
+    background:none; border:none; color: var(--text-dim); font-size:14px; cursor:pointer;
+    display:flex; align-items:center; gap:6px; padding: 6px 0 18px; font-family:'Manrope';
+  }
+  .back-btn:hover{ color: var(--gold); }
+  .ref-tag{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color: var(--gold); font-weight:700; }
+  .ref-title{ font-family:'Fraunces', serif; font-size:22px; font-weight:500; margin: 6px 0 18px; }
+  .verse-box{
+    margin: 0 22px; padding: 26px 22px 24px;
+    background: var(--bg-card); border:1px solid var(--line); border-radius: 20px;
+    box-shadow: var(--shadow);
+  }
+  .verse-text{
+    font-family:'Fraunces', serif; font-size: 21px; line-height:1.62; font-weight:400;
+    color: var(--text);
+  }
+  .verse-text .w{
+    color: var(--gold);
+    cursor:pointer;
+    border-bottom: 1.5px dotted var(--gold-dim);
+    padding: 1px 1px;
+    position: relative;
+    transition: color .15s ease, background .15s ease;
+    border-radius: 4px;
+  }
+  .verse-text .w:active, .verse-text .w.tapped{
+    background: rgba(232,183,93,0.18);
+  }
+  .verse-text .w:focus-visible{
+    outline: 2px solid var(--gold); outline-offset: 2px; background: rgba(232,183,93,0.14);
+  }
+  .verse-text .w.explored{ border-bottom-style: solid; }
+  .verse-text .w.explored::after{
+    content:''; position:absolute; top:-3px; right:-6px; width:5px; height:5px; border-radius:50%;
+    background: var(--coral);
+  }
+  .hint{
+    display:flex; align-items:center; gap:8px; color: var(--text-faint); font-size:12.5px;
+    margin: 16px 22px 6px; line-height:1.5;
+  }
+  .progress-wrap{ margin: 18px 22px 0; }
+  .progress-label{ display:flex; justify-content:space-between; font-size:12px; color: var(--text-dim); margin-bottom:8px; }
+  .progress-bar{ height:6px; border-radius:6px; background: var(--bg-raised); overflow:hidden; }
+  .progress-fill{ height:100%; background: linear-gradient(90deg, var(--gold), var(--coral)); border-radius:6px; transition: width .4s ease; }
+  /* ---------- Reflection sheet ---------- */
+  .overlay{
+    position:fixed; inset:0; background: rgba(8,9,20,0.62); backdrop-filter: blur(2px);
+    display:none; z-index: 40; opacity:0; transition: opacity .25s ease;
+  }
+  .overlay.show{ display:block; opacity:1; }
+  .sheet{
+    position:fixed; left:50%; bottom:0; transform: translate(-50%, 100%);
+    width:100%; max-width:480px; max-height: 88vh; overflow-y:auto;
+    background: linear-gradient(180deg, #1D2447, #151A38);
+    border-radius: 26px 26px 0 0;
+    border: 1px solid var(--line); border-bottom:none;
+    z-index: 41; transition: transform .32s cubic-bezier(.2,.8,.2,1);
+    padding-bottom: max(30px, env(safe-area-inset-bottom));
+  }
+  .overlay.show .sheet{ transform: translate(-50%, 0); }
+  .sheet-handle{ width:38px; height:4px; background: var(--line); border-radius:4px; margin: 12px auto 0; }
+  .sheet-top{ display:flex; justify-content:space-between; align-items:flex-start; padding: 14px 22px 0; }
+  .sheet-word-wrap{ padding: 4px 22px 18px; }
+  .sheet-eyebrow{ font-size:11px; letter-spacing:.1em; text-transform:uppercase; color: var(--text-faint); font-weight:700; }
+  .sheet-word{ font-family:'Fraunces', serif; font-size: 40px; font-weight:600; color: var(--gold); margin: 4px 0 0; line-height:1.05; }
+  .close-btn{
+    background: var(--bg-raised); border:1px solid var(--line); color: var(--text-dim);
+    width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .close-btn:hover{ color: var(--text); border-color: var(--gold-dim); }
+  .sheet-section{ padding: 16px 22px; border-top: 1px solid var(--line); }
+  .sheet-section-label{
+    display:flex; align-items:center; gap:8px; font-size:11.5px; letter-spacing:.09em; text-transform:uppercase;
+    font-weight:800; margin-bottom:10px;
+  }
+  .sheet-section-label .ico{ font-size:14px; }
+  .lbl-meaning{ color: var(--gold); }
+  .lbl-cross{ color: #8FB8E8; }
+  .lbl-visualize{ color: #B79CE8; }
+  .lbl-meditate{ color: var(--coral); }
+  .lbl-pray{ color: #86D6AE; }
+  .sheet-section p{ margin: 0 0 10px; font-size: 14.5px; line-height:1.62; color: var(--text); }
+  .sheet-section p:last-child{ margin-bottom:0; }
+  .synonyms{ display:flex; flex-wrap:wrap; gap:8px; margin-top:2px; }
+  .chip{
+    font-size:12.5px; background: rgba(232,183,93,0.1); border:1px solid rgba(232,183,93,0.25);
+    color: var(--gold); padding: 5px 12px; border-radius: 20px;
+  }
+  .cross-ref-box{
+    background: rgba(143,184,232,0.07); border:1px solid rgba(143,184,232,0.2); border-radius:14px;
+    padding: 14px 16px;
+  }
+  .cross-ref-box .ref{ font-weight:800; color:#8FB8E8; font-size:13px; margin-bottom:4px; display:block; }
+  .visualize-box{
+    background: rgba(183,156,232,0.08); border:1px solid rgba(183,156,232,0.22); border-radius:14px;
+    padding:14px 16px; font-style: italic;
+  }
+  .meditate-q{ font-weight:600; }
+  textarea.note{
+    width:100%; background: var(--bg-raised); border:1px solid var(--line); border-radius:12px;
+    color: var(--text); font-family:'Manrope'; font-size:14px; padding:12px 14px; resize:none;
+    min-height: 64px; margin-top: 4px;
+  }
+  textarea.note:focus{ outline:none; border-color: var(--coral); }
+  .save-note-btn{
+    margin-top:10px; background: var(--coral); color:#241012; border:none; font-weight:800;
+    font-size:13px; padding: 9px 16px; border-radius:20px; cursor:pointer; font-family:inherit;
+  }
+  .save-note-btn.saved{ background:#86D6AE; }
+  .pray-box{
+    background: rgba(134,214,174,0.08); border:1px solid rgba(134,214,174,0.22); border-radius:14px;
+    padding:14px 16px;
+  }
+  .pray-box p{ font-family:'Fraunces', serif; font-size:16px; font-style:italic; }
+  /* ---------- Journal screen ---------- */
+  .journal-empty{ padding: 40px 26px; text-align:center; color: var(--text-dim); line-height:1.6; }
+  .journal-entries{ padding: 4px 22px; display:flex; flex-direction:column; gap:12px; }
+  .j-entry{
+    background: var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:16px 18px; cursor:pointer;
+    width:100%; text-align:left; font-family:inherit; color:inherit;
+  }
+  .j-entry:hover{ border-color: var(--gold-dim); }
+  .j-entry .jw{ font-family:'Fraunces', serif; font-size:19px; color: var(--gold); }
+  .j-entry .jr{ font-size:11.5px; color: var(--text-faint); margin-top:2px; }
+  .j-entry .jn{ font-size:13px; color: var(--text-dim); margin-top:8px; font-style:italic; line-height:1.5; }
+  .storage-note{
+    margin: 26px 22px 0; font-size: 11.5px; line-height:1.55; color: var(--text-faint);
+  }
+  /* ripple */
+  .ripple{
+    position:fixed; width:14px; height:14px; border-radius:50%;
+    background: var(--gold); pointer-events:none; z-index:39;
+    transform: translate(-50%,-50%) scale(0); opacity:0.8;
+    animation: rippleOut .5s ease-out forwards;
+  }
+  @keyframes rippleOut{ to{ transform: translate(-50%,-50%) scale(8); opacity:0; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- HOME SCREEN -->
+  <section class="screen active" id="screen-home">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span>Pause on a Word</div>
+    </div>
+    <div class="hero">
+      <h1>A quiet <em>moment</em>, one word at a time.</h1>
+      <p>Read a short passage, then tap any word that stands out. Sit with it for a minute before you move on.</p>
+    </div>
+    <div class="card-list" id="card-list"></div>
+    <button class="journal-link" id="journal-link">
+      <span>Your <b>word journal</b></span>
+      <span id="journal-count-wrap">Open &rarr;</span>
+    </button>
+    <p class="storage-note" id="storage-note"></p>
+  </section>
+  <!-- PASSAGE SCREEN -->
+  <section class="screen" id="screen-passage">
+    <div class="reading-header">
+      <button class="back-btn" onclick="goHome()">&larr; All passages</button>
+      <div class="ref-tag" id="p-tag"></div>
+      <div class="ref-title" id="p-title"></div>
+    </div>
+    <div class="verse-box">
+      <div class="verse-text" id="p-verse"></div>
+    </div>
+    <div class="hint">&#10022; Tap a gold word to pause and reflect on it.</div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Words explored</span><span id="p-progress-text">0 / 0</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="p-progress-fill" style="width:0%"></div></div>
+    </div>
+  </section>
+  <!-- JOURNAL SCREEN -->
+  <section class="screen" id="screen-journal">
+    <div class="reading-header">
+      <button class="back-btn" onclick="goHome()">&larr; Home</button>
+      <div class="ref-tag">Saved reflections</div>
+      <div class="ref-title">Your Word Journal</div>
+    </div>
+    <div id="journal-body"></div>
+  </section>
+</div>
+<!-- REFLECTION SHEET -->
+<div class="overlay" id="overlay" onclick="closeSheetIfBackdrop(event)">
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-word">
+    <div class="sheet-handle"></div>
+    <div class="sheet-top">
+      <div class="sheet-word-wrap">
+        <div class="sheet-eyebrow" id="sheet-ref"></div>
+        <div class="sheet-word" id="sheet-word"></div>
+      </div>
+      <button class="close-btn" onclick="closeSheet()" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-section-label lbl-meaning"><span class="ico">&#9670;</span>Meaning</div>
+      <p id="s-definition"></p>
+      <div class="synonyms" id="s-synonyms"></div>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-section-label lbl-cross"><span class="ico">&#10022;</span>Where else it appears</div>
+      <div class="cross-ref-box">
+        <span class="ref" id="s-ref"></span>
+        <p id="s-refnote" style="margin:0;"></p>
+      </div>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-section-label lbl-visualize"><span class="ico">&#9680;</span>Visualize it</div>
+      <div class="visualize-box"><p id="s-visualize" style="margin:0;"></p></div>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-section-label lbl-meditate"><span class="ico">&#9678;</span>Sit with it</div>
+      <p class="meditate-q" id="s-meditate"></p>
+      <label class="sr-only" for="s-note" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Your note</label>
+      <textarea class="note" id="s-note" placeholder="Jot down a thought if you want (optional)&hellip;"></textarea>
+      <button class="save-note-btn" id="save-note-btn" onclick="saveNote()">Save to journal</button>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-section-label lbl-pray"><span class="ico">&#10023;</span>Pray it back</div>
+      <div class="pray-box"><p id="s-pray"></p></div>
+    </div>
+  </div>
+</div>
+<script>
+/* ---------------- DATA ---------------- */
+const PASSAGES = [
+  {
+    id: 'joshua', tag: 'Joshua 1:9 · WEB', title: 'Courage', theme: 'For when you feel unready for something big.',
+    verseHTML: `Haven't I <span class="w" data-k="j-commanded">commanded</span> you? Be <span class="w" data-k="j-strong">strong</span> and of good <span class="w" data-k="j-courage">courage</span>; don't be <span class="w" data-k="j-afraid">afraid</span>, neither be <span class="w" data-k="j-dismayed">dismayed</span>: for <span class="w" data-k="j-yahweh">Yahweh</span> your <span class="w" data-k="j-god">God</span> is with you <span class="w" data-k="j-wherever">wherever</span> you go.`,
+    words: ['j-commanded','j-strong','j-courage','j-afraid','j-dismayed','j-yahweh','j-god','j-wherever']
+  },
+  {
+    id: 'psalm', tag: 'Psalm 139:13–14 · WEB', title: 'Identity', theme: 'For when you’re not sure you like how you were made.',
+    verseHTML: `For you <span class="w" data-k="p-formed">formed</span> my inmost being. You <span class="w" data-k="p-knit">knit</span> me together in my mother's <span class="w" data-k="p-womb">womb</span>. I will give thanks to you, for I am <span class="w" data-k="p-fearfully">fearfully</span> and <span class="w" data-k="p-wonderfully">wonderfully</span> <span class="w" data-k="p-made">made</span>. Your <span class="w" data-k="p-works">works</span> are wonderful. My <span class="w" data-k="p-soul">soul</span> knows that very well.`,
+    words: ['p-formed','p-knit','p-womb','p-fearfully','p-wonderfully','p-made','p-works','p-soul']
+  },
+  {
+    id: 'phil', tag: 'Philippians 4:6–7 · WEB', title: 'Peace', theme: 'For when your mind won’t stop racing.',
+    verseHTML: `Be <span class="w" data-k="ph-anxious">anxious</span> for nothing, but in everything by <span class="w" data-k="ph-prayer">prayer</span> and <span class="w" data-k="ph-supplication">supplication</span>, with <span class="w" data-k="ph-thanksgiving">thanksgiving</span>, let your requests be made known to God; and the <span class="w" data-k="ph-peace">peace</span> of God, which <span class="w" data-k="ph-surpasses">surpasses</span> all <span class="w" data-k="ph-understanding">understanding</span>, will <span class="w" data-k="ph-guard">guard</span> your hearts and minds through Christ Jesus.`,
+    words: ['ph-anxious','ph-prayer','ph-supplication','ph-thanksgiving','ph-peace','ph-surpasses','ph-understanding','ph-guard']
+  }
+];
+const WORDS = {
+  'j-commanded': { word:'commanded', ref:'Joshua 1:9', definition:"Given a clear, authoritative instruction — not a suggestion, but something backed by real authority.", synonyms:['instructed','ordered','charged'], crossRef:'Deuteronomy 31:23', crossNote:"God gives Joshua this same charge earlier — be strong and courageous, because you will lead the people into the land.", visualize:"Picture someone you trust completely looking you in the eye and saying, ‘I need you to do this — and I’m with you the whole way.’ That’s the tone of this word.", meditate:"Is there something you already know God is asking of you, but you’ve been putting off? What’s making it hard to move?", pray:"God, help me listen when you speak, and give me the courage to actually do it." },
+  'j-strong': { word:'strong', ref:'Joshua 1:9', definition:"Having real strength — not just physical, but strength of will, character, and resolve.", synonyms:['powerful','steady','firm'], crossRef:'Ephesians 6:10', crossNote:"Paul tells believers to ‘be strong in the Lord’ — a strength that comes from God’s power, not our own effort.", visualize:"Think of a tree with deep roots holding firm in a storm. The strength isn’t in fighting the wind — it’s in what’s holding it steady underground.", meditate:"Where do you usually look for strength when things get hard — yourself, other people, or God? What would it look like to lean on Him first?", pray:"God, when I feel weak, remind me that your strength is enough for me." },
+  'j-courage': { word:'courage', ref:'Joshua 1:9', definition:"The ability to do something hard or frightening, even while you’re scared.", synonyms:['boldness','bravery','guts'], crossRef:'1 Corinthians 16:13', crossNote:"Paul tells believers to ‘be courageous’ as part of standing firm in their faith.", visualize:"Imagine standing at the edge of a diving board. Courage isn’t the absence of the shaky feeling — it’s jumping anyway.", meditate:"What’s one situation right now where you need courage — a conversation, a decision, a change? What would one small step look like?", pray:"God, give me courage for the thing I’ve been avoiding." },
+  'j-afraid': { word:'afraid', ref:'Joshua 1:9', definition:"Feeling fear — worried something bad is going to happen.", synonyms:['scared','fearful','frightened'], crossRef:'Isaiah 41:10', crossNote:"God tells His people not to fear, because He is with them and will strengthen and help them.", visualize:"Picture handing your fear to someone stronger than you — like passing a heavy bag to someone who can actually carry it.", meditate:"What’s something you’re afraid of right now? What would change if you believed God was right there with you in it?", pray:"God, when fear creeps in, remind me you’re already with me." },
+  'j-dismayed': { word:'dismayed', ref:'Joshua 1:9', definition:"Feeling discouraged or shaken, like the ground under you isn’t steady.", synonyms:['discouraged','shaken','disheartened'], crossRef:'Deuteronomy 31:8', crossNote:"Moses tells Joshua that God goes before him and will never leave or forsake him — so there’s no reason to be discouraged.", visualize:"Think of losing your footing on a hike, then feeling a hand grab your arm before you fall. That steadying is what this word points away from.", meditate:"When was the last time you felt discouraged or shaken? What helped, or what would have helped?", pray:"God, steady me when I feel like I’m losing my footing." },
+  'j-yahweh': { word:'Yahweh', ref:'Joshua 1:9', definition:"The personal name God used for Himself, often translated ‘LORD’ in English Bibles. It comes from a Hebrew phrase meaning something like ‘I am who I am’ — God isn’t naming a concept, He’s telling His people who He actually is.", synonyms:['the LORD','God’s covenant name'], crossRef:'Exodus 3:14', crossNote:"This is where God first reveals this name to Moses at the burning bush.", visualize:"Imagine being given someone’s actual first name instead of just their title — it’s personal, not distant.", meditate:"Does God feel more like a distant idea or someone personally present in your life right now? Why?", pray:"God, thank you that you’re not distant — you have a name, and you know mine." },
+  'j-god': { word:'God', ref:'Joshua 1:9', definition:"The Creator and ruler of everything — the one this whole passage is about.", synonyms:['Lord','Creator','Father'], crossRef:'Genesis 1:1', crossNote:"The very first line of the Bible says God created the heavens and the earth.", visualize:"Picture the biggest thing you can imagine — the ocean, the night sky — and then remember this verse says that same God is with you personally.", meditate:"How would today look different if you really believed God was right beside you in it?", pray:"God, help me remember you’re not far away — you’re with me right now." },
+  'j-wherever': { word:'wherever', ref:'Joshua 1:9', definition:"In any place at all — no exceptions, no matter where you go.", synonyms:['everywhere','no matter where','in every place'], crossRef:'Genesis 28:15', crossNote:"God says almost the same thing to Jacob — ‘I am with you and will watch over you wherever you go.’", visualize:"Picture drawing a map of everywhere you’ll go this week — school, home, practice, a friend’s house — and God’s presence covering every single spot on it.", meditate:"Is there a place in your life where it’s hard to believe God is present — school, home, online? What would change if you believed He was there too?", pray:"God, thank you that there’s nowhere I go that you’re not already there." },
+  'p-formed': { word:'formed', ref:'Psalm 139:13', definition:"Shaped or put together on purpose — not an accident, but something made with care.", synonyms:['shaped','crafted','created'], crossRef:'Jeremiah 1:5', crossNote:"God tells the prophet Jeremiah, ‘Before I formed you in the womb I knew you’ — formed with purpose, not by chance.", visualize:"Picture a potter’s hands shaping clay carefully and intentionally, not a machine stamping out identical parts.", meditate:"Do you tend to believe you were made on purpose, or more like a random accident? Why?", pray:"God, thank you for forming me on purpose — help me actually believe that today." },
+  'p-knit': { word:'knit', ref:'Psalm 139:13', definition:"Woven together piece by piece, like fabric — a slow, careful, detailed process.", synonyms:['woven','pieced together','assembled with care'], crossRef:'Job 10:11', crossNote:"Job uses similar imagery, describing God clothing him with skin and flesh and knitting him together with bones and sinews.", visualize:"Picture someone knitting a sweater by hand, one stitch at a time — nothing rushed, nothing careless.", meditate:"What part of how you were made — your personality, your looks, your story — do you struggle to see as ‘knit together with care’?", pray:"God, help me see the parts of myself I don’t like as still part of your careful work." },
+  'p-womb': { word:'womb', ref:'Psalm 139:13', definition:"The place inside a mother where a baby grows before birth — the very start of a person’s life.", synonyms:['mother’s body','the beginning of life'], crossRef:'Jeremiah 1:5', crossNote:"Same idea as ‘formed’ — God says He knew Jeremiah even before he was formed in the womb.", visualize:"Picture the very first moment of your existence — before anyone else knew you, God already did.", meditate:"What does it mean to you that God was present and knew you before you were even born?", pray:"God, thank you that you knew me before anyone else did." },
+  'p-fearfully': { word:'fearfully', ref:'Psalm 139:14', definition:"In a way that inspires awe and wonder — not scary-fear, but the kind of amazement that makes you stop and stare.", synonyms:['remarkably','with awe','amazingly'], crossRef:'Genesis 1:27', crossNote:"God creates humanity in His own image — every person carries something of God’s own design.", visualize:"Picture standing at the edge of a canyon or under a huge night sky — that speechless, awe-struck feeling. That’s the kind of ‘fearfully’ this verse means.", meditate:"When was the last time you looked at yourself and felt genuine wonder instead of criticism?", pray:"God, help me see myself the way you designed me — with awe, not criticism." },
+  'p-wonderfully': { word:'wonderfully', ref:'Psalm 139:14', definition:"In an extraordinary, remarkable way — something that makes you say ‘wow.’", synonyms:['remarkably','marvelously','extraordinarily'], crossRef:'Psalm 40:5', crossNote:"The psalmist says God’s wonders and thoughts toward us are too many to count.", visualize:"Think of the most intricate, detailed thing you’ve ever seen up close — a snowflake, a spider’s web — and remember you were made with that same level of detail.", meditate:"What’s one thing about how you’re made — your mind, your gifts, your story — that you can genuinely call ‘wonderful’?", pray:"God, thank you for making me wonderfully, even on days I don’t feel it." },
+  'p-made': { word:'made', ref:'Psalm 139:14', definition:"Created — brought into existence by someone, on purpose.", synonyms:['created','built','designed'], crossRef:'Genesis 1:31', crossNote:"After creating everything, including people, God looks at it all and calls it ‘very good.’", visualize:"Picture an artist stepping back from a finished painting and smiling at it — that’s how this verse says God sees you.", meditate:"If God looked at how He made you and called it ‘very good,’ what would it take for you to agree with Him?", pray:"God, help me agree with you about how you made me." },
+  'p-works': { word:'works', ref:'Psalm 139:14', definition:"The things someone has made or done — here, referring to everything God has created, including people.", synonyms:['creations','handiwork','craftsmanship'], crossRef:'Psalm 19:1', crossNote:"The psalmist says the skies themselves display God’s craftsmanship — his works are visible everywhere, not just in people.", visualize:"Picture flipping through a portfolio of an artist’s best work — every piece intentional, nothing thrown together.", meditate:"Where else in your life have you noticed God’s ‘work’ — in nature, in people, in moments that felt bigger than coincidence?", pray:"God, open my eyes today to see your work around me." },
+  'p-soul': { word:'soul', ref:'Psalm 139:14', definition:"The deepest part of a person — your true self, beyond just your body.", synonyms:['inner self','spirit','true self'], crossRef:'Psalm 42:1', crossNote:"Another psalm pictures the soul thirsting for God like a deer panting for water — a deep, real longing.", visualize:"Picture your body as a house, and your soul as the person actually living inside it — the real you.", meditate:"What is your soul actually longing for right now — rest, connection, direction, peace?", pray:"God, meet the part of me that words can’t fully explain." },
+  'ph-anxious': { word:'anxious', ref:'Philippians 4:6', definition:"Feeling worried or on edge about something that might go wrong.", synonyms:['worried','stressed','on edge'], crossRef:'1 Peter 5:7', crossNote:"Peter tells believers to cast all their anxiety on God, because He cares for them.", visualize:"Picture setting down a heavy backpack you’ve been carrying all day and finally feeling your shoulders relax.", meditate:"What’s the thing you’re most anxious about right now? Have you actually said it out loud to God, or just carried it silently?", pray:"God, here’s what’s weighing on me — I’m giving it to you." },
+  'ph-prayer': { word:'prayer', ref:'Philippians 4:6', definition:"Talking to God — honestly, not with special words, just real conversation.", synonyms:['talking to God','communication with God'], crossRef:'James 5:16', crossNote:"James says the prayer of a person who is right with God is powerful and does great things.", visualize:"Picture texting your closest friend the exact thing you’re thinking, no filter — that’s the kind of honesty prayer invites.", meditate:"Do your prayers usually feel like a real conversation, or more like a formality? What would make them feel more real?", pray:"God, teach me to actually talk to you, not just recite words." },
+  'ph-supplication': { word:'supplication', ref:'Philippians 4:6', definition:"An old word for earnest, specific pleading — asking for something you really need, not casually.", synonyms:['earnest request','pleading','asking urgently'], crossRef:'Ephesians 6:18', crossNote:"Paul tells believers to pray on all occasions, with all kinds of prayers and requests, staying alert.", visualize:"Picture the difference between casually mentioning you’re hungry and actually asking someone for food when you haven’t eaten in days — that urgency is supplication.", meditate:"Is there something you need to stop being casual about and actually bring to God with real urgency?", pray:"God, here’s what I actually need — I’m not going to pretend I don’t." },
+  'ph-thanksgiving': { word:'thanksgiving', ref:'Philippians 4:6', definition:"Actively expressing gratitude — naming specific things you’re thankful for, not just feeling vaguely grateful.", synonyms:['gratitude','giving thanks'], crossRef:'1 Thessalonians 5:18', crossNote:"Paul says to give thanks in every circumstance, not just the easy ones.", visualize:"Picture writing a specific thank-you note instead of just saying ‘thanks for everything’ — naming the actual details.", meditate:"Name three specific things — not vague ones — you’re actually thankful for today.", pray:"God, thank you specifically for the thing I just named." },
+  'ph-peace': { word:'peace', ref:'Philippians 4:7', definition:"A deep calm that isn’t just the absence of problems — it’s steadiness even when things are hard.", synonyms:['calm','steadiness','rest'], crossRef:'John 14:27', crossNote:"Jesus tells His disciples He’s giving them a peace unlike what the world gives — not dependent on circumstances.", visualize:"Picture the deep ocean floor, completely still, even while there are waves and storms up on the surface.", meditate:"What would it look like to have peace in your current situation — not because the problem’s solved, but because you trust who’s holding it?", pray:"God, give me your peace, even before anything actually changes." },
+  'ph-surpasses': { word:'surpasses', ref:'Philippians 4:7', definition:"Goes beyond, or is bigger than — more than something can fully explain or contain.", synonyms:['exceeds','goes beyond','is greater than'], crossRef:'Ephesians 3:19', crossNote:"Paul prays that believers would know a love that surpasses knowledge — too big to fully wrap your mind around.", visualize:"Picture trying to hold the ocean in your two hands — some things are just too big to fully grasp, but you can still stand in them.", meditate:"Have you ever experienced a peace or comfort that didn’t logically make sense given your circumstances? What was that like?", pray:"God, I don’t need to understand it to receive it — give me that kind of peace." },
+  'ph-understanding': { word:'understanding', ref:'Philippians 4:7', definition:"Being able to fully explain or make logical sense of something.", synonyms:['comprehension','logic','figuring it out'], crossRef:'Proverbs 3:5', crossNote:"Solomon tells his readers to trust God with all their heart and not lean on their own understanding.", visualize:"Picture trying to solve a puzzle with half the pieces missing, and someone telling you it’s okay to stop trying to force it to make sense.", meditate:"What’s something in your life right now that you’re trying to fully understand, when maybe you just need to trust instead?", pray:"God, help me trust you even in the parts I can’t fully figure out." },
+  'ph-guard': { word:'guard', ref:'Philippians 4:7', definition:"To protect or watch over closely — like a soldier standing at a gate, not letting danger in.", synonyms:['protect','watch over','defend'], crossRef:'Proverbs 4:23', crossNote:"Solomon says to guard your heart above everything else, because everything you do flows from it.", visualize:"Picture a guard standing at the door of your mind, deciding what thoughts and worries are actually allowed to stay.", meditate:"What’s something you need God’s peace to guard in your heart or mind right now — a fear, a thought pattern, a relationship?", pray:"God, guard my heart and mind today — especially in the place I just named." }
+};
+/* ---------------- STATE ---------------- */
+let currentPassageId = null;
+let activeWordKey = null;
+let journal = { explored: [], entries: {} };
+let storagePersists = true;
+
+/* ---------------- STORAGE ----------------
+ * This page used to run as a hosted artifact and kept the journal through a host-provided
+ * `window.storage` API. It is a plain file in this folder now, so the journal lives in the
+ * browser's own localStorage instead — same device, same browser, no account, no server.
+ *
+ * Every call is wrapped, because localStorage is not always there: a private window, a
+ * browser set to block site data, or a page opened straight off the filesystem can all make
+ * it throw on access rather than return null. In that case the app keeps working perfectly
+ * for the session and simply says so on the home screen, rather than dying on load.
+ */
+const STORE_KEY = 'ysb-pause-on-a-word';
+function storageAvailable(){
+  try{
+    const probe = '__ysb_probe__';
+    window.localStorage.setItem(probe, '1');
+    window.localStorage.removeItem(probe);
+    return true;
+  }catch(e){ return false; }
+}
+function loadJournal(){
+  storagePersists = storageAvailable();
+  if(storagePersists){
+    try{
+      const raw = window.localStorage.getItem(STORE_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(parsed && typeof parsed === 'object'){
+          journal.explored = Array.isArray(parsed.explored) ? parsed.explored : [];
+          journal.entries  = (parsed.entries && typeof parsed.entries === 'object') ? parsed.entries : {};
+        }
+      }
+    }catch(e){
+      /* corrupt or unreadable — start clean rather than refuse to load */
+      journal = { explored: [], entries: {} };
+    }
+  }
+  const note = document.getElementById('storage-note');
+  note.textContent = storagePersists
+    ? 'Your journal is saved on this device only. Nothing is sent anywhere.'
+    : 'This browser is not letting the page save anything, so your journal will last until you close the tab.';
+  renderHome();
+}
+function persistJournal(){
+  if(!storagePersists) return;
+  try{
+    window.localStorage.setItem(STORE_KEY, JSON.stringify(journal));
+  }catch(e){
+    /* quota, or permission revoked mid-session — carry on in memory */
+    storagePersists = false;
+  }
+}
+/* ---------------- RENDER: HOME ---------------- */
+function renderHome(){
+  const list = document.getElementById('card-list');
+  list.innerHTML = '';
+  PASSAGES.forEach(p => {
+    const exploredCount = p.words.filter(w => journal.explored.includes(w)).length;
+    const card = document.createElement('button');
+    card.className = 'passage-card';
+    card.onclick = () => openPassage(p.id);
+    card.innerHTML = `
+      <span class="passage-tag">${p.theme}</span>
+      <h3>${p.title} <span style="color:var(--text-faint); font-size:14px; font-weight:400;">— ${p.tag}</span></h3>
+      <p>Tap words in this passage to slow down and reflect on each one.</p>
+      <div class="passage-meta">
+        <span class="word-count">${exploredCount} / ${p.words.length} words explored</span>
+        <span class="go-arrow">→</span>
+      </div>`;
+    list.appendChild(card);
+  });
+  const entryCount = Object.keys(journal.entries).length;
+  document.getElementById('journal-count-wrap').innerHTML = entryCount > 0
+    ? `<span class="journal-badge">${entryCount}</span> Open →`
+    : 'Open →';
+}
+/* ---------------- RENDER: PASSAGE ---------------- */
+function openPassage(id){
+  currentPassageId = id;
+  const p = PASSAGES.find(x => x.id === id);
+  document.getElementById('p-tag').textContent = p.tag;
+  document.getElementById('p-title').textContent = p.title;
+  document.getElementById('p-verse').innerHTML = p.verseHTML;
+  document.querySelectorAll('#p-verse .w').forEach(el => {
+    /* a tap is the whole interaction here, so it has to work from a keyboard too */
+    el.setAttribute('role','button');
+    el.setAttribute('tabindex','0');
+    el.addEventListener('click', onWordTap);
+    el.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); onWordTap(e); }
+    });
+    if(journal.explored.includes(el.dataset.k)) el.classList.add('explored');
+  });
+  updateProgress();
+  showScreen('screen-passage');
+}
+function updateProgress(){
+  const p = PASSAGES.find(x => x.id === currentPassageId);
+  if(!p) return;   /* the sheet can also be opened from the journal, with no passage loaded */
+  const count = p.words.filter(w => journal.explored.includes(w)).length;
+  document.getElementById('p-progress-text').textContent = `${count} / ${p.words.length}`;
+  document.getElementById('p-progress-fill').style.width = `${Math.round(count / p.words.length * 100)}%`;
+}
+/* ---------------- WORD TAP + RIPPLE ---------------- */
+function onWordTap(e){
+  const rect = e.currentTarget.getBoundingClientRect();
+  spawnRipple(rect.left + rect.width/2, rect.top + rect.height/2);
+  const key = e.currentTarget.dataset.k;
+  setTimeout(() => openSheet(key), 90);
+}
+function spawnRipple(x,y){
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  r.style.left = x+'px'; r.style.top = y+'px';
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 550);
+}
+/* ---------------- REFLECTION SHEET ---------------- */
+function openSheet(key){
+  const d = WORDS[key];
+  if(!d) return;
+  activeWordKey = key;
+  document.getElementById('sheet-ref').textContent = d.ref;
+  document.getElementById('sheet-word').textContent = d.word;
+  document.getElementById('s-definition').textContent = d.definition;
+  document.getElementById('s-synonyms').innerHTML = d.synonyms.map(s => `<span class="chip">${s}</span>`).join('');
+  document.getElementById('s-ref').textContent = d.crossRef;
+  document.getElementById('s-refnote').textContent = d.crossNote;
+  document.getElementById('s-visualize').textContent = d.visualize;
+  document.getElementById('s-meditate').textContent = d.meditate;
+  document.getElementById('s-pray').textContent = '"' + d.pray + '"';
+  const noteBox = document.getElementById('s-note');
+  const existing = journal.entries[key];
+  noteBox.value = existing && existing.note ? existing.note : '';
+  const btn = document.getElementById('save-note-btn');
+  btn.textContent = existing ? 'Saved to journal ✓' : 'Save to journal';
+  btn.classList.toggle('saved', !!existing);
+  // mark explored
+  if(!journal.explored.includes(key)){
+    journal.explored.push(key);
+    persistJournal();
+    const el = document.querySelector(`#p-verse .w[data-k="${key}"]`);
+    if(el) el.classList.add('explored');
+    updateProgress();
+    renderHome();
+  }
+  document.getElementById('overlay').classList.add('show');
+  document.body.classList.add('locked');
+  document.getElementById('sheet').scrollTop = 0;
+}
+function closeSheet(){
+  document.getElementById('overlay').classList.remove('show');
+  document.body.classList.remove('locked');
+  activeWordKey = null;
+}
+function closeSheetIfBackdrop(e){
+  if(e.target.id === 'overlay') closeSheet();
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.getElementById('overlay').classList.contains('show')) closeSheet();
+});
+function saveNote(){
+  if(!activeWordKey) return;
+  const d = WORDS[activeWordKey];
+  const note = document.getElementById('s-note').value.trim();
+  journal.entries[activeWordKey] = {
+    word: d.word, ref: d.ref, note: note, ts: Date.now()
+  };
+  persistJournal();
+  const btn = document.getElementById('save-note-btn');
+  btn.textContent = 'Saved to journal ✓';
+  btn.classList.add('saved');
+  renderHome();
+}
+/* ---------------- JOURNAL SCREEN ---------------- */
+function openJournal(){
+  const entries = Object.entries(journal.entries).sort((a,b) => b[1].ts - a[1].ts);
+  const body = document.getElementById('journal-body');
+  if(entries.length === 0){
+    body.innerHTML = `<div class="journal-empty">No saved words yet. Tap a word in any passage, then hit <b>Save to journal</b> to keep it here.</div>`;
+  } else {
+    body.innerHTML = `<div class="journal-entries">${entries.map(([key, e]) => `
+      <button class="j-entry" data-k="${key}">
+        <div class="jw">${escapeHTML(e.word)}</div>
+        <div class="jr">${escapeHTML(e.ref)}</div>
+        ${e.note ? `<div class="jn">"${escapeHTML(e.note)}"</div>` : ''}
+      </button>`).join('')}</div>`;
+    body.querySelectorAll('.j-entry').forEach(el => {
+      el.addEventListener('click', () => openSheet(el.dataset.k));
+    });
+  }
+  showScreen('screen-journal');
+}
+/* the note is the reader's own text coming back out of storage, so it is escaped rather
+   than dropped into innerHTML raw */
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+/* ---------------- NAV ---------------- */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goHome(){ renderHome(); showScreen('screen-home'); }
+document.getElementById('journal-link').addEventListener('click', openJournal);
+loadJournal();
+</script>
+</body>
+</html>

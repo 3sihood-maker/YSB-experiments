@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Route Workouts — GPS Art &amp; Scripture</title>
+<meta name="description" content="Pick a Bible passage, walk the shape it hides, and see what you drew at the end.">
+<meta name="theme-color" content="#171B2E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,560;1,9..144,480&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root{
+    --night: #171B2E;
+    --night-2: #232B47;
+    --dawn: #E3A857;
+    --dawn-bright: #F3C878;
+    --horizon: #C9633F;
+    --parchment: #F3EEE2;
+    --parchment-dim: #E7E0D0;
+    --ink: #23283D;
+    --ink-soft: #545B78;
+    --muted: #8993A8;
+    --success: #5B8F6B;
+    --radius: 14px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background: var(--parchment); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; line-height:1.5; }
+  h1,h2,h3, .display{ font-family:'Fraunces', Georgia, serif; }
+  button{
+    font-family:'Inter', system-ui, sans-serif; cursor:pointer; border:none; border-radius: 999px;
+    padding: 13px 22px; font-size: 15px; font-weight:600;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  button:active{ transform: scale(.97); }
+  button:disabled{ opacity:.5; cursor:not-allowed; }
+  button:focus-visible, input:focus-visible{ outline: 3px solid var(--dawn); outline-offset: 2px; }
+  .btn-primary{ background: var(--dawn); color: var(--night); }
+  .btn-primary:hover{ background: var(--dawn-bright); }
+  .btn-quiet{ background: var(--night-2); color: var(--parchment); }
+  .btn-quiet:hover{ background:#2c3660; }
+  .btn-link{ background:none; color:var(--ink-soft); font-weight:500; font-size:13.5px; padding:8px 4px; text-decoration:underline; }
+  .btn-toggle{ background:#fff; border:1.5px solid var(--parchment-dim); color:var(--ink-soft); flex:1; }
+  .btn-toggle.selected{ background: var(--night); border-color:var(--night); color: var(--dawn); }
+  /* ---------- HERO ---------- */
+  .hero{ background: linear-gradient(180deg, var(--night) 0%, #2A3560 55%, var(--horizon) 130%); color: var(--parchment); padding: 44px 20px 36px; text-align:center; position:relative; overflow:hidden; }
+  .hero .eyebrow{ font-size:12px; letter-spacing:.16em; text-transform:uppercase; color: var(--dawn); font-weight:600; margin-bottom:14px; }
+  .hero svg{ display:block; margin: 6px auto 12px; width:110px; height:110px; }
+  .hero-path{ fill:none; stroke: var(--dawn); stroke-width:8; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: draw 2.2s ease forwards .3s; }
+  .hero-mark{ font-family:'Fraunces',serif; font-size:150px; stroke-width:3; }
+  @media (prefers-reduced-motion: reduce){ .hero-path{ animation:none; stroke-dashoffset:0; } }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  .hero-title{ font-size: clamp(22px,5vw,30px); margin: 4px 0 10px; }
+  .hero-sub{ max-width: 480px; margin: 10px auto 0; font-size:14.5px; color: rgba(243,238,226,.85); }
+  .mystery-note{ margin-top:10px; font-size:13px; color: var(--dawn-bright); font-style:italic; }
+  /* ---------- SECTIONS ---------- */
+  .wrap{ max-width: 560px; margin: 0 auto; padding: 26px 18px 60px; }
+  .card{ background:#fff; border:1px solid var(--parchment-dim); border-radius: var(--radius); padding: 22px; margin-bottom: 18px; box-shadow: 0 1px 2px rgba(23,27,46,.04); }
+  .card h2{ font-size: 20px; margin: 0 0 8px; font-weight:560; }
+  .card p.hint{ color: var(--ink-soft); font-size:13.8px; margin: 0 0 16px; }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .field{ flex:1; min-width:120px; display:flex; flex-direction:column; gap:5px; }
+  .field label{ font-size:12px; color: var(--ink-soft); font-weight:600; }
+  .field input{ padding:10px 12px; border-radius:9px; border:1.5px solid var(--parchment-dim); font-size:15px; font-family:inherit; }
+  .status-line{ display:flex; align-items:center; gap:8px; font-size:13.5px; color: var(--ink-soft); margin-top:12px; }
+  .dot{ width:8px; height:8px; border-radius:50%; background: var(--muted); flex-shrink:0; }
+  .dot.ok{ background: var(--success); }
+  .dot.warn{ background: var(--horizon); }
+  .section-label{ font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; margin: 4px 0 8px; }
+  /* verse picker */
+  .verse-option{ border:1.5px solid var(--parchment-dim); border-radius:12px; padding:16px; margin-bottom:12px; cursor:pointer; transition: border-color .15s ease, background .15s ease; }
+  .verse-option:hover{ border-color: var(--dawn); }
+  .verse-option.selected{ border-color: var(--dawn); background: #FFFBF2; }
+  .verse-option .ref{ font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color: var(--horizon); margin-bottom:6px; }
+  .verse-option .vtext{ font-family:'Fraunces',serif; font-style:italic; font-size:15px; color: var(--ink); margin:0; }
+  .verse-banner{ display:flex; align-items:center; justify-content:space-between; gap:10px; background: var(--parchment); border-radius:10px; padding:12px 14px; margin-bottom:16px; }
+  .verse-banner .ref{ font-size:12.5px; font-weight:700; color: var(--horizon); text-transform:uppercase; letter-spacing:.04em; }
+  .stat-strip{ display:flex; gap:24px; justify-content:center; margin: 6px 0 4px; }
+  .stat-strip .stat{ text-align:center; }
+  .stat-strip b{ display:block; font-family:'Fraunces',serif; font-size:26px; }
+  .stat-strip span{ font-size:11.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+  /* ---------- TRACKING / COMPASS ---------- */
+  .track-panel{ text-align:center; }
+  .station-badge{ display:inline-block; background:var(--night); color:var(--dawn); font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:5px 14px; border-radius:999px; margin-bottom:14px; }
+  .progress-bar{ height:8px; border-radius:5px; background:var(--parchment-dim); overflow:hidden; margin:10px 0 22px; }
+  .progress-fill{ height:100%; background: linear-gradient(90deg, var(--dawn), var(--horizon)); width:0%; transition: width .4s ease; }
+  .compass-dial{ width:220px; height:220px; border-radius:50%; margin: 0 auto 18px; position:relative; background: radial-gradient(circle at 50% 45%, #232B47, var(--night) 75%); box-shadow: inset 0 0 0 1px rgba(227,168,87,.25), 0 6px 18px rgba(23,27,46,.25); }
+  .compass-fixed-mark{ position:absolute; top:10px; left:50%; transform:translateX(-50%); font-size:11px; color: var(--dawn); letter-spacing:.08em; font-weight:700; }
+  .compass-needle{ position:absolute; top:50%; left:50%; width:0; height:0; transform-origin:50% 50%; transition: transform .25s ease; }
+  .compass-needle .tip{ position:absolute; left:-16px; top:-95px; width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent; border-bottom:48px solid var(--dawn); }
+  .compass-needle .tail{ position:absolute; left:-6px; top:-46px; width:12px; height:70px; background: rgba(227,168,87,.35); border-radius:6px; }
+  .compass-center{ position:absolute; top:50%; left:50%; width:10px; height:10px; margin:-5px; border-radius:50%; background:var(--parchment); }
+  .compass-caption{ font-size:12.5px; color:var(--ink-soft); margin-bottom:6px; }
+  .big-num{ font-family:'Fraunces',serif; font-size:40px; font-weight:560; color:var(--night); }
+  .big-num small{ font-size:13.5px; font-weight:500; color:var(--ink-soft); display:block; margin-top:2px; }
+  .exercise-callout{ background: var(--night); color: var(--parchment); border-radius: var(--radius); padding:24px; text-align:center; }
+  .exercise-callout .label{ color:var(--dawn); font-size:12px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; }
+  .exercise-callout h3{ margin:8px 0 6px; font-size:21px; }
+  .exercise-callout p{ font-size:14.5px; color:rgba(243,238,226,.85); margin:0 0 18px; }
+  #reveal-map{ height: 300px; border-radius: var(--radius); overflow:hidden; margin: 16px 0; border:1px solid var(--parchment-dim); }
+  .legend{ display:flex; gap:16px; font-size:12.5px; color:var(--ink-soft); margin-bottom:6px; flex-wrap:wrap; justify-content:center; }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .swatch{ width:16px; height:3px; border-radius:2px; display:inline-block; }
+  .done-panel{ text-align:center; }
+  .reveal-title{ font-size:23px; margin: 4px 0 10px; }
+  .station-log{ list-style:none; padding:0; margin: 18px 0; text-align:left; }
+  .station-log li{ padding:8px 0; border-top:1px solid var(--parchment-dim); font-size:14px; display:flex; justify-content:space-between; gap:10px;}
+  .station-log li:first-child{ border-top:none; }
+  .station-log .name{ font-weight:600; }
+  .station-log .note{ color:var(--ink-soft); font-size:12.5px; }
+  .done-verse{ font-family:'Fraunces', Georgia, serif; font-style: italic; font-size: 17px; color: var(--ink); max-width: 460px; margin: 14px auto 4px; }
+  .done-ref{ font-size:13px; letter-spacing:.05em; color: var(--horizon); font-weight:600; }
+  .hidden{ display:none !important; }
+  footer{ text-align:center; font-size:12px; color: var(--ink-soft); padding: 10px 18px 30px; }
+  #flash-overlay{ position:fixed; inset:0; pointer-events:none; background: var(--dawn); opacity:0; z-index: 9999; }
+  #flash-overlay.flash-active{ animation: flashPulse .6s ease; }
+  @keyframes flashPulse{ 0%{opacity:0;} 15%{opacity:.55;} 100%{opacity:0;} }
+</style>
+</head>
+<body>
+<div id="flash-overlay"></div>
+<div class="hero">
+  <div class="eyebrow">Route-Drawing Workouts</div>
+  <svg viewBox="0 0 300 300" aria-hidden="true">
+    <text x="150" y="215" text-anchor="middle" class="hero-path hero-mark" fill="none">?</text>
+  </svg>
+  <h1 class="hero-title">Walk a verse. Draw its shape.</h1>
+  <p class="hero-sub">Pick a Bible passage below. Each one hides a different shape, traced in one continuous route with a few exercises along the way. Your phone buzzes when you've gone the right distance — you won't see what you've drawn until you finish.</p>
+  <p class="mystery-note">The shape stays hidden until the end.</p>
+</div>
+<div class="wrap">
+  <!-- VERSE PICKER -->
+  <div class="card" id="verse-select-card">
+    <h2>Choose your verse</h2>
+    <p class="hint">Each passage draws a different silhouette. Pick the one that speaks to you today — the exact shape is still a surprise.</p>
+    <div id="verse-options"></div>
+  </div>
+  <!-- SETUP -->
+  <div class="card hidden" id="setup-card">
+    <div class="verse-banner">
+      <span class="ref" id="setup-verse-ref">Verse</span>
+      <button class="btn-link" id="change-verse-btn">Change</button>
+    </div>
+    <h2>Get ready</h2>
+    <p class="hint">Find open ground — a park, oval, or quiet block — with roughly 150&nbsp;m of clearance around you. We'll use your GPS to place the route and your phone's compass to guide each turn.</p>
+    <div class="section-label">Track distance by</div>
+    <div class="row" style="margin-bottom:6px;">
+      <button class="btn-toggle selected" id="mode-gps-btn">GPS distance</button>
+      <button class="btn-toggle" id="mode-steps-btn">Step count</button>
+    </div>
+    <p class="hint" id="mode-hint">Best in open areas with clear sky view.</p>
+    <div class="row hidden" id="stride-field">
+      <div class="field">
+        <label for="stride-input">Your stride length (meters)</label>
+        <input id="stride-input" type="text" inputmode="decimal" value="0.75">
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <button class="btn-primary" id="use-location-btn" style="flex:1;">Enable location &amp; compass, then start</button>
+    </div>
+    <div class="row hidden" id="manual-fields" style="margin-top:14px;">
+      <div class="field">
+        <label for="lat-input">Latitude</label>
+        <input id="lat-input" type="text" inputmode="decimal" placeholder="-33.8688">
+      </div>
+      <div class="field">
+        <label for="lon-input">Longitude</label>
+        <input id="lon-input" type="text" inputmode="decimal" placeholder="151.2093">
+      </div>
+      <div class="field" style="flex:0 0 100%;">
+        <button class="btn-primary" id="manual-set-btn" style="width:100%;">Set trailhead manually</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:4px;">
+      <button class="btn-link" id="manual-toggle-btn">Trouble with GPS? Enter coordinates manually</button>
+    </div>
+    <div class="status-line"><span class="dot" id="loc-dot"></span><span id="loc-status">Waiting for a starting point&hellip;</span></div>
+    <div class="status-line"><span class="dot" id="sensor-dot"></span><span id="sensor-status">Compass and step sensors not yet enabled.</span></div>
+  </div>
+  <!-- READY -->
+  <div class="card hidden" id="ready-card">
+    <h2>Route generated</h2>
+    <p class="hint">Hidden until the end. Follow the compass — you don't need straight lines or square turns, just keep the arrow pointing up.</p>
+    <div class="stat-strip">
+      <div class="stat"><b id="ready-distance">0</b><span>meters total</span></div>
+      <div class="stat"><b id="ready-legs">0</b><span>stations</span></div>
+    </div>
+    <div class="row" style="margin-top:14px;">
+      <button class="btn-primary" id="start-workout-btn" style="width:100%;">Begin</button>
+    </div>
+    <p class="hint" id="start-note" style="margin:12px 0 0;"></p>
+  </div>
+  <!-- ACTIVE TRACKING -->
+  <div class="card hidden" id="track-card">
+    <div class="track-panel">
+      <div class="station-badge" id="station-badge">Station 1 of 6</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="compass-dial">
+        <div class="compass-fixed-mark">FORWARD</div>
+        <div class="compass-needle" id="compass-needle">
+          <div class="tip"></div>
+          <div class="tail"></div>
+        </div>
+        <div class="compass-center"></div>
+      </div>
+      <p class="compass-caption">Turn until the arrow points straight up, then walk.</p>
+      <div class="big-num" id="dist-remaining">&mdash;<small>meters to go</small></div>
+      <p class="hint" style="margin-top:14px;" id="track-hint">We'll buzz your phone when you've gone far enough.</p>
+      <button class="btn-link" id="arrived-btn">Sensors seem off? Tap to continue manually</button>
+    </div>
+  </div>
+  <!-- EXERCISE CALLOUT -->
+  <div class="exercise-callout hidden" id="exercise-card">
+    <div class="label" id="exercise-station-label">Station</div>
+    <h3 id="exercise-title">Exercise</h3>
+    <p id="exercise-desc">Description</p>
+    <button class="btn-primary" id="continue-btn">Done — continue</button>
+  </div>
+  <!-- DONE / REVEAL -->
+  <div class="card done-panel hidden" id="done-card">
+    <h2 class="reveal-title">Here's what you drew</h2>
+    <svg viewBox="0 0 300 300" style="width:110px;height:110px;margin:0 auto 6px;">
+      <path class="hero-path" id="reveal-icon-path" style="stroke:var(--horizon);animation-duration:1.6s;" d=""/>
+    </svg>
+    <p class="hint" id="reveal-blurb"></p>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--muted);border:1px dashed var(--muted);"></i>Planned route</span>
+      <span><i class="swatch" style="background:var(--dawn);"></i>Your actual path</span>
+    </div>
+    <div id="reveal-map"></div>
+    <div class="stat-strip">
+      <div class="stat"><b id="done-distance">0</b><span>meters walked</span></div>
+      <div class="stat"><b id="done-stations">0</b><span>stations completed</span></div>
+    </div>
+    <ol class="station-log" id="station-log"></ol>
+    <p class="done-verse" id="reveal-closing-text"></p>
+    <div class="done-ref" id="reveal-closing-ref"></div>
+  </div>
+</div>
+<footer>Route generated locally in your browser. GPS and motion sensors vary by device — treat distances as approximate, and use the manual button if a station seems stuck.</footer>
+<script>
+(function(){
+  "use strict";
+  // ================= VERSE / SHAPE LIBRARY =================
+  // Each shape is a list of {x,y} meters (x=east, y=north) from the trailhead,
+  // walked as ONE continuous, non-retracing route. Closed shapes repeat their
+  // first point as their last point so legs = shape.length - 1 always.
+  const VERSES = [
+    {
+      id: 'arrow',
+      ref: 'Isaiah 55:8-9',
+      verse: `"For my thoughts are not your thoughts, neither are your ways my ways," saith the LORD. "For as the heavens are higher than the earth, so are my ways higher than your thoughts, and my thoughts than your ways."`,
+      closingRef: 'Isaiah 55:11',
+      closing: `"So shall my word be that goeth forth out of my mouth: it shall not return unto me void."`,
+      revealBlurb: "An arrow, pointing up — a small picture of a wide idea: what's above is higher than what's here.",
+      revealIcon: 'M60,280 L60,150 L20,150 L150,20 L280,150 L240,150 L240,280',
+      shape: [ {x:-40,y:0},{x:-40,y:200},{x:-100,y:200},{x:0,y:340},{x:100,y:200},{x:40,y:200},{x:40,y:0} ],
+      legInstructions: [
+        "Jog or brisk-walk, steady effort, heading roughly north.",
+        "Continue north, then curl west-northwest.",
+        "Climb toward the peak — shorten your stride if the ground rises.",
+        "Descend east-southeast.",
+        "Head south, back the way you came.",
+        "Finish your descent to the trailhead."
+      ],
+      exercises: [
+        { title:"Reach Higher", desc:"10 slow overhead reaches. Stretch tall on each one — reaching for thoughts higher than your own." },
+        { title:"Rising Lunges", desc:"12 walking lunges, arms overhead on every step." },
+        { title:"Stand Still", desc:"60 seconds of stillness. Breathe, and read verse 9 again before moving on." },
+        { title:"Rising Lunges", desc:"12 walking lunges, leading with the other leg this time." },
+        { title:"Reach Higher", desc:"10 slow overhead reaches, exhaling as your arms rise." },
+        { title:"Grounded", desc:"Cool down with 10 slow bodyweight squats — grounding back to earth." }
+      ],
+      stationNames: ["Ascending Shaft","Left Wing","The Point","Right Wing","Descending Shaft","Trail's End"],
+      stationNotes: ["","","Highest ground","","","Back to earth"]
+    },
+    {
+      id: 'cross',
+      ref: 'Galatians 6:14',
+      verse: `"God forbid that I should glory, save in the cross of our Lord Jesus Christ, by whom the world is crucified unto me, and I unto the world."`,
+      closingRef: '1 Corinthians 1:18',
+      closing: `"For the preaching of the cross is to them that perish foolishness; but unto us which are saved it is the power of God."`,
+      revealBlurb: "A cross — the shape at the center of the passage you chose.",
+      revealIcon: 'M120,280 L120,190 L60,190 L60,120 L120,120 L120,20 L180,20 L180,120 L240,120 L240,190 L180,190 L180,280 Z',
+      shape: [
+        {x:-25,y:-90},{x:25,y:-90},{x:25,y:20},{x:80,y:20},{x:80,y:60},{x:25,y:60},
+        {x:25,y:140},{x:-25,y:140},{x:-25,y:60},{x:-80,y:60},{x:-80,y:20},{x:-25,y:20},
+        {x:-25,y:-90}
+      ],
+      legInstructions: [
+        "Head along the base, left to right.",
+        "Turn and climb straight up the right side of the stem.",
+        "Turn right, walk out along the base of the right arm.",
+        "Turn left, walk up the outer edge of the right arm.",
+        "Turn left, walk back in along the top of the right arm.",
+        "Turn right, continue up toward the crown.",
+        "Turn left, cross straight over the top.",
+        "Turn left, head down the crown's far side.",
+        "Turn right, walk in along the top of the left arm.",
+        "Turn left, walk down the outer edge of the left arm.",
+        "Turn left, walk back in along the base of the left arm.",
+        "Turn right, descend the stem to finish where you began."
+      ],
+      exercises: [
+        { title:"Steady Footing", desc:"10 squats — steady footing before the climb." },
+        { title:"Press Forward", desc:"20 mountain climbers — pressing on in the work." },
+        { title:"Poured Out", desc:"12 push-ups — strength poured out." },
+        { title:"Bear the Weight", desc:"30-second plank — steady under the weight." },
+        { title:"Carry It", desc:"10 slow tricep dips (use a step, bench, or chair) — bearing the cross." },
+        { title:"Lifted Up", desc:"15 overhead reaches — lifted up." },
+        { title:"Glory", desc:"30 seconds of stillness. “God forbid that I should glory, save in the cross.”" },
+        { title:"Lifted Up", desc:"15 overhead reaches, other arm leading." },
+        { title:"Carry It", desc:"10 slow tricep dips." },
+        { title:"Bear the Weight", desc:"30-second plank." },
+        { title:"Poured Out", desc:"12 push-ups." },
+        { title:"Finished Work", desc:"20 mountain climbers, then walk it out slowly." }
+      ],
+      stationNames: ["Stem Right","Arm Base Right","Arm Tip Right","Arm Top Right","Crown Right","Crown Peak","Crown Left","Arm Top Left","Arm Tip Left","Arm Base Left","Stem Left","Foot of the Cross"],
+      stationNotes: ["","","","","","the cross of our Lord","","","","","","crucified unto me"]
+    },
+    {
+      id: 'star',
+      ref: 'Matthew 2:9-10',
+      verse: `"When they had heard the king, they departed; and, lo, the star, which they saw in the east, went before them, till it came and stood over where the young child was. When they saw the star, they rejoiced with exceeding great joy."`,
+      closingRef: 'Numbers 24:17',
+      closing: `"There shall come a Star out of Jacob, and a Sceptre shall rise out of Israel."`,
+      revealBlurb: "A five-pointed star, walked in a single unbroken line — the same way you'd draw one without lifting a pen.",
+      revealIcon: 'M150,30 L220.5,247 L36,113 L264,113 L79.5,247 Z',
+      shape: [ {x:0,y:110},{x:65,y:-89},{x:-105,y:34},{x:105,y:34},{x:-65,y:-89},{x:0,y:110} ],
+      legInstructions: [
+        "Set out toward the first point, any direction you like.",
+        "Cut across to the next point — the star doesn't travel in straight lines toward you.",
+        "Continue across to the third point.",
+        "Cross again to the fourth point.",
+        "One more crossing back to where you started."
+      ],
+      exercises: [
+        { title:"Great Joy", desc:"12 jumping jacks — “they rejoiced with exceeding great joy.”" },
+        { title:"Follow the Light", desc:"10 long strides or broad jumps forward." },
+        { title:"Star Pose", desc:"Hold arms and legs spread wide for 20 seconds." },
+        { title:"Quick Steps", desc:"15 high knees." },
+        { title:"It Stood Still", desc:"Stand still for 30 seconds and look up — “the star... stood over where the young child was.”" }
+      ],
+      stationNames: ["Went Before Them","Stood Still","Exceeding Joy","Where the Child Was","Journey's End"],
+      stationNotes: ["","","","",""]
+    },
+    {
+      id: 'mountains',
+      ref: 'Psalm 121:1',
+      verse: `"I will lift up mine eyes unto the hills, from whence cometh my help."`,
+      closingRef: 'Psalm 121:2',
+      closing: `"My help cometh from the LORD, which made heaven and earth."`,
+      revealBlurb: "Two hills — lifted eyes, and the ground it took to get there.",
+      revealIcon: 'M20,280 L100,60 L150,180 L200,40 L280,280',
+      shape: [ {x:-160,y:0},{x:-80,y:230},{x:0,y:90},{x:80,y:250},{x:160,y:0} ],
+      legInstructions: [
+        "Climb toward the first summit — power-walk or jog, whatever the slope calls for.",
+        "Descend into the valley at an easy pace.",
+        "Climb again toward the second summit.",
+        "Descend to finish."
+      ],
+      exercises: [
+        { title:"Lift Your Eyes", desc:"10 step-ups or high-knee marches — “from whence cometh my help.”" },
+        { title:"Held Low", desc:"20 squats — even the low places are held." },
+        { title:"The Summit", desc:"60 seconds of stillness. “I will lift up mine eyes unto the hills.”" },
+        { title:"Coming Down", desc:"10 slow forward bends to close." }
+      ],
+      stationNames: ["First Summit","The Valley","Second Summit","Journey's End"],
+      stationNotes: ["lift up mine eyes","","from whence cometh my help",""]
+    },
+    {
+      id: 'house',
+      ref: 'Matthew 7:24-25',
+      verse: `"Therefore whosoever heareth these sayings of mine, and doeth them, I will liken him unto a wise man, which built his house upon a rock."`,
+      closingRef: 'Matthew 7:25',
+      closing: `"And the rain descended, and the floods came, and the winds blew, and beat upon that house; and it fell not: for it was founded upon a rock."`,
+      revealBlurb: "A house, built one wall and roofline at a time.",
+      revealIcon: 'M60,280 L240,280 L240,140 L150,40 L60,140 Z',
+      shape: [ {x:-100,y:0},{x:100,y:0},{x:100,y:150},{x:0,y:260},{x:-100,y:150},{x:-100,y:0} ],
+      legInstructions: [
+        "Walk the foundation line, steady and level.",
+        "Turn and climb the wall line.",
+        "Head up to the roofline.",
+        "Descend the far side of the roof.",
+        "Finish back down to the foundation."
+      ],
+      exercises: [
+        { title:"Firm Footing", desc:"20 squats — a house founded on rock." },
+        { title:"Steady Wall", desc:"30-second wall-sit (use a wall or tree) — steady under pressure." },
+        { title:"Built Strong", desc:"12 push-ups — built strong against the wind." },
+        { title:"It Fell Not", desc:"30-second plank. “The rain descended, and the floods came... and it fell not.”" },
+        { title:"Founded", desc:"10 slow squats to close — founded, and not moved." }
+      ],
+      stationNames: ["Right Corner","Right Wall Top","Roof Peak","Left Wall Top","Foundation Complete"],
+      stationNotes: ["","","founded upon a rock","","it fell not"]
+    }
+  ];
+  const STEP_THRESHOLD = 3.2;
+  const STEP_MIN_INTERVAL_MS = 280;
+  const ARRIVE_TOLERANCE_M = 0;
+  // ---------- Geo helpers ----------
+  function metersToLatLon(origin, dx, dy){
+    const dLat = dy / 111320;
+    const dLon = dx / (111320 * Math.cos(origin.lat * Math.PI/180));
+    return { lat: origin.lat + dLat, lon: origin.lon + dLon };
+  }
+  function haversine(lat1, lon1, lat2, lon2){
+    const R = 6371000;
+    const toRad = d => d * Math.PI/180;
+    const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+  function bearing(lat1, lon1, lat2, lon2){
+    const toRad = d => d*Math.PI/180, toDeg = r => r*180/Math.PI;
+    const y = Math.sin(toRad(lon2-lon1)) * Math.cos(toRad(lat2));
+    const x = Math.cos(toRad(lat1))*Math.sin(toRad(lat2)) - Math.sin(toRad(lat1))*Math.cos(toRad(lat2))*Math.cos(toRad(lon2-lon1));
+    return (toDeg(Math.atan2(y,x)) + 360) % 360;
+  }
+  // ---------- State ----------
+  const state = {
+    verse: null,
+    origin: null,
+    waypoints: [],
+    legDistances: [],
+    currentLeg: 0,
+    actualPath: [],
+    lastFix: null,
+    legDistanceWalked: 0,
+    legStepCount: 0,
+    legCompleteTriggered: false,
+    trackingMode: 'gps',
+    strideLength: 0.75,
+    deviceHeading: 0,
+    hasCompass: false,
+    targetBearing: 0,
+    watchId: null,
+    motion: { filtered: 9.8, lastStepTime: 0 },
+    map: null,
+    plannedLine: null,
+    actualLine: null,
+  };
+  const $ = id => document.getElementById(id);
+  const locDot = $('loc-dot'), locStatus = $('loc-status');
+  const sensorDot = $('sensor-dot'), sensorStatus = $('sensor-status');
+  const verseSelectCard = $('verse-select-card'), setupCard = $('setup-card'), readyCard = $('ready-card'),
+        trackCard = $('track-card'), exerciseCard = $('exercise-card'), doneCard = $('done-card');
+  // ================= VERSE PICKER =================
+  function renderVerseOptions(){
+    const container = $('verse-options');
+    container.innerHTML = '';
+    VERSES.forEach(v => {
+      const div = document.createElement('div');
+      div.className = 'verse-option';
+      div.tabIndex = 0;
+      div.setAttribute('role','button');
+      div.innerHTML = '<div class="ref">' + v.ref + '</div><p class="vtext">' + v.verse + '</p>';
+      div.addEventListener('click', () => selectVerse(v));
+      div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectVerse(v); } });
+      container.appendChild(div);
+    });
+  }
+  function selectVerse(v){
+    state.verse = v;
+    document.querySelectorAll('.verse-option').forEach(el => el.classList.remove('selected'));
+    verseSelectCard.classList.add('hidden');
+    $('setup-verse-ref').textContent = v.ref;
+    setupCard.classList.remove('hidden');
+    setupCard.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+  $('change-verse-btn').addEventListener('click', () => {
+    setupCard.classList.add('hidden');
+    readyCard.classList.add('hidden');
+    verseSelectCard.classList.remove('hidden');
+    verseSelectCard.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  renderVerseOptions();
+  // ---------- Tracking mode toggle ----------
+  $('mode-gps-btn').addEventListener('click', () => setMode('gps'));
+  $('mode-steps-btn').addEventListener('click', () => setMode('steps'));
+  function setMode(mode){
+    state.trackingMode = mode;
+    $('mode-gps-btn').classList.toggle('selected', mode === 'gps');
+    $('mode-steps-btn').classList.toggle('selected', mode === 'steps');
+    $('stride-field').classList.toggle('hidden', mode !== 'steps');
+    $('mode-hint').textContent = mode === 'gps'
+      ? "Best in open areas with clear sky view."
+      : "Estimates distance from your step count and stride length — useful where GPS is weak. Rough by nature, so treat the buzz as a good-enough cue.";
+    updateStartNote();
+  }
+  $('stride-input').addEventListener('change', () => {
+    const v = parseFloat($('stride-input').value);
+    if (!isNaN(v) && v > 0.2 && v < 2) state.strideLength = v;
+  });
+  // ---------- Setup: location + sensors (single gesture) ----------
+  $('use-location-btn').addEventListener('click', () => {
+    requestSensorPermissions();
+    if (!navigator.geolocation){
+      locStatus.textContent = "Geolocation isn't available on this browser — try entering coordinates instead.";
+      locDot.className = 'dot warn';
+      $('manual-fields').classList.remove('hidden');
+      return;
+    }
+    locStatus.textContent = "Finding your location…";
+    navigator.geolocation.getCurrentPosition(
+      pos => setOrigin(pos.coords.latitude, pos.coords.longitude),
+      err => {
+        locStatus.textContent = "Couldn't get your location (" + err.message + "). Try entering coordinates.";
+        locDot.className = 'dot warn';
+        $('manual-fields').classList.remove('hidden');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+  $('manual-toggle-btn').addEventListener('click', () => {
+    requestSensorPermissions();
+    $('manual-fields').classList.toggle('hidden');
+  });
+  $('manual-set-btn').addEventListener('click', () => {
+    const lat = parseFloat($('lat-input').value);
+    const lon = parseFloat($('lon-input').value);
+    if (isNaN(lat) || isNaN(lon)){
+      locStatus.textContent = "Enter valid decimal latitude and longitude.";
+      locDot.className = 'dot warn';
+      return;
+    }
+    setOrigin(lat, lon);
+  });
+  function setOrigin(lat, lon){
+    state.origin = { lat, lon };
+    locDot.className = 'dot ok';
+    locStatus.textContent = "Trailhead set at " + lat.toFixed(5) + ", " + lon.toFixed(5) + ".";
+    buildRoute();
+    renderReady();
+    readyCard.classList.remove('hidden');
+    readyCard.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+  // ---------- Sensor permissions ----------
+  function requestSensorPermissions(){
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
+      DeviceOrientationEvent.requestPermission().then(r => { if (r === 'granted') attachOrientation(); updateSensorStatus(); }).catch(updateSensorStatus);
+    } else if (typeof DeviceOrientationEvent !== 'undefined'){
+      attachOrientation();
+    }
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+      DeviceMotionEvent.requestPermission().then(r => { if (r === 'granted') attachMotion(); updateSensorStatus(); }).catch(updateSensorStatus);
+    } else if (typeof DeviceMotionEvent !== 'undefined'){
+      attachMotion();
+    }
+    setTimeout(updateSensorStatus, 400);
+  }
+  function updateSensorStatus(){
+    if (state.hasCompass){
+      sensorDot.className = 'dot ok';
+      sensorStatus.textContent = "Compass is live.";
+    } else {
+      sensorDot.className = 'dot warn';
+      sensorStatus.textContent = "Compass unavailable on this device/browser — you'll still get a distance countdown.";
+    }
+  }
+  function attachOrientation(){
+    const handler = e => {
+      let heading = null;
+      if (typeof e.webkitCompassHeading === 'number'){
+        heading = e.webkitCompassHeading;
+      } else if (e.alpha !== null && e.alpha !== undefined){
+        const screenAngle = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : (window.orientation || 0);
+        heading = (360 - e.alpha + screenAngle) % 360;
+      }
+      if (heading !== null){
+        state.deviceHeading = heading;
+        state.hasCompass = true;
+        renderCompassNeedle();
+      }
+    };
+    const eventName = ('ondeviceorientationabsolute' in window) ? 'deviceorientationabsolute' : 'deviceorientation';
+    window.addEventListener(eventName, handler);
+  }
+  function attachMotion(){
+    window.addEventListener('devicemotion', e => {
+      const acc = e.accelerationIncludingGravity || e.acceleration;
+      if (!acc || acc.x === null) return;
+      const mag = Math.sqrt((acc.x||0)**2 + (acc.y||0)**2 + (acc.z||0)**2);
+      state.motion.filtered = state.motion.filtered * 0.9 + mag * 0.1;
+      const delta = mag - state.motion.filtered;
+      const now = Date.now();
+      if (delta > STEP_THRESHOLD && (now - state.motion.lastStepTime) > STEP_MIN_INTERVAL_MS){
+        state.motion.lastStepTime = now;
+        onStepDetected();
+      }
+    });
+  }
+  // ---------- Build route ----------
+  function buildRoute(){
+    state.waypoints = state.verse.shape.map(pt => {
+      const ll = metersToLatLon(state.origin, pt.x, pt.y);
+      return { lat: ll.lat, lon: ll.lon };
+    });
+    state.legDistances = [];
+    for (let i=1;i<state.waypoints.length;i++){
+      const a = state.waypoints[i-1], b = state.waypoints[i];
+      state.legDistances.push(haversine(a.lat,a.lon,b.lat,b.lon));
+    }
+    state.currentLeg = 0;
+    state.actualPath = [];
+  }
+  function renderReady(){
+    const totalDist = state.legDistances.reduce((a,b)=>a+b,0);
+    $('ready-distance').textContent = Math.round(totalDist);
+    $('ready-legs').textContent = state.legDistances.length;
+    updateStartNote();
+  }
+  /* Says plainly what this run will and will not be able to do, rather than letting the
+     reader find out halfway round a field. */
+  function updateStartNote(){
+    const note = $('start-note');
+    if (!note) return;
+    if (navigator.geolocation){
+      note.textContent = state.trackingMode === 'steps'
+        ? "Your path will still be recorded by GPS for the reveal at the end, but the distance countdown comes from your steps."
+        : "";
+    } else {
+      note.textContent = state.trackingMode === 'steps'
+        ? "This browser has no GPS, so there will be no drawn path on the map at the end — but the step counter will still walk you through every station."
+        : "This browser has no GPS. Switch to step counting above to walk the route anyway.";
+    }
+  }
+  // ---------- Start workout ----------
+  $('start-workout-btn').addEventListener('click', () => {
+    /* GPS is required for the GPS distance mode and for drawing the path afterwards, but
+       NOT for the walk itself. Someone who typed coordinates in by hand precisely because
+       their GPS is unavailable used to be stopped dead here by an alert; now the step
+       counter carries them round and only the map at the end is missing. */
+    if (!navigator.geolocation && state.trackingMode === 'gps'){
+      locStatus.textContent = "No geolocation on this browser — switch to step counting to walk the route.";
+      locDot.className = 'dot warn';
+      setMode('steps');
+      return;
+    }
+    startLeg(0);
+    trackCard.classList.remove('hidden');
+    trackCard.scrollIntoView({ behavior:'smooth', block:'start' });
+    if (navigator.geolocation){
+      state.watchId = navigator.geolocation.watchPosition(onPosition, onPositionError, {
+        enableHighAccuracy: true, maximumAge: 2000, timeout: 15000
+      });
+    }
+  });
+  function startLeg(index){
+    state.currentLeg = index;
+    state.legDistanceWalked = 0;
+    state.legStepCount = 0;
+    state.legCompleteTriggered = false;
+    $('station-badge').textContent = "Station " + (index+1) + " of " + state.legDistances.length;
+    $('track-hint').textContent = state.trackingMode === 'gps'
+      ? "We'll buzz your phone when your GPS trail covers the right distance."
+      : "We'll buzz your phone after roughly the right number of steps.";
+    $('arrived-btn').disabled = false;
+    /* Point the needle from the leg's own start waypoint straight away, so the compass is
+       useful before the first GPS fix arrives — and at all, if there is no GPS. Each live
+       fix then refines it from where the walker actually is. */
+    setBearingFromWaypoints();
+    updateRemainingUI(0);
+  }
+  function setBearingFromWaypoints(){
+    const from = state.waypoints[state.currentLeg], to = state.waypoints[state.currentLeg + 1];
+    if (!from || !to) return;
+    state.targetBearing = bearing(from.lat, from.lon, to.lat, to.lon);
+    renderCompassNeedle();
+  }
+  function updateRemainingUI(distanceSoFar){
+    const target = state.legDistances[state.currentLeg];
+    const remaining = Math.max(0, target - distanceSoFar);
+    $('dist-remaining').innerHTML = Math.round(remaining) + '<small>meters to go</small>';
+    const legProgress = Math.min(1, distanceSoFar / target);
+    const overallProgress = ((state.currentLeg + legProgress) / state.legDistances.length) * 100;
+    $('progress-fill').style.width = overallProgress + '%';
+  }
+  function renderCompassNeedle(){
+    const rel = ((state.targetBearing - state.deviceHeading) + 360) % 360;
+    $('compass-needle').style.transform = 'rotate(' + rel + 'deg)';
+  }
+  function onPositionError(){
+    $('dist-remaining').innerHTML = '&mdash;<small>GPS signal weak</small>';
+  }
+  function onPosition(pos){
+    const { latitude, longitude } = pos.coords;
+    if (state.lastFix){
+      const d = haversine(state.lastFix.lat, state.lastFix.lon, latitude, longitude);
+      if (d > 0.8 && d < 30){
+        if (state.trackingMode === 'gps') state.legDistanceWalked += d;
+      }
+    }
+    state.lastFix = { lat: latitude, lon: longitude };
+    state.actualPath.push([latitude, longitude]);
+    if (state.actualLine) state.actualLine.setLatLngs(state.actualPath);
+    const target = state.waypoints[state.currentLeg + 1];
+    if (target){
+      state.targetBearing = bearing(latitude, longitude, target.lat, target.lon);
+      renderCompassNeedle();
+    }
+    if (state.trackingMode === 'gps'){
+      updateRemainingUI(state.legDistanceWalked);
+      checkLegCompletion(state.legDistanceWalked);
+    }
+  }
+  function onStepDetected(){
+    if (state.trackingMode !== 'steps') return;
+    if (trackCard.classList.contains('hidden')) return;
+    state.legStepCount++;
+    const estDist = state.legStepCount * state.strideLength;
+    updateRemainingUI(estDist);
+    checkLegCompletion(estDist);
+  }
+  function checkLegCompletion(distanceSoFar){
+    const target = state.legDistances[state.currentLeg];
+    if (distanceSoFar >= target + ARRIVE_TOLERANCE_M && !state.legCompleteTriggered){
+      state.legCompleteTriggered = true;
+      notifyArrival();
+      setTimeout(arriveAtStation, 350);
+    }
+  }
+  // ---------- Notification ----------
+  function notifyArrival(){
+    if (navigator.vibrate) navigator.vibrate([300,100,300,100,300]);
+    else playBeep();
+    flashScreen();
+  }
+  function playBeep(){
+    try{
+      const ctx = new (window.AudioContext||window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = 880;
+      o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.5);
+      o.start(); o.stop(ctx.currentTime+0.55);
+    }catch(e){}
+  }
+  function flashScreen(){
+    const el = $('flash-overlay');
+    el.classList.remove('flash-active');
+    void el.offsetWidth;
+    el.classList.add('flash-active');
+  }
+  // ---------- Station arrival / exercise ----------
+  $('arrived-btn').addEventListener('click', arriveAtStation);
+  function arriveAtStation(){
+    if (!exerciseCard.classList.contains('hidden')) return;
+    const ex = state.verse.exercises[state.currentLeg];
+    $('exercise-station-label').textContent = 'Station ' + (state.currentLeg + 1) + ' of ' + state.legDistances.length;
+    $('exercise-title').textContent = ex.title;
+    $('exercise-desc').textContent = ex.desc;
+    trackCard.classList.add('hidden');
+    exerciseCard.classList.remove('hidden');
+    exerciseCard.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+  $('continue-btn').addEventListener('click', () => {
+    exerciseCard.classList.add('hidden');
+    const next = state.currentLeg + 1;
+    if (next >= state.legDistances.length){ finishWorkout(); return; }
+    startLeg(next);
+    trackCard.classList.remove('hidden');
+    trackCard.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  // ---------- Finish + reveal ----------
+  function finishWorkout(){
+    if (state.watchId !== null && navigator.geolocation) navigator.geolocation.clearWatch(state.watchId);
+    let total = 0;
+    for (let i=1;i<state.actualPath.length;i++){
+      total += haversine(state.actualPath[i-1][0], state.actualPath[i-1][1], state.actualPath[i][0], state.actualPath[i][1]);
+    }
+    /* With no GPS there is no recorded trail, so fall back to the planned distance rather
+       than telling someone who just walked 900 m that they walked zero. */
+    if (state.actualPath.length < 2) total = state.legDistances.reduce((a,b)=>a+b,0);
+    $('done-distance').textContent = Math.round(total);
+    $('done-stations').textContent = state.legDistances.length;
+    $('reveal-icon-path').setAttribute('d', state.verse.revealIcon);
+    $('reveal-blurb').textContent = state.verse.revealBlurb;
+    $('reveal-closing-text').textContent = state.verse.closing;
+    $('reveal-closing-ref').textContent = state.verse.closingRef.toUpperCase() + ', KJV';
+    const log = $('station-log');
+    log.innerHTML = '';
+    for (let i=1;i<state.waypoints.length;i++){
+      const li = document.createElement('li');
+      li.innerHTML = '<span class="name">' + i + '. ' + state.verse.stationNames[i-1] + '</span><span class="note">' + (state.verse.stationNotes[i-1]||'') + '</span>';
+      log.appendChild(li);
+    }
+    doneCard.classList.remove('hidden');
+    doneCard.scrollIntoView({ behavior:'smooth', block:'start' });
+    setTimeout(renderRevealMap, 50);
+  }
+  function renderRevealMap(){
+    /* Leaflet comes off a CDN; if it did not load, say so instead of throwing and taking
+       the whole reveal down with it. */
+    if (typeof L === 'undefined'){
+      $('reveal-map').style.height = 'auto';
+      $('reveal-map').innerHTML = '<p class="hint" style="padding:18px;margin:0;">The map could not load — you may be offline. Everything else below is still yours.</p>';
+      return;
+    }
+    if (!state.map){
+      state.map = L.map('reveal-map', { zoomControl:true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(state.map);
+    }
+    const plannedLatLngs = state.waypoints.map(w => [w.lat, w.lon]);
+    const bounds = plannedLatLngs.concat(state.actualPath);
+    state.map.fitBounds(bounds, { padding: [24,24] });
+    if (state.plannedLine) state.map.removeLayer(state.plannedLine);
+    state.plannedLine = L.polyline(plannedLatLngs, { color:'#8993A8', weight:4, dashArray:'6,8' }).addTo(state.map);
+    if (state.actualLine) state.map.removeLayer(state.actualLine);
+    state.actualLine = L.polyline(state.actualPath, { color:'#E3A857', weight:5 }).addTo(state.map);
+    state.map.invalidateSize();
+  }
+})();
+</script>
+</body>
+</html>
