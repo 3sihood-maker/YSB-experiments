@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Game Ideas · Youth Sports Bible</title>
+<meta name="theme-color" content="#20180f">
+<meta name="description" content="Games based on specific sports that could link to a testimony page or stand alone.">
+<style>
+@font-face{font-family:YSBSans;font-weight:400;font-style:normal;font-display:swap;
+  src:url(data:font/woff2;base64,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) format('woff2')}
+@font-face{font-family:YSBSans;font-weight:800;font-style:normal;font-display:swap;
+  src:url(data:font/woff2;base64,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) format('woff2')}
+
+:root{
+  /* Old handmade paper: never a flat white. The featured stock on this menu is a light
+     orange — the same dyed-pulp treatment as the layout menu's straw and the interactive
+     menu's leaf green, kept pale and chalky so it reads as paper dyed in a vat rather than
+     as a fluorescent marker, and so it still separates from a field photographed at
+     sunset. */
+  --tang:#eeb37c;       --tang-core:#fadcbe;
+  --straw:#e8c85c;      --straw-core:#f7e7a4;
+  --oat:#e7ddc6;        --oat-core:#f8f2e2;
+  --ink:#231c12;
+  --ink-soft:#5c5140;
+  --clay:#a1442a;
+  --gold:#8a6a1f;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:#20180f;color:var(--ink);
+  font-family:YSBSans,Bahnschrift,'DIN Alternate','Segoe UI',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;overscroll-behavior-y:none;
+}
+
+/* ---------------- the court, in two planes ---------------- */
+/* One photograph, two layers, moving at different rates. #far is the court and the city
+   beyond it; #near is the strip of ground at the very bottom of the same frame, pulled
+   out and put back IN FRONT of the paper. The reader scrolls between them, which is what
+   makes it read as depth rather than as a picture behind a page. */
+#far{position:fixed;left:0;pointer-events:none;background-repeat:no-repeat}
+/* Exactly one viewport tall, and the parallax comes from scaling it up and sliding it
+   INSIDE its own overflow. A taller plate would seem simpler, but background-size:cover on
+   a box twice the height of the window crops the photograph to a letterbox and throws the
+   composition away — and a plate that only translates eventually runs off the bottom of a
+   long page and leaves a void behind it, which is exactly what happened here. */
+#far{
+  top:0;width:100%;height:100vh;z-index:0;
+  background-image:url(bg-diamond.webp);
+  background-size:cover;background-position:50% 42%;
+  transform:scale(1.22);transform-origin:50% 50%;
+  will-change:transform;
+}
+#wash{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(28,20,12,.30) 0%,rgba(28,20,12,.06) 22%,
+                    rgba(28,20,12,.10) 62%,rgba(24,16,10,.46) 100%),
+    radial-gradient(120% 78% at 50% 34%,rgba(255,214,150,0) 40%,rgba(30,20,12,.34) 100%);
+}
+@media (prefers-reduced-motion:reduce){ #far{will-change:auto} }
+
+/* ---------------- the ball, on the court in front ---------------- */
+/* Full window, z-index 2: above the court, BELOW the paper. The ball is lying on the
+   court, so a sheet of paper dropped on the court covers it. */
+#courtfg{position:fixed;inset:0;z-index:2;pointer-events:none}
+#ball{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ballshadow{
+  position:absolute;left:0;top:0;transform-origin:50% 50%;
+  /* Darkest towards the right-hand end, where the ball actually touches, and trailing off
+     to the left the way a shadow does at this hour. */
+  background:radial-gradient(50% 50% at 66% 50%,rgba(20,8,2,.97) 0%,rgba(20,8,2,.55) 44%,
+             rgba(24,10,3,0) 100%);
+  filter:blur(5px);pointer-events:none;
+}
+#ballhint{
+  position:absolute;left:0;right:0;bottom:8px;text-align:center;
+  font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  color:#ffeccd;opacity:0;text-shadow:0 2px 10px rgba(20,8,0,.9);
+  transition:opacity 1s ease;pointer-events:none;
+}
+#ballhint.show{opacity:.55}
+#ballhint.gone{opacity:0}
+
+/* ---------------- the page ---------------- */
+#page{--pad:clamp(18px,4.5vw,40px);
+  position:relative;z-index:3;max-width:1060px;margin:0 auto;
+  padding:clamp(26px,6vw,74px) var(--pad) 22vh}
+
+.crumb{display:inline-flex;align-items:center;gap:.55em;text-decoration:none;
+  font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:800;
+  color:#ffe9c4;background:rgba(30,18,10,.42);border:1px solid rgba(255,225,180,.28);
+  padding:8px 14px;border-radius:2px;backdrop-filter:blur(2px);
+  transition:background .18s ease,color .18s ease}
+.crumb:hover{background:rgba(30,18,10,.66);color:#fff}
+
+/* Nothing behind the title at all. There was a torn black scrap here, then a bigger and
+   rougher one, then a soft radial wash — all three read as a panel laid over the
+   photograph, because a wash with any falloff at all still has a visible boundary
+   somewhere. The type carries itself instead: it is white, it is heavy, and the shadow
+   under it is doing the work a background was doing badly. */
+.head{position:relative;max-width:min(100%,34em)}
+
+/* Two shadows, not one: a wide soft pool that lifts the letters off whatever is behind
+   them, and a tight dark one right against the edges that keeps them crisp where the
+   photograph goes pale. */
+h1{margin:26px 0 0;font-weight:800;letter-spacing:-.018em;line-height:.94;
+   font-size:clamp(38px,7.4vw,82px);color:#fff8ea;
+   text-shadow:0 4px 30px rgba(20,10,3,.80),0 2px 10px rgba(20,10,3,.55),
+               0 1px 2px rgba(20,10,3,.60)}
+.lede{max-width:44ch;margin:16px 0 0;font-size:clamp(15px,1.5vw,18px);line-height:1.55;
+  color:#f6ead6;
+  text-shadow:0 2px 18px rgba(20,10,3,.90),0 1px 6px rgba(20,10,3,.70),
+              0 1px 1px rgba(20,10,3,.55)}
+
+/* positioned, so it paints ABOVE the header scrap now that the scrap reaches down past it
+   — an unpositioned block paints before every positioned one, whatever the source order */
+.rubric{position:relative;z-index:1;
+  display:flex;align-items:center;gap:14px;margin:clamp(34px,5vw,58px) 0 18px}
+.rubric b{font-weight:800;font-size:11px;letter-spacing:.26em;text-transform:uppercase;
+  color:#ffe1a8;text-shadow:0 2px 10px rgba(24,12,4,.8)}
+.rubric i{flex:1;height:1px;background:linear-gradient(90deg,rgba(255,225,168,.5),rgba(255,225,168,0))}
+
+/* ---------------- a scrap of paper ---------------- */
+.grid{display:grid;gap:clamp(18px,2.4vw,30px)}
+.grid.feat{max-width:920px}
+.grid.rest{grid-template-columns:1fr}
+@media (min-width:900px){ .grid.rest{grid-template-columns:1fr 1fr} }
+
+/* The sheet is sized by the TEXT, not by the card. That is the whole arrangement: the
+   paper's height follows its own copy, so a one-line item gets a small scrap and a long one
+   gets a big one, and the photograph is a separate object laid across the edge of it rather
+   than something printed on it. It also means the shadow and the torn edge belong to the
+   paper alone. */
+.scrap{position:relative;display:flex;align-items:center;text-decoration:none;color:inherit;
+  --ovl:56px;
+  transition:transform .22s cubic-bezier(.2,.8,.25,1)}
+@media (hover:hover){ .scrap:hover{transform:translateY(-4px) rotate(-.2deg)} }
+.scrap:active{transform:translateY(-1px) scale(.996)}
+.scrap:focus-visible{outline:3px solid #ffd977;outline-offset:8px}
+.rest .scrap{--ovl:38px}
+
+.sheet{position:relative;z-index:1;flex:1 1 auto;min-width:0;
+  margin-left:calc(var(--ovl) * -1);
+  filter:drop-shadow(0 14px 20px rgba(18,9,3,.44)) drop-shadow(0 3px 4px rgba(18,9,3,.34));
+  transition:filter .22s ease}
+@media (hover:hover){ .scrap:hover .sheet{
+  filter:drop-shadow(0 24px 30px rgba(18,9,3,.5)) drop-shadow(0 4px 6px rgba(18,9,3,.4))} }
+
+/* The pale core is the torn edge; the face is the printed surface sitting inside it.
+   Both fill the sheet absolutely and the type sits over them — the sheet has to be the
+   size of the copy, and the copy is what gives it a size. */
+.core{position:absolute;inset:0;z-index:0;clip-path:polygon(0 0,0 0,0 0)}
+.face{position:absolute;inset:0;clip-path:polygon(0 0,0 0,0 0)}
+.core,.face{
+  /* Two turbulences, not one: a stretched coarse pass for the fibres you can see through
+     handmade sheets, and a fine pass for the tooth. A single noise reads as digital
+     grain and the paper stays flat. */
+  background-repeat:repeat;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 .28 0 0 0 0 .21 0 0 0 0 .10 0 0 0 .16 0'/></filter><rect width='260' height='260' filter='url(%23f)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='1.05' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .10 0'/></filter><rect width='120' height='120' filter='url(%23g)'/></svg>");
+  background-size:260px 260px,120px 120px;
+}
+.tang  .core{background-color:var(--tang-core)}  .tang  .face{background-color:var(--tang)}
+.oat   .core{background-color:var(--oat-core)}   .oat   .face{background-color:var(--oat)}
+/* the mottle of a sheet couched by hand — thinner in some places than others */
+.face::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(60% 44% at 22% 18%,rgba(255,255,255,.34),rgba(255,255,255,0) 70%),
+    radial-gradient(52% 40% at 84% 74%,rgba(120,88,40,.13),rgba(120,88,40,0) 72%),
+    radial-gradient(70% 60% at 60% 8%,rgba(120,88,40,.09),rgba(120,88,40,0) 70%)}
+
+/* the copy, held well clear of the torn edge — the deckle bites up to 9 px inward and type
+   sitting near it reads as though it is falling off the sheet */
+/* display:block, and it matters — .body is a <span> (a card is one <a>, so everything in
+   it has to be phrasing content) and padding on an INLINE box does not push the lines
+   inside it. Without this the copy slides straight back under the photograph. */
+.body{display:block;position:relative;z-index:1}
+.feat .body{padding:38px 36px 32px calc(var(--ovl) + 34px)}
+.rest .body{padding:30px 26px 26px calc(var(--ovl) + 26px)}
+@media (max-width:640px){
+  .scrap{flex-direction:column;align-items:stretch;--ovl:0px}
+  .pol{align-self:flex-start;margin-bottom:-30px}
+  .sheet{margin-left:0}
+  /* generous on a narrow screen: the deckle bites up to 9 px in, so the gap the eye sees
+     between the copy and the edge of the paper is a third less than the padding says */
+  .feat .body{padding:56px 34px 30px 34px}
+  .rest .body{padding:50px 30px 26px 30px}
+}
+
+/* ---------------- the polaroid ---------------- */
+.pol{position:relative;z-index:2;flex:0 0 auto;background:#fbf8f0;padding:9px 9px 30px;
+  box-shadow:0 9px 18px rgba(24,12,4,.42),0 2px 3px rgba(24,12,4,.32);
+  transform:rotate(-1.6deg);transition:transform .22s cubic-bezier(.2,.8,.25,1)}
+.pol img{display:block;width:100%;height:auto;background:#ddd6c6}
+.scrap:nth-of-type(even) .pol{transform:rotate(1.4deg)}
+@media (hover:hover){ .scrap:hover .pol{transform:rotate(-.3deg) scale(1.014)} }
+.feat .pol{width:min(46%,340px);padding:11px 11px 38px}
+.rest .pol{width:min(40%,190px);padding:7px 7px 22px}
+@media (max-width:640px){ .feat .pol,.rest .pol{width:min(76%,320px)} }
+
+/* ---------------- the cut-out number ---------------- */
+/* A separate chip of darker stock with its own torn edge, sitting on top of the sheet at
+   a slight angle — a number cut out and stuck on, not a number typed on the page. */
+.num{position:absolute;z-index:2;display:grid;place-items:center;
+  font-weight:800;line-height:1;color:#2a2114;
+  background:#cbb079;
+  box-shadow:0 4px 7px rgba(24,12,4,.36);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .16 0'/></filter><rect width='90' height='90' filter='url(%23n)'/></svg>")}
+.feat .num{width:60px;height:60px;font-size:27px;left:-12px;top:-16px;transform:rotate(-6deg)}
+.rest .num{width:42px;height:42px;font-size:19px;left:-8px;top:-11px;transform:rotate(5deg)}
+@media (max-width:640px){
+  .feat .num{width:48px;height:48px;font-size:22px}
+  .rest .num{width:38px;height:38px;font-size:17px}
+}
+
+/* ---------------- type on the paper ---------------- */
+.body{flex:1 1 auto;min-width:0}
+.kicker{display:block;font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  font-weight:800;color:var(--clay);margin:0 0 8px}
+.feat .kicker{color:var(--gold)}
+h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--ink)}
+.feat h2{font-size:clamp(23px,2.9vw,34px)}
+.rest h2{font-size:clamp(17px,1.8vw,21px)}
+.desc{margin:10px 0 0;color:var(--ink-soft);line-height:1.52}
+.feat .desc{font-size:clamp(14px,1.35vw,16.5px);max-width:54ch}
+.rest .desc{font-size:13.5px;max-width:42ch}
+/* No "Open the example" line: the whole scrap is the link, and the lift on hover says so
+   without a second call to action under every card. */
+
+/* ---------------- the way out ---------------- */
+/* Buttons, not the breadcrumb the top of the page uses: this is the end of the road and
+   the reader needs somewhere obvious to go next, so the forward one is solid and the way
+   back is quiet. */
+.foot{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+  gap:14px;margin-top:clamp(38px,6vw,68px)}
+.btn{display:inline-flex;align-items:center;gap:.6em;text-decoration:none;
+  font-weight:800;font-size:clamp(11px,1.15vw,13px);letter-spacing:.16em;
+  text-transform:uppercase;line-height:1;padding:16px 24px;border-radius:2px;
+  transition:transform .18s cubic-bezier(.2,.8,.25,1),box-shadow .18s ease,
+             background .18s ease,color .18s ease}
+/* the label is its own element so a long one wraps INSIDE the button and the arrow stays
+   beside it, instead of the flex row centring a full-width text block and shoving the
+   arrow out to the edge */
+.btn span{text-align:center}
+.btn svg{flex:0 0 auto;width:1.05em;height:1.05em;fill:none;stroke:currentColor;stroke-width:2.4}
+.btn.primary{color:#2a2114;background:var(--straw);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .13 0'/></filter><rect width='120' height='120' filter='url(%23b)'/></svg>");
+  box-shadow:0 10px 18px rgba(18,9,3,.42),0 2px 3px rgba(18,9,3,.34)}
+.btn.ghost{color:#ffe9c4;background:rgba(30,18,10,.46);
+  border:1px solid rgba(255,225,180,.30);backdrop-filter:blur(2px)}
+@media (hover:hover){
+  .btn:hover{transform:translateY(-2px)}
+  .btn.primary:hover{box-shadow:0 16px 24px rgba(18,9,3,.48),0 3px 5px rgba(18,9,3,.4)}
+  .btn.ghost:hover{background:rgba(30,18,10,.70);color:#fff}
+}
+.btn:active{transform:translateY(0) scale(.985)}
+.btn:focus-visible{outline:3px solid #ffd977;outline-offset:5px}
+@media (max-width:560px){ .foot{flex-direction:column-reverse} .btn{width:100%;justify-content:center} }
+
+</style>
+</head>
+<body>
+
+<div id="far"></div>
+<div id="wash"></div>
+
+<main id="page">
+  <a class="crumb" href="menu-pool.html">&#8592; All experiments</a>
+  <div class="head">
+    <h1>Game<br>Ideas</h1>
+    <p class="lede">Some games based on specific sports that could link to a testimony page or be standalone. Ideally these could be shareable to draw others to want to download the Youth Sport Bible app.</p>
+  </div>
+
+  <div class="rubric"><b>Start with these two</b><i></i></div>
+  <div class="grid feat">
+  <a class="scrap feat tang" href="verse-strike.html" data-seed="1000" aria-label="Verse Strike">
+    <span class="pol"><img src="thumbs/verse-strike.jpg" alt="" loading="lazy" width="480" height="300"></span>
+    <span class="sheet">
+      <span class="core"><span class="face"></span></span>
+      <span class="body">
+        <h2>Verse Strike</h2>
+        <p class="desc">An idea that might link a game to a Soccer Testimony, with the idea of revealing a Bible verse while playing the game.</p>
+      </span>
+    </span>
+    <span class="num">18</span>
+  </a>
+  <a class="scrap feat tang" href="https://strong-malabi-63d187.netlify.app/" target="_blank" rel="noopener" data-seed="1613" aria-label="No. 1">
+    <span class="pol"><img src="thumbs/no-1.jpg" alt="" loading="lazy" width="480" height="300"></span>
+    <span class="sheet">
+      <span class="core"><span class="face"></span></span>
+      <span class="body">
+        <h2>No. 1</h2>
+        <p class="desc">An experiment using football as an entry point or metaphor for the Gospel.</p>
+      </span>
+    </span>
+    <span class="num">19</span>
+  </a>
+  </div>
+
+  <div class="rubric"><b>And then the rest</b><i></i></div>
+  <div class="grid rest">
+  <a class="scrap rest oat" href="the-floor.html" data-seed="2226" aria-label="The Floor — Heat 01: Jive">
+    <span class="pol"><img src="thumbs/the-floor.jpg" alt="" loading="lazy" width="480" height="300"></span>
+    <span class="sheet">
+      <span class="core"><span class="face"></span></span>
+      <span class="body">
+        <span class="kicker">Example 20</span>
+        <h2>The Floor — Heat 01: Jive</h2>
+        <p class="desc">First stab at a dance game that might link to a testimony. Needs a lot more thought to work with a dancer. More a proof of concept.</p>
+      </span>
+    </span>
+    <span class="num">20</span>
+  </a>
+  <a class="scrap rest oat" href="verse-shot.html" data-seed="2839" aria-label="Verse Shot">
+    <span class="pol"><img src="thumbs/verse-shot.jpg" alt="" loading="lazy" width="480" height="300"></span>
+    <span class="sheet">
+      <span class="core"><span class="face"></span></span>
+      <span class="body">
+        <span class="kicker">Example 21</span>
+        <h2>Verse Shot</h2>
+        <p class="desc">An experiment using a game of digital basketball to reveal a Bible verse. Needs refining but is a very workable idea in any sport.</p>
+      </span>
+    </span>
+    <span class="num">21</span>
+  </a>
+  </div>
+
+  <div class="foot">
+    <a class="btn ghost" href="menu-pool.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Back to the menu</span></a>
+    <a class="btn primary" href="menu-reading-plan.html"><span>Show me the Reading Plan Experiments</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </div>
+</main>
+
+<div id="courtfg">
+  <div id="ballshadow"></div>
+  <canvas id="ball"></canvas>
+  <div id="ballhint">Give the ball a knock</div>
+</div>
+
+<script>
+"use strict";
+/* -------------------------------------------------------------------------
+ * Torn paper, lifted from baba-tear.html and simplified.
+ *
+ * The silhouette is a clip-path polygon walked round the border box, and every
+ * offset BITES INWARD — a clip-path is happy to leave the box but paper is not,
+ * so an outward wander would just be squared off by the element bounds and the
+ * deckle would come and go along each edge.
+ *
+ * Two nested clips make the edge: the outer one on a pale core, the inner one
+ * (the same polygon shrunk by a couple of millimetres) on the printed face.
+ * The sliver of core left showing is the lighter lip you see along a real torn
+ * edge, and it is what stops the paper reading as a jagged sticker.
+ * ---------------------------------------------------------------------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function ringN(seed,K,N){
+  var r=mulberry32(seed),c=new Float32Array(K),out=new Float32Array(N),i;
+  for(i=0;i<K;i++)c[i]=r()*2-1;
+  for(i=0;i<N;i++){var t=i/N*K,i0=Math.floor(t)%K,i1=(i0+1)%K,f=t-Math.floor(t),
+    u=f*f*(3-2*f); out[i]=c[i0]*(1-u)+c[i1]*u;}
+  return out;
+}
+function fbm1(seed,N,oct){
+  var out=new Float32Array(N),amp=1,K=4,norm=0,o,i;
+  for(o=0;o<oct;o++){
+    var n=ringN(seed+o*977,K,N);
+    for(i=0;i<N;i++)out[i]+=n[i]*amp;
+    norm+=amp; amp*=0.55; K=Math.min(K*2,Math.max(4,N));
+  }
+  for(i=0;i<N;i++)out[i]/=norm;
+  return out;
+}
+function sharpen(v){return (v<0?-1:1)*Math.pow(Math.abs(v),0.72);}
+
+/* the resting torn outline of one scrap, in px, inside a w x h box */
+function tornOutline(w,h,seed,inset,rough,step){
+  inset=inset||14; rough=(rough===undefined)?0.62:rough; step=step||9;
+  var bw=w-inset*2, bh=h-inset*2;
+  if(bw<24||bh<24)return null;
+  var per=2*(bw+bh), N=Math.max(28,Math.round(per/step));
+  var wander=fbm1(seed,N,6), jit=mulberry32(seed+17), amp=2+rough*7;
+  var pts=new Array(N),i;
+  for(i=0;i<N;i++){
+    var s=i/N*per,x,y,nx,ny;
+    if(s<bw){x=s;y=0;nx=0;ny=-1;}
+    else if((s-=bw)<bh){x=bw;y=s;nx=1;ny=0;}
+    else if((s-=bh)<bw){x=bw-s;y=bh;nx=0;ny=1;}
+    else {s-=bw;x=0;y=bh-s;nx=-1;ny=0;}
+    var bite=(sharpen(wander[i])*0.5+0.5)*amp + jit()*1.6;
+    pts[i]={x:inset+x-nx*bite, y:inset+y-ny*bite};
+  }
+  return pts;
+}
+
+/* shrink a polygon inward to make the lip */
+function shrink(pts,seed,lo,hi){
+  lo=(lo===undefined)?2.2:lo; hi=(hi===undefined)?3.4:hi;
+  var jit=mulberry32(seed+41), n=pts.length, out=new Array(n), cx=0, cy=0, i;
+  for(i=0;i<n;i++){cx+=pts[i].x;cy+=pts[i].y;} cx/=n; cy/=n;
+  for(i=0;i<n;i++){
+    var p=pts[i], a=pts[(i+n-1)%n], b=pts[(i+1)%n];
+    var tx=b.x-a.x, ty=b.y-a.y, L=Math.hypot(tx,ty)||1; tx/=L; ty/=L;
+    var nx=ty, ny=-tx;
+    if(nx*(cx-p.x)+ny*(cy-p.y)<0){nx=-nx;ny=-ny;}
+    var d=lo+jit()*(hi-lo);
+    out[i]={x:p.x+nx*d, y:p.y+ny*d};
+  }
+  return out;
+}
+function polyStr(pts){
+  if(!pts)return 'polygon(0 0,0 0,0 0)';
+  var s='polygon(',i;
+  for(i=0;i<pts.length;i++){
+    if(i)s+=',';
+    s+=pts[i].x.toFixed(1)+'px '+pts[i].y.toFixed(1)+'px';
+  }
+  return s+')';
+}
+
+/* Give one element a torn edge. The seed is stable per element, so the same scrap
+   tears the same way on every resize instead of reshuffling under the reader. */
+function tearElement(el,seed,opt){
+  opt=opt||{};
+  var core=el.querySelector('.core'), face=el.querySelector('.face');
+  var w=el.offsetWidth, h=el.offsetHeight;
+  if(!w||!h)return;
+  var pts=tornOutline(w,h,seed,opt.inset,opt.rough,opt.step);
+  if(!pts){core.style.clipPath='none';face.style.clipPath='none';return;}
+  core.style.clipPath=polyStr(pts);
+  face.style.clipPath=polyStr(shrink(pts,seed,opt.lipLo,opt.lipHi));
+}
+
+
+/* Every scrap gets its edge torn once it has been laid out, and again when the column
+   width changes — but from a seed fixed to the card, so the same scrap tears the same way
+   every time instead of reshuffling under the reader on a rotate. */
+var SCRAPS=[].slice.call(document.querySelectorAll('.scrap'));
+function tearAll(){
+  SCRAPS.forEach(function(card){
+    var el=card.querySelector('.sheet');
+    var feat=card.classList.contains('feat');
+    tearElement(el, +card.dataset.seed, feat
+      ? {inset:15, rough:.66, step:9,  lipLo:2.6, lipHi:4.2}
+      : {inset:12, rough:.58, step:8,  lipLo:2.0, lipHi:3.2});
+  });
+  document.querySelectorAll('.num').forEach(function(el,i){
+    /* the chip is small, so it wants a tighter bite or it eats its own numeral */
+    var w=el.offsetWidth,h=el.offsetHeight;
+    if(!w||!h)return;
+    var p=tornOutline(w,h,7000+i*331,5,.5,5);
+    el.style.clipPath=p?polyStr(p):'none';
+  });
+}
+/* fonts change the height of every card, so tear after they land as well */
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(tearAll);
+addEventListener('load',tearAll);
+var rt=null;
+addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(tearAll,120);});
+tearAll();
+/* a thumbnail arriving late changes a card's height too */
+document.querySelectorAll('.pol img').forEach(function(im){
+  if(!im.complete)im.addEventListener('load',tearAll,{once:true});
+});
+
+/* ---------------- parallax ---------------- */
+/* Both plates travel a fixed distance across the WHOLE document rather than a fixed
+   distance per pixel scrolled. Per-pixel is the usual way and it is wrong here: the travel
+   then depends on how long the page is, so it either runs out of plate on a long page or
+   barely moves on a short one. Tied to progress, the same 20% of a screen-height of
+   movement is spread over whatever the document turns out to be, and the plate can never
+   slide out of its own overflow.
+   Transform only — never background-position, which repaints the whole photograph every
+   frame — and read once per frame off rAF rather than on the scroll event, so a fling on a
+   phone does not queue up a hundred style writes. */
+(function(){
+  var far=document.getElementById('far');
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var want=0, have=-1, tick=false;
+  function apply(){
+    tick=false;
+    if(want===have)return;
+    have=want;
+    var travel=innerHeight*0.20, y=(0.5-have)*travel;
+    /* published, so the ball can keep its feet on the court as the court slides */
+    window.__FARY=y;
+    far.style.transform='translate3d(0,'+y.toFixed(1)+'px,0) scale(1.22)';
+  }
+  function onScroll(){
+    var max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+    want=Math.min(1,Math.max(0,(window.pageYOffset||document.documentElement.scrollTop||0)/max));
+    if(!tick){tick=true;requestAnimationFrame(apply);}
+  }
+  addEventListener('scroll',onScroll,{passive:true});
+  addEventListener('resize',function(){have=-1;onScroll();},{passive:true});
+  onScroll();
+})();
+
+var PACK={"soccer": {"nv": 486, "P": "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S2GrvMFZzD2kwC29X9QfvZnhrz1wd3C9cHdwvZnhrz1f1B+9qSAfsM7N3D3bQrU8qSAfsNCfuz0BB349S2GrvMFZzD2kwC09pMAtvcFZzD1LYas8cHdwvZnhrz1f1B89X9QfvZnhrz1wd3A920K1PM7N3D2pIB+wAQd+PdCfuz2pIB+wpMAtPcFZzD1LYas8S2GrPMFZzD2kwC09X9QfPZnhrz1wd3A9cHdwPZnhrz1f1B895OqNveTqjb2aFl295OqNveTqjb2aFl29EeKdvRDinb2VBaG8EeKdvRDinb2VBaG8EeKdvRHinb2VBaE8EeKdvRHinb2VBaE85OqNveTqjb2aFl095OqNveTqjb2aFl095OqNvZoWXb3k6o095OqNvZoWXb3k6o09EeKdvZUFobwQ4p09EeKdvZUFobwQ4p09EeKdvZUFoTwR4p09EeKdvZUFoTwR4p095OqNvZoWXT3k6o095OqNvZoWXT3k6o095OqNveTqjT2aFl095OqNveTqjT2aFl09EeKdvRDinT2VBaE8EeKdvRDinT2VBaE8EeKdvRHinT2VBaG8EeKdvRHinT2VBaG85OqNveTqjT2aFl295OqNveTqjT2aFl295OqNvZoWXT3k6o295OqNvZoWXT3k6o29EeKdvZUFoTwQ4p29EeKdvZUFoTwQ4p29EeKdvZUFobwR4p29EeKdvZUFobwR4p295OqNvZoWXb3k6o295OqNvZoWXb3k6o29mhZdPeTqjb3k6o29mhZdPeTqjb3k6o29lQWhPBDinb0R4p29lQWhPBDinb0R4p29lQWhvBHinb0R4p29lQWhvBHinb0R4p29mhZdveTqjb3k6o29mhZdveTqjb3k6o29mhZdveTqjT3k6o29mhZdveTqjT3k6o29lQWhvBDinT0R4p29lQWhvBDinT0R4p29lQWhPBHinT0R4p29lQWhPBHinT0R4p29mhZdPeTqjT3k6o29mhZdPeTqjT3k6o295OqNPZoWXT3k6o295OqNPZoWXT3k6o29EOKdPZUFoTwR4p29EOKdPZUFoTwR4p29EeKdPZUFobwR4p29EeKdPZUFobwR4p295OqNPZoWXb3k6o295OqNPZoWXb3k6o295OqNPeTqjb2aFl095OqNPeTqjb2aFl09EeKdPRDinb2VBaE8EeKdPRDinb2VBaE8EeKdPRHinb2VBaG8EeKdPRHinb2VBaG85OqNPeTqjb2aFl295OqNPeTqjb2aFl295OqNPeTqjT2aFl295OqNPeTqjT2aFl29EeKdPRDinT2VBaG8EeKdPRDinT2VBaG8EeKdPRHinT2VBaE8EeKdPRHinT2VBaE85OqNPeTqjT2aFl095OqNPeTqjT2aFl095OqNPZoWXT3k6o095OqNPZoWXT3k6o09EeKdPZUFoTwQ4p09EeKdPZUFoTwQ4p09EeKdPZUFobwR4p09EeKdPZUFobwR4p095OqNPZoWXb3k6o095OqNPZoWXb3k6o09mhZdveTqjb3k6o09mhZdveTqjb3k6o09lQWhvBDinb0R4p09lQWhvBDinb0R4p09lQWhPBHinb0R4p09lQWhPBHinb0R4p09mhZdPeTqjb3k6o09mhZdPeTqjb3k6o09mhZdPeTqjT3k6o09mhZdPeTqjT3k6o09lQWhPBDinT0R4p09lQWhPBDinT0R4p09lQWhvBHinT0R4p09lQWhvBHinT0R4p09mhZdveTqjT3k6o09mhZdveTqjT3k6o09rkfhvW2FZzBm5CGwbgjQvRjhZjCJyzA9bgjQvYnLMD2gnx+wbgjQvRjhZjCJyzC9bgjQvYnLML2gnx+wC43Bvaw6J72rOic9C43Bvas6Jz2sOic9C43Bvaw6Jz2rOie9C43Bvas6J72sOie9vSQisG2FZzCuR+G9icswvRjhZjBuCNC9LKsfsInLMD1uCNC9icswPRjhZjBuCNC9LKsfsInLML1uCNC9qzonvaw6J70LjcG9rDonvas6Jz0LjcG9qzonPaw6Jz0LjcG9rDonPas6J70LjcG9rkfhPW2FZzBm5CGwbgjQPRjhZjCJyzC9bgjQPYnLMD2gnx+wbgjQPRjhZjCJyzA9bgjQPYnLML2gnx+wC43BPaw6J72rOie9C43BPas6Jz2sOie9C43BPaw6Jz2rOic9C43BPas6J72sOic9vSQisG2FZzCuR+E9icswPRjhZjBuCNA9LKsfsInLMD1uCNA9icswvRjhZjBuCNA9LKsfsInLML1uCNA9qzonPaw6J70LjcE9rDonPas6Jz0LjcE9qzonvaw6Jz0LjcE9rDonvas6J70LjcE9bBMisK5H4b1m5CGwLKsfsG4I0L2JyzC9icswPW4I0L2gnx+wLKsfsG4I0L2JyzA9icswvW4I0L2gnx+wrDonvQuNwb2rOie9qzonPQuNwb2sOie9rDonPQuNwb2rOic9qzonvQuNwb2sOic9bBMisK5H4T1m5CGwLKsfsG4I0D2JyzC9icswvW4I0D2gnx+wLKsfsG4I0D2JyzA9icswPW4I0D2gnx+wrDonPQuNwT2rOie9qzonvQuNwT2sOie9rDonvQuNwT2rOic9qzonPQuNwT2sOic9u2qXvbtql70k6Ru9u2qXvbtql70k6Ru9nlugvZ5boL0rlhywnlugvZ5boL0rlhywumqXvbpql70k6Rs9umqXvbpql70k6Rs9u2qXvSTpG727apc9u2qXvSTpG727apc9nlugve3+ZTCeW6A9nlugve3+ZTCeW6A9umqXvSTpGz26apc9umqXvSTpGz26apc9u2qXvbtqlz0k6Rs9u2qXvbtqlz0k6Rs9nlugvZ5boD0rlhywnlugvZ5boD0rlhywumqXvbpqlz0k6Ru9umqXvbpqlz0k6Ru9u2qXvSTpGz27ape9u2qXvSTpGz27ape9nlugve3+ZTCeW6C9nlugve3+ZTCeW6C9umqXvSTpG726ape9umqXvSTpG726ape9JOkbPbtql727ape9JOkbPbtql727ape9CVscsJ5boL2eW6C9CVscsJ5boL2eW6C9JOkbvbpql726ape9JOkbvbpql726ape9JOkbvbtqlz27ape9JOkbvbtqlz27ape9CVscsJ5boD2eW6C9CVscsJ5boD2eW6C9JOkbPbpqlz26ape9JOkbPbpqlz26ape9u2qXPSTpGz27ape9u2qXPSTpGz27ape9nlugPe3+ZTCeW6C9nlugPe3+ZTCeW6C9umqXPSTpG726ape9umqXPSTpG726ape9u2qXPbtql70k6Rs9u2qXPbtql70k6Rs9nlugPZ5boL0rlhywnlugPZ5boL0rlhywumqXPbpql70k6Ru9umqXPbpql70k6Ru9u2qXPbtqlz0k6Ru9u2qXPbtqlz0k6Ru9nlugPZ5boD0rlhywnlugPZ5boD0rlhywumqXPbpqlz0k6Rs9umqXPbpqlz0k6Rs9u2qXPSTpGz27apc9u2qXPSTpGz27apc9nlugPe3+ZTCeW6A9nlugPe3+ZTCeW6A9umqXPSTpG726apc9umqXPSTpG726apc9JOkbvbtql727apc9JOkbvbtql727apc9CVscsJ5boL2eW6A9CVscsJ5boL2eW6A9JOkbPbpql726apc9JOkbPbpql726apc9JOkbPbtqlz27apc9JOkbPbtqlz27apc9CVscsJ5boD2eW6A9CVscsJ5boD2eW6A9JOkbvbpqlz26apc9JOkbvbpqlz26apc9Zu6DvWbug71m7oM9Zu6DvWbug71m7oM9Zu6DvWbug71m7oM9Zu6DvWbugz1m7oM9Zu6DvWbugz1m7oM9Zu6DvWbugz1m7oM9Zu6DvWbug71m7oO9Zu6DvWbug71m7oO9Zu6DvWbug71m7oO9Zu6DvWbugz1m7oO9Zu6DvWbugz1m7oO9Zu6DvWbugz1m7oO9Zu6DPWbug71m7oM9Zu6DPWbug71m7oM9Zu6DPWbug71m7oM9Zu6DPWbugz1m7oM9Zu6DPWbugz1m7oM9Zu6DPWbugz1m7oM9Zu6DPWbug71m7oO9Zu6DPWbug71m7oO9Zu6DPWbug71m7oO9Zu6DPWbugz1m7oO9Zu6DPWbugz1m7oO9Zu6DPWbugz1m7oO9", "N": "hugYmOtFmLsVo8M9hhgYmEUVmBVFoz09hhjomBW7mEXroz3DhujomLvrmOu7o8PD6OiGu+uY67uYw8Oj6BiG60WYuxWYwz2jGBiGRRWYFUWYPT2jGOiGFbuYReuYPcOjeujoaOu7aLvrXcPDehjoaEXraBW7XT3DehgYaBVFaEUVXT09eugYaLsVaOtFXcM9GOh6RetoFbtoPcNdGBh6FUVoRRVoPT1d6Bh6uxVo60Vowz1d6Oh667tou+tow8Nd6Ibo65i7u5jrw6PDGIboRZjrFZi7PaPDGIYYFZhFRZgVPaM96IYYu5gV65hFw6M9GHroFWi7RWjrPV3D6Hrou2jr62i7w13D6HoY62hFu2gVw109GHoYRWgVFWhFPV09gwAYlgBGjOkvjNEXm74pm9dCgxgAlkYAjC8XjBcvmylCm0IpgwDolgC6jBfRjC/pm0LXmym+g+gAlroAjNHpjOnRm9e+m77X6ACDugCW0emM6dGM176bvtebABiDAEaW6S+M0ReMvimb10KbGACDRgCWLxeMFy+MKUKbQimbAOiDALqWF9GML+mMQtebKb6bfQDoagC6dOnRdNHpZb7XZde+fRgAakYAdC/pdBfRZSm+ZULXfQAYagBGdBcvdC8XZUIpZSlCfegAaroAdNEXdOkvZddCZb4pGAB9RgBqL+l0F9F0Kb5lQtdlABh9AEZqFy90Lxd0QillKUJl6AB9ugBq0Rd06S9010JlvillAOh9ALpq6dF00el0vtdl175lAIPoAJa66YzR0YzpvpvX15u+GIMARpYAL4zpF4zRKZu+QpvXAIMYAJZGF4wvL4wXQpspKZtC6IMAupYA0YwX6Ywv15tCvpspAH3oAGq6F3TRL3TpQmXXKWW+6H0AumoA0XTp6XTR12W+vmXXAH0YAGpG6XQv0XQXvmUp12VCGH0ARmoAL3QXF3QvKWVCQmUpsLDFsLDFp6fsp6fsp6cUp6cUsLA7sLA7sMVQsMVQp+xZp+xZpxRZpxRZsDtQsDtQsFA7sFA7p1kUp1kUp1nsp1nssFDFsFDFsDuwsDuwpxSnpxSnp+ynp+ynsMWwsMWwO7CwO7CwFKenFKen7Ken7KenxbCwxbCwxVCwxVCw7Fmn7FmnFFmnFFmnO1CwO1CwUDuwUDuwWRSnWRSnWeynWeynUMWwUMWwULA7ULA7WacUWacUWafsWafsULDFULDFUFDFUFDFWVnsWVnsWVkUWVkUUFA7UFA7UDtQUDtQWRRZWRRZWexZWexZUMVQUMVQxbBQxbBQ7KdZ7KdZFKdZFKdZO7BQO7BQO1BQO1BQFFlZFFlZ7FlZ7FlZxVBQxVBQgQAAigAwijAAigDQitAAktQskiwskizUktTUAACB0ACKADCKMACKANCK1NSS1CySLCySLNSSfwAAdgDQdjAAdgAwdtAAbtTUbizUbiwsbtQsAAB/MAB2ADB20AB2ANB2LNRuLCxu1Cxu1NRuAIEAAIrQMIoAAIow0IoA1JLULJLULJIs1JIsAH8AAHbQ0HYAAHYwMHYALG7U1G7U1G4sLG4sq6vZq6vZpqYApqYAq6snq6snq9lVq9lVpgBapgBaqydVqydVq1Unq1UnploAploAq1XZq1XZqyerqyerpgCmpgCmq9mrq9mrJ6urJ6urAKamAKam2aur2aur2VWr2VWrAFqmAFqmJ1WrJ1WrVSerVSerWgCmWgCmVdmrVdmrVasnVasnWqYAWqYAVavZVavZVVXZVVXZWloAWloAVVUnVVUnVSdVVSdVWgBaWgBaVdlVVdlV2atV2atVAKZaAKZaJ6tVJ6tVJ1VVJ1VVAFpaAFpa2VVV2VVVt7dJt7dJt7dJt0lJt0lJt0lJt7e3t7e3t7e3t0m3t0m3t0m3SbdJSbdJSbdJSUlJSUlJSUlJSbe3Sbe3Sbe3SUm3SUm3SUm3", "T": "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", "I": "AABQAXIAcgBjAAAAAABVAWIAYgBgAAAAAQBRAWIAYgBlAAEAAQCNAfsA+wBhAAEAAgBUAXMAcwD1AAIAAgCLAWQAZABjAAIAAwBVAWQAZAD3AAMAAwDPAfkA+QBlAAMABABQAWAAYABpAAQABABWAWgAaABmAAQABQBSAWgAaABrAAUABQCTAQMBAwFnAAUABgBRAWEAYQD9AAYABgCRAWoAagBpAAYABwBWAWoAagD/AAcABwDTAQEBAQFrAAcACABQAWYAZgBvAAgACABXAW4AbgBsAAgACQBTAW4AbgBxAAkACQCZAQsBCwFtAAkACgBSAWcAZwAFAQoACgCXAXAAcABvAAoACwBXAXAAcAAHAQsACwDZAQkBCQFxAAsADABQAWwAbAB1AAwADABYAXQAdAByAAwADQBUAXQAdAB3AA0ADQCHAfMA8wBzAA0ADgBTAW0AbQANAQ4ADgCdAXYAdgB1AA4ADwBYAXYAdgAPAQ8ADwDWAfEA8QB3AA8AEABZAYoAigB7ABAAEABeAXoAegB4ABAAEQBaAXoAegB9ABEAEQCcAQwBDAF5ABEAEgBdAYsAiwAUARIAEgCiAXwAfAB7ABIAEwBeAXwAfAAWARMAEwDUAQ4BDgF9ABMAFABZAXgAeACBABQAFABfAYAAgAB+ABQAFQBbAYAAgACDABUAFQClARsBGwF/ABUAFgBaAXkAeQAKARYAFgCYAYIAggCBABYAFwBfAYIAggAIARcAFwDYARkBGQGDABcAGABZAX4AfgCHABgAGABgAYYAhgCEABgAGQBcAYYAhgCJABkAGQCqASIBIgGFABkAGgBbAX8AfwAdARoAGgCpAYgAiACHABoAGwBgAYgAiAAfARsAGwDkASABIAGJABsAHABZAYQAhACNABwAHABhAYwAjACKABwAHQBdAYwAjACPAB0AHQCeARIBEgGLAB0AHgBcAYUAhQAkAR4AHgCuAY4AjgCNAB4AHwBhAY4AjgAmAR8AHwDgARABEAGPAB8AIABiAaIAogCTACAAIABnAZIAkgCQACAAIQBjAZIAkgCVACEAIQCvASUBJQGRACEAIgBmAaMAowAsASIAIgC0AZQAlACTACIAIwBnAZQAlAAuASMAIwDiAScBJwGVACMAJABiAZAAkACZACQAJABoAZgAmACWACQAJQBkAZgAmACbACUAJQC3ATMBMwGXACUAJgBjAZEAkQAjASYAJgCrAZoAmgCZACYAJwBoAZoAmgAhAScAJwDlATEBMQGbACcAKABiAZYAlgCfACgAKABpAZ4AngCcACgAKQBlAZ4AngChACkAKQC9ATsBOwGdACkAKgBkAZcAlwA1ASoAKgC7AaAAoACfACoAKwBpAaAAoAA3ASsAKwDfATkBOQGhACsALABiAZwAnAClACwALABqAaQApACiACwALQBmAaQApACnAC0ALQCwASoBKgGjAC0ALgBlAZ0AnQA9AS4ALgDBAaYApgClAC4ALwBqAaYApgA/AS8ALwDbASgBKAGnAC8AMABrAboAugCrADAAMABwAaoAqgCoADAAMQBsAaoAqgCtADEAMQDAATwBPAGpADEAMgBvAbsAuwBEATIAMgDGAawArACrADIAMwBwAawArABGATMAMwDaAT4BPgGtADMANABrAagAqACxADQANABxAbAAsACuADQANQBtAbAAsACzADUANQDIAUoBSgGvADUANgBsAakAqQA6ATYANgC8AbIAsgCxADYANwBxAbIAsgA4ATcANwDdAUgBSAGzADcAOABrAa4ArgC3ADgAOAByAbYAtgC0ADgAOQBuAbYAtgC5ADkAOQCQAfwA/AC1ADkAOgBtAa8ArwBMAToAOgDMAbgAuAC3ADoAOwByAbgAuABOATsAOwDRAf4A/gC5ADsAPABrAbQAtAC9ADwAPABzAbwAvAC6ADwAPQBvAbwAvAC/AD0APQDCAUIBQgG7AD0APgBuAbUAtQD6AD4APgCMAb4AvgC9AD4APwBzAb4AvgD4AD8APwDOAUABQAG/AD8AQAB0AdIA0gDDAEAAQAB5AcIAwgDAAEAAQQB1AcIAwgDFAEEAQQCjARUBFQHBAEEAQgB4AdMA0wDyAEIAQgCGAcQAxADDAEIAQwB5AcQAxADwAEMAQwDVARcBFwHFAEMARAB0AcAAwADJAEQARAB6AcgAyADGAEQARQB2AcgAyADLAEUARQC1AS0BLQHHAEUARgB1AcEAwQATAUYARgCfAcoAygDJAEYARwB6AcoAygARAUcARwDhAS8BLwHLAEcASAB0AcYAxgDPAEgASAB7Ac4AzgDMAEgASQB3Ac4AzgDRAEkASQDHAUUBRQHNAEkASgB2AccAxwArAUoASgCxAdAA0ADPAEoASwB7AdAA0AApAUsASwDcAUcBRwHRAEsATAB0AcwAzADVAEwATAB8AdQA1ADSAEwATQB4AdQA1ADXAE0ATQCKAfQA9ADTAE0ATgB3Ac0AzQBDAU4ATgDDAdYA1gDVAE4ATwB8AdYA1gBBAU8ATwDQAfYA9gDXAE8AUAB9AeoA6gDbAFAAUACCAdoA2gDYAFAAUQB+AdoA2gDdAFEAUQCoARwBHAHZAFEAUgCBAesA6wAyAVIAUgC2AdwA3ADbAFIAUwCCAdwA3AAwAVMAUwDjAR4BHgHdAFMAVAB9AdgA2ADhAFQAVACDAeAA4ADeAFQAVQB/AeAA4ADjAFUAVQCWAQQBBAHfAFUAVgB+AdkA2QAaAVYAVgCkAeIA4gDhAFYAVwCDAeIA4gAYAVcAVwDXAQYBBgHjAFcAWAB9Ad4A3gDnAFgAWACEAeYA5gDkAFgAWQCAAeYA5gDpAFkAWQDNAU0BTQHlAFkAWgB/Ad8A3wACAVoAWgCSAegA6ADnAFoAWwCEAegA6AAAAVsAWwDSAU8BTwHpAFsAXAB9AeQA5ADtAFwAXACFAewA7ADqAFwAXQCBAewA7ADvAF0AXQC6ATQBNAHrAF0AXgCAAeUA5QBLAV4AXgDJAe4A7gDtAF4AXwCFAe4A7gBJAV8AXwDeATYBNgHvAF8AAABgAFABcgBUAWMAAABjAFUBYgBRAWAAAQBhAFEBYgBVAWUAAQBlAI0B+wCPAWEAAgBjAFQBcwCJAfUAAgD1AIsBZABVAWMAAwBlAFUBZACLAfcAAwD3AM8B+QCNAWUABABmAFABYABRAWkABABpAFYBaABSAWYABQBnAFIBaABWAWsABQBrAJMBAwGVAWcABgBpAFEBYQCPAf0ABgD9AJEBagBWAWkABwBrAFYBagCRAf8ABwD/ANMBAQGTAWsACABsAFABZgBSAW8ACABvAFcBbgBTAWwACQBtAFMBbgBXAXEACQBxAJkBCwGbAW0ACgBvAFIBZwCVAQUBCgAFAZcBcABXAW8ACwBxAFcBcACXAQcBCwAHAdkBCQGZAXEADAByAFABbABTAXUADAB1AFgBdABUAXIADQBzAFQBdABYAXcADQB3AIcB8wCJAXMADgB1AFMBbQCbAQ0BDgANAZ0BdgBYAXUADwB3AFgBdgCdAQ8BDwAPAdYB8QCHAXcAEAB4AFkBigBdAXsAEAB7AF4BegBaAXgAEQB5AFoBegBeAX0AEQB9AJwBDAGaAXkAEgB7AF0BiwCgARQBEgAUAaIBfABeAXsAEwB9AF4BfACiARYBEwAWAdQBDgGcAX0AFAB+AFkBeABaAYEAFACBAF8BgABbAX4AFQB/AFsBgABfAYMAFQCDAKUBGwGnAX8AFgCBAFoBeQCaAQoBFgAKAZgBggBfAYEAFwCDAF8BggCYAQgBFwAIAdgBGQGlAYMAGACEAFkBfgBbAYcAGACHAGABhgBcAYQAGQCFAFwBhgBgAYkAGQCJAKoBIgGsAYUAGgCHAFsBfwCnAR0BGgAdAakBiABgAYcAGwCJAGABiACpAR8BGwAfAeQBIAGqAYkAHACKAFkBhABcAY0AHACNAGEBjABdAYoAHQCLAF0BjABhAY8AHQCPAJ4BEgGgAYsAHgCNAFwBhQCsASQBHgAkAa4BjgBhAY0AHwCPAGEBjgCuASYBHwAmAeABEAGeAY8AIACQAGIBogBmAZMAIACTAGcBkgBjAZAAIQCRAGMBkgBnAZUAIQCVAK8BJQGtAZEAIgCTAGYBowCyASwBIgAsAbQBlABnAZMAIwCVAGcBlAC0AS4BIwAuAeIBJwGvAZUAJACWAGIBkABjAZkAJACZAGgBmABkAZYAJQCXAGQBmABoAZsAJQCbALcBMwG5AZcAJgCZAGMBkQCtASMBJgAjAasBmgBoAZkAJwCbAGgBmgCrASEBJwAhAeUBMQG3AZsAKACcAGIBlgBkAZ8AKACfAGkBngBlAZwAKQCdAGUBngBpAaEAKQChAL0BOwG/AZ0AKgCfAGQBlwC5ATUBKgA1AbsBoABpAZ8AKwChAGkBoAC7ATcBKwA3Ad8BOQG9AaEALACiAGIBnABlAaUALAClAGoBpABmAaIALQCjAGYBpABqAacALQCnALABKgGyAaMALgClAGUBnQC/AT0BLgA9AcEBpgBqAaUALwCnAGoBpgDBAT8BLwA/AdsBKAGwAacAMACoAGsBugBvAasAMACrAHABqgBsAagAMQCpAGwBqgBwAa0AMQCtAMABPAG+AakAMgCrAG8BuwDEAUQBMgBEAcYBrABwAasAMwCtAHABrADGAUYBMwBGAdoBPgHAAa0ANACuAGsBqABsAbEANACxAHEBsABtAa4ANQCvAG0BsABxAbMANQCzAMgBSgHKAa8ANgCxAGwBqQC+AToBNgA6AbwBsgBxAbEANwCzAHEBsgC8ATgBNwA4Ad0BSAHIAbMAOAC0AGsBrgBtAbcAOAC3AHIBtgBuAbQAOQC1AG4BtgByAbkAOQC5AJAB/ACOAbUAOgC3AG0BrwDKAUwBOgBMAcwBuAByAbcAOwC5AHIBuADMAU4BOwBOAdEB/gCQAbkAPAC6AGsBtABuAb0APAC9AHMBvABvAboAPQC7AG8BvABzAb8APQC/AMIBQgHEAbsAPgC9AG4BtQCOAfoAPgD6AIwBvgBzAb0APwC/AHMBvgCMAfgAPwD4AM4BQAHCAb8AQADAAHQB0gB4AcMAQADDAHkBwgB1AcAAQQDBAHUBwgB5AcUAQQDFAKMBFQGhAcEAQgDDAHgB0wCIAfIAQgDyAIYBxAB5AcMAQwDFAHkBxACGAfAAQwDwANUBFwGjAcUARADGAHQBwAB1AckARADJAHoByAB2AcYARQDHAHYByAB6AcsARQDLALUBLQGzAccARgDJAHUBwQChARMBRgATAZ8BygB6AckARwDLAHoBygCfAREBRwARAeEBLwG1AcsASADMAHQBxgB2Ac8ASADPAHsBzgB3AcwASQDNAHcBzgB7AdEASQDRAMcBRQHFAc0ASgDPAHYBxwCzASsBSgArAbEB0AB7Ac8ASwDRAHsB0ACxASkBSwApAdwBRwHHAdEATADSAHQBzAB3AdUATADVAHwB1AB4AdIATQDTAHgB1AB8AdcATQDXAIoB9ACIAdMATgDVAHcBzQDFAUMBTgBDAcMB1gB8AdUATwDXAHwB1gDDAUEBTwBBAdAB9gCKAdcAUADYAH0B6gCBAdsAUADbAIIB2gB+AdgAUQDZAH4B2gCCAd0AUQDdAKgBHAGmAdkAUgDbAIEB6wC4ATIBUgAyAbYB3ACCAdsAUwDdAIIB3AC2ATABUwAwAeMBHgGoAd0AVADeAH0B2AB+AeEAVADhAIMB4AB/Ad4AVQDfAH8B4ACDAeMAVQDjAJYBBAGUAd8AVgDhAH4B2QCmARoBVgAaAaQB4gCDAeEAVwDjAIMB4gCkARgBVwAYAdcBBgGWAeMAWADkAH0B3gB/AecAWADnAIQB5gCAAeQAWQDlAIAB5gCEAekAWQDpAM0BTQHLAeUAWgDnAH8B3wCUAQIBWgACAZIB6ACEAecAWwDpAIQB6ACSAQABWwAAAdIBTwHNAekAXADqAH0B5ACAAe0AXADtAIUB7ACBAeoAXQDrAIEB7ACFAe8AXQDvALoBNAG4AesAXgDtAIAB5QDLAUsBXgBLAckB7gCFAe0AXwDvAIUB7gDJAUkBXwBJAd4BNgG6Ae8A"}};
+var BVS=`#version 300 es
+precision highp float;
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec3 aNrm;
+layout(location=2) in vec2 aUv;
+uniform mat3 uRot;
+uniform vec2 uC,uRes;       /* screen centre in device px (y down), canvas size */
+uniform float uR;
+out vec3 vN;out vec2 vUv;out vec3 vW;out vec3 vO;
+void main(){
+  vec3 p=uRot*aPos; vec3 n=normalize(uRot*aNrm);
+  vec2 s=vec2(uC.x+p.x*uR, uC.y-p.y*uR);
+  /* the UNROTATED position as well: the seam and the scuffs are painted in the ball's own
+     space, so they turn with it instead of swimming across a rolling ball */
+  vO=normalize(aPos);
+  vW=vec3(s,p.z*uR); vN=n; vUv=aUv;
+  gl_Position=vec4(vec2(s.x/uRes.x,1.0-s.y/uRes.y)*2.0-1.0,-p.z*0.02,1.0);
+}
+`;
+var BFS=`#version 300 es
+precision highp float;
+in vec3 vN;in vec2 vUv;in vec3 vW;in vec3 vO;
+out vec4 frag;
+uniform mat3 uRot;
+uniform float uRMul,uRAdd,uF0,uNrmScale,uR;
+const float PI=3.14159265359;
+
+/* ---------------------------------------------------------------------------
+ * A BASEBALL, MADE HERE RATHER THAN SCANNED
+ *
+ * The scan pack has a soccer ball, a basketball and a tennis ball and no baseball,
+ * so this one is drawn in the shader instead of sampled from textures.
+ *
+ * The seam is not a hand-drawn squiggle. A baseball is two identical peanut-shaped
+ * panels, and the curve where they meet is the same closed curve a tennis ball has.
+ * It has an exact parametrisation that lies on the unit sphere:
+ *
+ *     x = a·cos t + b·cos 3t
+ *     y = a·sin t − b·sin 3t
+ *     z = c·sin 2t
+ *
+ * because x²+y² = a²+b² + 2ab·cos 4t and z² = c²(1−cos 4t)/2, so the cos 4t terms
+ * cancel when c² = 4ab, and the constant part is (a+b)². Choose a+b = 1 and the whole
+ * curve sits on the sphere exactly. a = 0.70 gives the familiar baseball proportions.
+ *
+ * Every fragment finds its nearest point on that curve — a coarse sweep, then two
+ * refinements — which gives both the distance across the seam (for the crease and the
+ * stitch rows) and the distance along it (for spacing the stitches). Roughly 70 curve
+ * evaluations per fragment, over a ball that is at most 60 px across: nothing.
+ * ------------------------------------------------------------------------ */
+const float SA=0.70, SB=0.30;
+vec3 seamPt(float t){
+  float c=2.0*sqrt(SA*SB);
+  return vec3(SA*cos(t)+SB*cos(3.0*t), SA*sin(t)-SB*sin(3.0*t), c*sin(2.0*t));
+}
+vec3 seamTan(float t){
+  float c=2.0*sqrt(SA*SB);
+  return normalize(vec3(-SA*sin(t)-3.0*SB*sin(3.0*t),
+                         SA*cos(t)-3.0*SB*cos(3.0*t),
+                         2.0*c*cos(2.0*t)));
+}
+
+/* Lit for this photograph. The sun is on the horizon off to the LEFT, behind the houses,
+   so the key is warm and all but horizontal from that side; the infield dirt throws a
+   warm bounce up into the underside; the deep blue dusk sky fills the other side. */
+const vec3 KEY =normalize(vec3(-0.82, 0.20, 0.54));
+const vec3 GRND=normalize(vec3( 0.00,-1.00, 0.10));
+const vec3 SKY =normalize(vec3( 0.40, 0.82, 0.42));
+
+float D_GGX(float NoH,float a){float a2=a*a;float x=(NoH*a2-NoH)*NoH+1.0;return a2/(PI*x*x+1e-7);}
+float V_S(float NoV,float NoL,float a){float a2=a*a;
+  float lv=NoL*sqrt(NoV*NoV*(1.0-a2)+a2),ll=NoV*sqrt(NoL*NoL*(1.0-a2)+a2);
+  return 0.5/max(lv+ll,1e-5);}
+vec3 F_S(vec3 f0,float u){return f0+(1.0-f0)*pow(1.0-u,5.0);}
+vec3 aces(vec3 x){const float a=2.51,b=0.03,c=2.43,d=0.59,e=0.14;
+  return clamp((x*(a*x+b))/(x*(c*x+d)+e),0.0,1.0);}
+
+float hash31(vec3 p){p=fract(p*0.3183099+vec3(0.1,0.2,0.3));p*=17.0;
+  return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float vnoise(vec3 p){
+  vec3 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
+  float n=mix(mix(mix(hash31(i+vec3(0,0,0)),hash31(i+vec3(1,0,0)),f.x),
+                  mix(hash31(i+vec3(0,1,0)),hash31(i+vec3(1,1,0)),f.x),f.y),
+              mix(mix(hash31(i+vec3(0,0,1)),hash31(i+vec3(1,0,1)),f.x),
+                  mix(hash31(i+vec3(0,1,1)),hash31(i+vec3(1,1,1)),f.x),f.y),f.z);
+  return n;
+}
+
+void main(){
+  vec3 P=normalize(vO);
+
+  /* nearest point on the seam: coarse sweep, then two refinements */
+  float best=1e9, bt=0.0;
+  for(int k=0;k<40;k++){
+    float t=float(k)/40.0*2.0*PI;
+    float dist=1.0-dot(P,seamPt(t));
+    if(dist<best){best=dist;bt=t;}
+  }
+  float half_=2.0*PI/40.0;
+  for(int r=0;r<2;r++){
+    float lo=bt-half_, hi=bt+half_;
+    for(int k=0;k<=8;k++){
+      float t=mix(lo,hi,float(k)/8.0);
+      float dist=1.0-dot(P,seamPt(t));
+      if(dist<best){best=dist;bt=t;}
+    }
+    half_*=0.25;
+  }
+  vec3 Q=seamPt(bt);
+  float ang=acos(clamp(dot(P,Q),-1.0,1.0));          /* radians across the seam */
+  vec3 Tg=seamTan(bt);
+  vec3 Cx=normalize(cross(Q,Tg));                     /* across the seam, in the surface */
+  float off=ang*sign(dot(P-Q,Cx));                    /* SIGNED distance across */
+
+  /* ---- leather ---- */
+  /* Never white. A ball that has been used is bone/cream with dirt ground into it, and on
+     this field it is also sitting in the last of a very orange sun. */
+  float grain=vnoise(P*140.0)*0.5+vnoise(P*46.0)*0.5;
+  float dirt =vnoise(P*7.0+13.0);
+  vec3 alb=vec3(0.86,0.82,0.72);
+  alb*=mix(0.84,1.0,smoothstep(0.22,0.78,dirt));      /* scuffed patches */
+  alb*=0.93+0.07*grain;
+  alb*=vec3(0.98,0.93,0.84);                          /* age */
+  alb=pow(alb,vec3(2.2));
+
+  /* ---- the seam ---- */
+  float a_=abs(off);
+  float crease=1.0-smoothstep(0.0,0.030,a_);          /* the valley the panels meet in */
+  /* two rows of stitches either side, slanted: the slant comes from letting the phase
+     depend on the across-seam offset, which shears the dashes without any extra maths */
+  float phase=fract((bt+off*2.6)*54.0/(2.0*PI));
+  float row=smoothstep(0.030,0.042,a_)*(1.0-smoothstep(0.086,0.100,a_));
+  float dash=1.0-smoothstep(0.30,0.42,abs(phase-0.5));
+  float stitch=row*dash;
+  vec3 red=pow(vec3(0.62,0.11,0.12),vec3(2.2));
+  alb=mix(alb,red,stitch*0.96);
+  alb*=1.0-crease*0.42;
+
+  /* ---- normal ---- */
+  /* No normal map to sample, so the relief is analytic: the crease pushes the normal down
+     into the valley, each stitch rounds up out of it. */
+  vec3 Ng=normalize(vN);
+  vec3 CxW=normalize(uRot*Cx);
+  float w=0.030;
+  float creaseSlope=-(off/w)*exp(-(off/w)*(off/w))*1.35;
+  float stitchSlope=stitch*sign(off)*0.55;
+  vec3 N=normalize(Ng+CxW*(creaseSlope+stitchSlope)*uNrmScale);
+
+  float rough=clamp(0.46+0.16*grain-0.10*stitch+0.10*crease,0.055,1.0);
+  rough=clamp(rough*uRMul+uRAdd,0.055,1.0);
+  vec3 V=vec3(0.0,0.0,1.0);
+  float NoV=max(dot(N,V),1e-4);
+  vec3 f0=vec3(uF0);
+
+  vec3 dirs[3]; dirs[0]=KEY; dirs[1]=GRND; dirs[2]=SKY;
+  vec3 cols[3];
+  /* Last of the sun, straight down the first-base line. */
+  cols[0]=vec3(1.00,0.66,0.32)*1.30;   /* the sun, on the horizon      */
+  cols[1]=vec3(0.90,0.48,0.26)*0.50;   /* bounce off the infield dirt  */
+  cols[2]=vec3(0.34,0.40,0.72)*0.34;   /* deep dusk sky                */
+  vec3 col=vec3(0.0);
+  for(int k=0;k<3;k++){
+    vec3 L=dirs[k];float NoL=max(dot(N,L),0.0);if(NoL<=0.0)continue;
+    vec3 H=normalize(L+V);
+    float aa=max(rough*rough,0.002);
+    float sp=D_GGX(max(dot(N,H),0.0),aa)*V_S(NoV,NoL,aa);
+    vec3 F=F_S(f0,max(dot(V,H),0.0));
+    col+=((1.0-F)*alb/PI+F*sp)*cols[k]*NoL;
+  }
+  /* Occlusion from the ground: without it the bounce term lights the underside and the
+     ball reads as hovering an inch above the dirt. */
+  float ao=clamp(0.5+0.5*N.y,0.0,1.0);
+  ao=0.24+0.76*ao*ao;
+  col*=ao;
+  col+=alb*vec3(0.050,0.046,0.056)*ao;
+  float rim=pow(1.0-NoV,3.0);
+  col+=alb*rim*vec3(1.00,0.70,0.38)*0.16*ao;
+
+  frag=vec4(pow(aces(col),vec3(1.0/2.2)),1.0);
+}
+`;
+/* -------------------------------------------------------------------------
+ * The tennis ball on the court.
+ *
+ * It lives in the FOREGROUND layer, sitting on the strip of court at the bottom
+ * of the window, in front of the paper. That is where the photograph puts the
+ * ground, and it is the one place a ball can always be seen and always be hit
+ * however far down the menu you have scrolled.
+ *
+ * The physics is deliberately in screen pixels rather than in a world. The ball
+ * is a metre from the camera in a photograph with no measurable geometry, so a
+ * perspective solve would be inventing numbers; a ground line, gravity, and the
+ * ball's own restitution and rolling resistance out of the scan pack give the
+ * right motion for a fraction of the code.
+ * ---------------------------------------------------------------------- */
+(function(){
+var cv=document.getElementById('ball');
+if(!cv)return;
+var gl=null;
+try{gl=cv.getContext('webgl2',{alpha:true,antialias:true,premultipliedAlpha:true,
+                               powerPreference:'low-power'});}catch(e){}
+if(!gl){cv.style.display='none';return;}
+
+function mk(v,f){
+  function sh(t,src){var s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))console.warn(gl.getShaderInfoLog(s));return s;}
+  var p=gl.createProgram();
+  gl.attachShader(p,sh(gl.VERTEX_SHADER,v));
+  gl.attachShader(p,sh(gl.FRAGMENT_SHADER,f));
+  gl.linkProgram(p);
+  if(!gl.getProgramParameter(p,gl.LINK_STATUS)){console.warn(gl.getProgramInfoLog(p));return null;}
+  return p;
+}
+var P=mk(BVS,BFS);
+if(!P){cv.style.display='none';return;}
+var U={};
+['uRot','uC','uRes','uR','uRMul','uRAdd','uF0','uNrmScale']
+  .forEach(function(n){U[n]=gl.getUniformLocation(P,n);});
+
+function b64buf(s){var b=atob(s),u=new Uint8Array(b.length),i;
+  for(i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;}
+var rec=PACK.soccer;   /* mesh only — the baseball is painted in the shader */
+var Pp=new Float32Array(b64buf(rec.P).buffer),
+    Ni=new Int8Array(b64buf(rec.N).buffer),
+    Tq=new Uint16Array(b64buf(rec.T).buffer),
+    Ix=new Uint16Array(b64buf(rec.I).buffer),
+    nv=rec.nv, it=new Float32Array(nv*8), i, rr=0;
+for(i=0;i<nv;i++)rr=Math.max(rr,Math.hypot(Pp[i*3],Pp[i*3+1],Pp[i*3+2]));
+for(i=0;i<nv;i++){
+  it[i*8]=Pp[i*3]/rr;it[i*8+1]=Pp[i*3+1]/rr;it[i*8+2]=Pp[i*3+2]/rr;
+  it[i*8+3]=Ni[i*3]/127;it[i*8+4]=Ni[i*3+1]/127;it[i*8+5]=Ni[i*3+2]/127;
+  it[i*8+6]=Tq[i*2]/65535;it[i*8+7]=Tq[i*2+1]/65535;
+}
+var vao=gl.createVertexArray();gl.bindVertexArray(vao);
+var vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);
+gl.bufferData(gl.ARRAY_BUFFER,it,gl.STATIC_DRAW);
+gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);
+gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,32,12);
+gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,32,24);
+var ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,Ix,gl.STATIC_DRAW);
+gl.bindVertexArray(null);
+var COUNT=Ix.length;
+
+function rot3(m,ax,ay,az,ang){
+  var c=Math.cos(ang),s=Math.sin(ang),t=1-c;
+  var r=[t*ax*ax+c,t*ax*ay-s*az,t*ax*az+s*ay,
+         t*ax*ay+s*az,t*ay*ay+c,t*ay*az-s*ax,
+         t*ax*az-s*ay,t*ay*az+s*ax,t*az*az+c];
+  var o=new Float32Array(9),i,j;
+  for(i=0;i<3;i++)for(j=0;j<3;j++)
+    o[i*3+j]=r[i*3]*m[j]+r[i*3+1]*m[3+j]+r[i*3+2]*m[6+j];
+  return o;
+}
+
+/* ---------- where the ground is ----------
+ * Not a fraction of the window. The court is a place in a PHOTOGRAPH, and where that
+ * place lands on screen depends on how `cover` has cropped the plate, which depends on
+ * the window's aspect: the same 80%-down line is flat court on a laptop and the grass
+ * verge at the bottom of the frame on a wide, short one. So the ground line is worked
+ * out from the plate's own geometry — cover scale, the 42% vertical anchor, the 1.22
+ * blow-up and the parallax offset — from one number, BEDLINE, which is a height in the
+ * IMAGE. The ball then sits on the same patch of tarmac whatever the window is doing,
+ * and rides up and down with the court as the page scrolls. */
+var IW=1920, IH=1434, BEDLINE=0.68;
+var W=0,H=0,DPR=1,R=34,GY=0,roomy=false,shadow=document.getElementById('ballshadow');
+function courtY(){
+  var s=Math.max(W/IW,H/IH), dh=IH*s;
+  var y0=(H-dh)*0.42+BEDLINE*dh;              /* before the blow-up */
+  var y=H/2+(y0-H/2)*1.22+(window.__FARY||0); /* after it, and after the parallax */
+  /* Clamped, and by whether there is clear court to stand on rather than by the window's
+     size. With margins either side of the column the ball can take its proper place up the
+     court. Without them — a phone, or any window narrower than the column — that place is
+     halfway up the page behind the cards, where the ball is a green thing poking out from
+     under a button; there it is pinned low instead, into the clear court below the last
+     card. On a phone the plate is cropped so hard that everything from 60% down is flat
+     tarmac anyway, so low is still on the court. */
+  var lo=(roomy?0.50:0.84)*H, hi=(roomy?0.80:0.92)*H;
+  return Math.max(lo,Math.min(hi,y));
+}
+var B={x:0,y:0,vx:0,vy:0,om:0,R3:new Float32Array([1,0,0,0,1,0,0,0,1])};
+var E=0.44, CRR=0.055;
+
+function resize(){
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  W=cv.clientWidth; H=cv.clientHeight;
+  cv.width=Math.max(1,Math.round(W*DPR));
+  cv.height=Math.max(1,Math.round(H*DPR));
+  gl.viewport(0,0,cv.width,cv.height);
+  /* the ball is a fixed share of the window's width, floored so it stays hittable on a
+     phone and capped so it does not become a beach ball on a wide monitor. A little
+     smaller than it was, because it now sits further back up the court. */
+  R=Math.max(16,Math.min(30,W*0.021));
+  /* Now that it lies UNDER the paper it has to be parked where there is no paper. The
+     content column is a fixed max-width, so on a wide window there is clean court in the
+     margins either side of it and the ball goes in the wider one; on a narrow window there
+     are none, and the ball drops to the bottom of the page instead (see courtY). */
+  var pg=document.getElementById('page');
+  var pr=pg?pg.getBoundingClientRect():null;
+  var lm=pr?pr.left:0, rm=pr?W-pr.right:0;
+  roomy=Math.max(lm,rm)>R*2.6;
+  GY=Math.max(R+6,courtY()-R);
+  if(!started){
+    /* The right-hand margin, but held back from the window edge. The sun here is on the
+       horizon off to the left, so the shadow falls to the RIGHT and the ball needs clear
+       ground on that side; parked in the middle of the margin, half its shadow ran off the
+       edge of the window. The left margin was the other candidate and is worse: the bottom
+       left of this photograph is the grass verge, and the ball belongs on the dirt. */
+    if(rm>R*2.6)      B.x=Math.min(pr.right+rm*0.5, W-R*3.4);
+    else if(lm>R*2.6) B.x=lm*0.5;
+    else              B.x=Math.max(R*2.0,W*0.22);
+    B.y=GY;
+  }
+  B.x=Math.max(R,Math.min(W-R,B.x));
+}
+var started=false;
+
+/* ---------- the hit ---------- */
+function hit(cx,cy){
+  var d=Math.hypot(cx-B.x,cy-B.y);
+  if(d>R*1.9)return false;
+  var away=(cx<B.x)?1:-1;
+  B.vy=-(420+Math.random()*160);
+  B.vx+=away*(120+Math.random()*130);
+  B.om=-away*(7+Math.random()*5);
+  started=true;
+  var h=document.getElementById('ballhint');
+  if(h)h.classList.add('gone');
+  return true;
+}
+/* The canvas covers the whole foreground strip, so it must not swallow taps meant for the
+   paper underneath: pointer-events stay off and the hit test is done from a capture-phase
+   listener on the window. When the ball IS hit the event has to be stopped dead AND the
+   click that follows it swallowed — preventing a pointerdown does not stop a click, so
+   without the second half of this a knock on the ball also opens whatever card it happens
+   to be sitting over. */
+cv.style.pointerEvents='none';
+var swallow=false;
+addEventListener('pointerdown',function(e){
+  /* the ball lies UNDER the paper, so anything that landed on a link belongs to the link */
+  if(e.target&&e.target.closest&&e.target.closest('a'))return;
+  var r=cv.getBoundingClientRect();
+  var x=e.clientX-r.left, y=e.clientY-r.top;
+  if(x<0||y<0||x>W||y>H)return;
+  if(hit(x,y)){swallow=true;e.preventDefault();e.stopPropagation();}
+},true);
+addEventListener('click',function(e){
+  if(swallow){swallow=false;e.preventDefault();e.stopPropagation();}
+},true);
+
+/* ---------- the loop ---------- */
+var last=0,run=true,GRAV=1750;
+document.addEventListener('visibilitychange',function(){
+  run=!document.hidden; if(run){last=0;requestAnimationFrame(frame);}
+});
+function step(dt){
+  /* the court slides under the ball as the page parallaxes, so the ground line is read
+     every frame and a ball at rest is carried with it rather than left hanging */
+  var resting=(B.vy===0&&Math.abs(B.y-GY)<0.6);
+  GY=Math.max(R+6,courtY()-R);
+  if(resting)B.y=GY;
+
+  B.vy+=GRAV*dt;
+  B.x+=B.vx*dt; B.y+=B.vy*dt;
+  if(B.y>=GY){
+    B.y=GY;
+    if(B.vy>40){ B.vy=-B.vy*E; B.om+=(B.vx/Math.max(R,1))*0.55; B.vx*=0.86; }
+    else { B.vy=0; }
+    if(B.vy===0){
+      /* rolling: resistance off the scan pack, and it comes to a stop */
+      var s=B.vx<0?-1:1;
+      var dec=CRR*GRAV*dt;
+      if(Math.abs(B.vx)<=dec) B.vx=0; else B.vx-=s*dec;
+      B.om=B.vx/Math.max(R,1);
+    }
+  }
+  if(B.x<R){B.x=R;B.vx=Math.abs(B.vx)*0.5;}
+  if(B.x>W-R){B.x=W-R;B.vx=-Math.abs(B.vx)*0.5;}
+  B.om*=Math.max(0,1-0.55*dt);
+  if(Math.abs(B.om)>1e-4)B.R3=rot3(B.R3,0,0,1,-B.om*dt);
+
+  if(shadow){
+    /* Thrown to the RIGHT and sheared the other way from the tennis page, because the sun
+       in this photograph is on the horizon off to the LEFT — the same direction the key
+       light comes from in the shader. A round shadow directly under the ball is the
+       giveaway of a sprite pasted onto a photo. It shrinks and fades as the ball goes up,
+       which is the only cue for height there is. And the sun is lower here, so the shadow
+       is longer. */
+    var air=Math.max(0,GY-B.y)/(R*7);
+    var sc=1-Math.min(0.60,air*0.60);
+    var sw=R*3.4, sh=R*1.24, cx=B.x+R*0.30, cy=GY+R*1.04;
+    shadow.style.width=sw+'px'; shadow.style.height=sh+'px';
+    shadow.style.transform='translate3d('+(cx-sw/2)+'px,'+(cy-sh/2)+'px,0) skewX(16deg) scale('+
+      sc.toFixed(3)+','+(sc*0.9).toFixed(3)+')';
+    shadow.style.opacity=(0.95*(1-Math.min(0.78,air))).toFixed(3);
+  }
+}
+function frame(t){
+  if(!run)return;
+  if(!last)last=t;
+  var dt=Math.min(0.032,(t-last)/1000); last=t;
+  step(dt);
+  gl.clearColor(0,0,0,0);
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  {
+    gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.depthMask(true);
+    gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+    gl.useProgram(P);
+    gl.bindVertexArray(vao);
+    gl.uniform2f(U.uRes,cv.width,cv.height);
+    gl.uniform2f(U.uC,B.x*DPR,B.y*DPR);
+    gl.uniform1f(U.uR,R*DPR);
+    /* worn leather: matt, with only a little sheen where the sun catches it */
+    gl.uniform1f(U.uRMul,1.00);gl.uniform1f(U.uRAdd,0.06);
+    gl.uniform1f(U.uF0,0.035);gl.uniform1f(U.uNrmScale,1.00);
+    gl.uniformMatrix3fv(U.uRot,false,B.R3);
+    gl.drawElements(gl.TRIANGLES,COUNT,gl.UNSIGNED_SHORT,0);
+    gl.bindVertexArray(null);
+  }
+  requestAnimationFrame(frame);
+}
+addEventListener('resize',resize);
+resize();
+requestAnimationFrame(frame);
+setTimeout(function(){
+  var h=document.getElementById('ballhint');
+  if(h&&!started)h.classList.add('show');
+},2200);
+})();
+
+</script>
+</body>
+</html>
