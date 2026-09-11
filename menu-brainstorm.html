@@ -201,6 +201,22 @@ h1{margin:26px 0 0;font-weight:800;letter-spacing:-.018em;line-height:.94;
   .rest .num{width:38px;height:38px;font-size:17px}
 }
 
+/* ---------------- the NEW sticker ---------------- */
+/* Same idea as the number chip — a scrap of dyed stock with its own torn edge — but in a
+   rust red so it carries at a glance, and pinned to the opposite corner so the two can
+   never collide. */
+.new{position:absolute;z-index:3;display:grid;place-items:center;
+  font-weight:800;line-height:1;letter-spacing:.12em;color:#fdf3e2;
+  background:#b8402a;
+  box-shadow:0 4px 7px rgba(24,12,4,.36);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .16 0'/></filter><rect width='90' height='90' filter='url(%23n)'/></svg>")}
+.feat .new{font-size:14px;min-height:34px;padding:0 14px;right:-14px;top:-16px;transform:rotate(7deg)}
+.rest .new{font-size:11px;min-height:31px;padding:0 12px;right:-11px;top:-12px;transform:rotate(-6deg)}
+@media (max-width:640px){
+  .feat .new{font-size:12px;min-height:32px;padding:0 12px}
+  .rest .new{font-size:10px;min-height:30px;padding:0 11px}
+}
+
 /* ---------------- type on the paper ---------------- */
 .body{flex:1 1 auto;min-width:0}
 .kicker{display:block;font-size:10px;letter-spacing:.24em;text-transform:uppercase;
@@ -298,6 +314,19 @@ h2{margin:0;font-weight:800;letter-spacing:-.012em;line-height:1.04;color:var(--
       </span>
     </span>
     <span class="num">50</span>
+  </a>
+  <a class="scrap rest rose" href="ball-faces.html" data-seed="2839" aria-label="Ball Faces">
+    <span class="pol"><img src="thumbs/ball-faces.jpg" alt="" loading="lazy" width="480" height="300"></span>
+    <span class="sheet">
+      <span class="core"><span class="face"></span></span>
+      <span class="body">
+        <span class="kicker">Example 53</span>
+        <h2>Ball Faces</h2>
+        <p class="desc">Like the Ball Studio, but with faces — more for a Kids Bible. Ten characters on the same scanned balls, and they watch your finger as you drag them around.</p>
+      </span>
+      <span class="new">NEW</span>
+    </span>
+    <span class="num">53</span>
   </a>
   </div>
 
@@ -419,6 +448,13 @@ function tearAll(){
     var w=el.offsetWidth,h=el.offsetHeight;
     if(!w||!h)return;
     var p=tornOutline(w,h,7000+i*331,5,.5,5);
+    el.style.clipPath=p?polyStr(p):'none';
+  });
+  document.querySelectorAll('.new').forEach(function(el,i){
+    /* the sticker is smaller again than the number chip, so a tighter bite still */
+    var w=el.offsetWidth,h=el.offsetHeight;
+    if(!w||!h)return;
+    var p=tornOutline(w,h,9100+i*457,3,.45,4);
     el.style.clipPath=p?polyStr(p):'none';
   });
 }
