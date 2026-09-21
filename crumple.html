@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crumple</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#6f8f82; --ink:#f7f5ee; --ink-soft:rgba(247,245,238,.78);
+  --pencil:#f4c542; --graphite:#2a2a28; --chip:rgba(255,255,255,.16); --chip-line:rgba(255,255,255,.34);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --desk:#1f2b27; --ink:#ece9df; --ink-soft:rgba(236,233,223,.7); --chip:rgba(255,255,255,.08); --chip-line:rgba(255,255,255,.22); }
+}
+:root[data-theme="dark"]{ --desk:#1f2b27; --ink:#ece9df; --ink-soft:rgba(236,233,223,.7); --chip:rgba(255,255,255,.08); --chip-line:rgba(255,255,255,.22); }
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--desk);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+.top{position:fixed;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 18px) 22px 0;pointer-events:none;max-width:34rem}
+.top h1{margin:0;font-family:"Caveat",cursive;font-weight:700;font-size:2.6rem;line-height:1;letter-spacing:.01em}
+.top p{margin:.35rem 0 0;font-size:1rem;line-height:1.45;color:var(--ink-soft);min-height:1.45em}
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;
+  padding:0 16px calc(env(safe-area-inset-bottom,0px) + 18px)}
+button{font:inherit;font-size:1rem;font-weight:700;border-radius:999px;padding:.7em 1.25em;cursor:pointer;
+  border:1.5px solid var(--chip-line);background:var(--chip);color:var(--ink);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+button.primary{background:var(--pencil);color:var(--graphite);border-color:var(--pencil)}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+button:disabled{opacity:.5;cursor:default}
+details{position:fixed;right:16px;top:calc(env(safe-area-inset-top,0px) + 18px);max-width:min(20rem,calc(100vw - 32px));
+  font-size:.92rem;line-height:1.5;color:var(--ink-soft);text-align:right}
+details[open]{background:var(--chip);border:1.5px solid var(--chip-line);border-radius:14px;padding:.7rem .9rem;text-align:left;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+summary{cursor:pointer;color:var(--ink);font-weight:700;list-style:none}
+summary::-webkit-details-marker{display:none}
+details p{margin:.5rem 0 0}
+#loading{position:fixed;inset:0;display:grid;place-items:center;font-family:"Caveat",cursive;font-size:1.8rem;pointer-events:none;transition:opacity .3s}
+#loading.hide{opacity:0}
+@media (max-width:560px){ .top h1{font-size:2.2rem} details{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 80px)} }
+</style>
+</head>
+<body>
+<canvas id="scene" tabindex="-1" aria-label="A sheet of paper on a desk. Press and hold it to crumple, then drag and flick to throw."></canvas>
+<div class="top"><h1>Crumple</h1><p id="hint">Press and hold the sheet to crumple it.</p></div>
+<details><summary>How it works</summary>
+<p>Each sheet is simulated once in your browser: 1,800 points held together like paper, squeezed into a ball by virtual hands.</p>
+<p>Every frame of that simulation is stored in a texture (a vertex animation texture), so the GPU can play the crumple forward or backward instantly while the ball is thrown around.</p>
+</details>
+<div class="bar">
+  <button id="crumpleBtn" class="primary" type="button">Crumple</button>
+  <button id="newBtn" type="button">New sheet</button>
+  <button id="soundBtn" type="button" aria-pressed="true">Sound on</button>
+</div>
+<div id="loading">Smoothing a fresh sheet…</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const NX=36, NY=50, PW=2.0, PH=2.8, FRAMES=72, NV=NX*NY;
+function bakeCrumple(seed){
+  const rnd=mulberry32(seed);
+  const s=PW/(NX-1);
+  const p=new Float32Array(NV*3), q=new Float32Array(NV*3);
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const k=(j*NX+i)*3;p[k]=(i/(NX-1)-.5)*PW;p[k+1]=0;p[k+2]=(j/(NY-1)-.5)*PH;}
+  const A=[],B=[],Rr=[],K=[];
+  const add=(a,b,k)=>{A.push(a);B.push(b);Rr.push(Math.hypot(p[b*3]-p[a*3],p[b*3+1]-p[a*3+1],p[b*3+2]-p[a*3+2]));K.push(k);};
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const id=j*NX+i;
+    if(i<NX-1)add(id,id+1,1); if(j<NY-1)add(id,id+NX,1);
+    if(i<NX-1&&j<NY-1){add(id,id+NX+1,.9);add(id+1,id+NX,.9);}
+    if(i<NX-2)add(id,id+2,.18); if(j<NY-2)add(id,id+2*NX,.18);}
+  const ca=Int32Array.from(A),cb=Int32Array.from(B),cr=Float32Array.from(Rr),ck=Float32Array.from(K),NC=ca.length;
+  const frames=new Float32Array(NV*4*FRAMES), minY=new Float32Array(FRAMES);
+  let cx=0,cy=0,cz=0;
+  const centroid=()=>{cx=cy=cz=0;for(let k=0;k<NV*3;k+=3){cx+=p[k];cy+=p[k+1];cz+=p[k+2];}cx/=NV;cy/=NV;cz/=NV;};
+  const record=f=>{centroid();let m=1e9;for(let k=0;k<NV;k++){const o=(f*NV+k)*4,y=p[k*3+1]-cy;frames[o]=p[k*3]-cx;frames[o+1]=y;frames[o+2]=p[k*3+2]-cz;frames[o+3]=1;if(y<m)m=y;}minY[f]=m;};
+  record(0);
+  // seed gentle bumps so buckling goes different ways each sheet
+  const w=[];for(let n=0;n<4;n++)w.push([rnd()*6+2,rnd()*6+2,rnd()*6.28,(rnd()-.5)*.03]);
+  for(let k=0;k<NV;k++){let y=0;const x=p[k*3],z=p[k*3+2];for(const a of w)y+=a[3]*Math.sin(a[0]*x+a[1]*z+a[2]);p[k*3+1]=y+(rnd()-.5)*.004;}
+  q.set(p);
+  const SUB=4,ITER=8,TOTAL=(FRAMES-1)*SUB;
+  const R0=Math.hypot(PW,PH)/2*1.02,R1=.46;
+  const minD=s*.62,minD2=minD*minD,TS=8192,cs=new Int32Array(TS+1),ce=new Int32Array(NV);
+  const hk=(x,y,z)=>(((x*92837111)^(y*689287499)^(z*283923481))>>>0)&(TS-1);
+  const collide=()=>{
+    cs.fill(0);
+    for(let k=0;k<NV;k++)cs[hk(Math.floor(p[k*3]/minD),Math.floor(p[k*3+1]/minD),Math.floor(p[k*3+2]/minD))]++;
+    let st=0;for(let i=0;i<TS;i++){st+=cs[i];cs[i]=st;}cs[TS]=st;
+    for(let k=0;k<NV;k++){const h=hk(Math.floor(p[k*3]/minD),Math.floor(p[k*3+1]/minD),Math.floor(p[k*3+2]/minD));ce[--cs[h]]=k;}
+    for(let k=0;k<NV;k++){const ix=Math.floor(p[k*3]/minD),iy=Math.floor(p[k*3+1]/minD),iz=Math.floor(p[k*3+2]/minD);
+      for(let a=-1;a<2;a++)for(let b=-1;b<2;b++)for(let c=-1;c<2;c++){const h=hk(ix+a,iy+b,iz+c);
+        for(let m=cs[h];m<cs[h+1];m++){const j=ce[m];if(j<=k)continue;
+          const dx=p[j*3]-p[k*3],dy=p[j*3+1]-p[k*3+1],dz=p[j*3+2]-p[k*3+2],d2=dx*dx+dy*dy+dz*dz;
+          if(d2<minD2&&d2>1e-12){const d=Math.sqrt(d2),cc=(minD-d)/d*.5;
+            p[k*3]-=dx*cc;p[k*3+1]-=dy*cc;p[k*3+2]-=dz*cc;p[j*3]+=dx*cc;p[j*3+1]+=dy*cc;p[j*3+2]+=dz*cc;}}}}
+  };
+  let step=0;
+  for(let f=1;f<FRAMES;f++){
+    for(let sb=0;sb<SUB;sb++){
+      step++;const t=step/TOTAL,u=Math.min(1,t/.82),e=u*u*(3-2*u),R=R0+(R1-R0)*e;
+      centroid();
+      for(let k=0;k<NV*3;k+=3){
+        for(let d=0;d<3;d++){const v=(p[k+d]-q[k+d])*.93;q[k+d]=p[k+d];p[k+d]+=v;}
+        p[k]+=(cx-p[k])*.0015;p[k+1]+=(cy-p[k+1])*.0015;p[k+2]+=(cz-p[k+2])*.0015;
+      }
+      if(t<.85&&rnd()<.14){ // a "hand" grabs a spot and pushes it in
+        const g=Math.floor(rnd()*NV),gx=p[g*3],gy=p[g*3+1],gz=p[g*3+2],amt=.06+rnd()*.14,rad=.2+rnd()*.25;
+        const dx=(cx-gx)*amt,dy=(cy-gy)*amt+(rnd()-.5)*.05,dz=(cz-gz)*amt;
+        for(let k=0;k<NV;k++){const d=Math.hypot(p[k*3]-gx,p[k*3+1]-gy,p[k*3+2]-gz);if(d<rad){const wt=1-d/rad;p[k*3]+=dx*wt;p[k*3+1]+=dy*wt;p[k*3+2]+=dz*wt;}}
+      }
+      for(let it=0;it<ITER;it++)for(let c=0;c<NC;c++){
+        const a=ca[c]*3,b=cb[c]*3,dx=p[b]-p[a],dy=p[b+1]-p[a+1],dz=p[b+2]-p[a+2],d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+        if(d<1e-9)continue;const df=(d-cr[c])/d*.5*ck[c];
+        p[a]+=dx*df;p[a+1]+=dy*df;p[a+2]+=dz*df;p[b]-=dx*df;p[b+1]-=dy*df;p[b+2]-=dz*df;}
+      for(let k=0;k<NV*3;k+=3){const dx=p[k]-cx,dy=p[k+1]-cy,dz=p[k+2]-cz,d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+        if(d>R){const sc=R/d;p[k]=cx+dx*sc;p[k+1]=cy+dy*sc;p[k+2]=cz+dz*sc;}}
+      collide();
+    }
+    record(f);
+  }
+  let sum=0,mx=0;const L=(FRAMES-1)*NV*4;
+  for(let k=0;k<NV;k++){const o=L+k*4,d=Math.hypot(frames[o],frames[o+1],frames[o+2]);sum+=d;if(d>mx)mx=d;}
+  return {frames,minY,radius:(sum/NV)*.35+mx*.65};
+}
+(function(){
+const hintEl=document.getElementById('hint'),loadEl=document.getElementById('loading');
+const crumpleBtn=document.getElementById('crumpleBtn'),newBtn=document.getElementById('newBtn'),soundBtn=document.getElementById('soundBtn');
+const canvas=document.getElementById('scene');
+
+// ---------- renderer / scene ----------
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(38,1,.1,200);
+const CAM_TARGET=new THREE.Vector3(0,.4,-.3),CAM_DIR=new THREE.Vector3(0,.72,1).normalize();
+
+scene.add(new THREE.HemisphereLight(0xfff8ec,0x3c4a44,.75));
+const sun=new THREE.DirectionalLight(0xfff3e0,1.35);
+sun.position.set(3.5,9,4);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-7,right:7,top:7,bottom:-7,near:1,far:25});sun.shadow.bias=-.0004;sun.shadow.radius=4;
+scene.add(sun);
+const floorMat=new THREE.MeshStandardMaterial({color:0x6f8f82,roughness:1});
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(80,80),floorMat);
+floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+
+function applyTheme(){
+  const c=getComputedStyle(document.documentElement).getPropertyValue('--desk').trim()||'#6f8f82';
+  const col=new THREE.Color(c);col.convertSRGBToLinear();
+  floorMat.color.copy(col).multiplyScalar(1.15);
+  scene.background=new THREE.Color(c).convertSRGBToLinear().multiplyScalar(.9);
+  scene.fog=new THREE.Fog(scene.background,14,34);
+}
+applyTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
+
+// ---------- paper mesh with VAT ----------
+const geo=new THREE.BufferGeometry();
+{const pos=new Float32Array(NV*3),uv=new Float32Array(NV*2),vu=new Float32Array(NV),idx=[];
+ for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const k=j*NX+i;
+   pos[k*3]=(i/(NX-1)-.5)*PW;pos[k*3+2]=(j/(NY-1)-.5)*PH;uv[k*2]=i/(NX-1);uv[k*2+1]=1-j/(NY-1);vu[k]=(k+.5)/NV;
+   if(i<NX-1&&j<NY-1){const a=k,b=k+NX,c=k+1,d=k+NX+1;idx.push(a,b,c,c,b,d);}}
+ geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+ geo.setAttribute('vatU',new THREE.BufferAttribute(vu,1));geo.setIndex(idx);geo.computeVertexNormals();}
+
+const vatTex=new THREE.DataTexture(new Float32Array(NV*4*FRAMES),NV,FRAMES,THREE.RGBAFormat,THREE.FloatType);
+vatTex.minFilter=vatTex.magFilter=THREE.NearestFilter;vatTex.generateMipmaps=false;
+const U={uVat:{value:vatTex},uProgress:{value:0},uFrames:{value:FRAMES}};
+function injectVAT(shader){
+  Object.assign(shader.uniforms,U);
+  shader.vertexShader='uniform sampler2D uVat;\nuniform float uProgress;\nuniform float uFrames;\nattribute float vatU;\n'+
+  shader.vertexShader.replace('#include <begin_vertex>',`
+    float vf=clamp(uProgress,0.0,1.0)*(uFrames-1.0);
+    float vf0=floor(vf); float vf1=min(vf0+1.0,uFrames-1.0);
+    vec3 vp0=texture2D(uVat,vec2(vatU,(vf0+0.5)/uFrames)).xyz;
+    vec3 vp1=texture2D(uVat,vec2(vatU,(vf1+0.5)/uFrames)).xyz;
+    vec3 transformed=mix(vp0,vp1,vf-vf0);`);
+}
+const paperCanvas=document.createElement('canvas');paperCanvas.width=1024;paperCanvas.height=1434;
+const paperTex=new THREE.CanvasTexture(paperCanvas);paperTex.encoding=THREE.sRGBEncoding;
+paperTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+const paperMat=new THREE.MeshStandardMaterial({map:paperTex,roughness:.93,metalness:0,side:THREE.DoubleSide,flatShading:true});
+paperMat.shadowSide=THREE.DoubleSide;
+paperMat.onBeforeCompile=sh=>{
+  injectVAT(sh);
+  sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>',`
+  #ifdef USE_MAP
+    vec4 texelColor=texture2D(map,vUv);
+    texelColor=mapTexelToLinear(texelColor);
+    if(!gl_FrontFacing) texelColor=mapTexelToLinear(vec4(0.955,0.95,0.93,1.0));
+    diffuseColor*=texelColor;
+  #endif`);
+};
+const depthMat=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,side:THREE.DoubleSide});
+depthMat.onBeforeCompile=injectVAT;
+const paper=new THREE.Mesh(geo,paperMat);
+paper.customDepthMaterial=depthMat;paper.castShadow=true;paper.receiveShadow=true;paper.frustumCulled=false;
+scene.add(paper);
+
+// ---------- paper artwork ----------
+const drafts=[
+  ["The big idea:","a game where the","sheep find the shepherd","...no, other way round","","needs more sheep"],
+  ["Opening line","It was a dark and","It was a stormy","It was a Tuesday","","start again"],
+  ["Poster headline","\"Come and see\"","\"Come and see!!\"","\"COME and see\"","","hmm"],
+  ["Plan for the weekend","finish the thing","finish the other thing","sleep","","too ambitious"],
+  ["Paper plane v4","wings wider","nose heavier","fold on the dotted line","","it went backwards"]
+];
+let draftNo=6;
+function drawPaper(){
+  const g=paperCanvas.getContext('2d'),W=paperCanvas.width,H=paperCanvas.height;
+  g.fillStyle='#fbfaf4';g.fillRect(0,0,W,H);
+  for(let n=0;n<2600;n++){g.fillStyle=`rgba(120,110,90,${Math.random()*.05})`;g.fillRect(Math.random()*W,Math.random()*H,1.5,1.5);}
+  g.strokeStyle='rgba(96,150,205,.55)';g.lineWidth=2.2;
+  for(let y=190;y<H-40;y+=52){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  g.strokeStyle='rgba(214,86,86,.65)';g.lineWidth=2.5;g.beginPath();g.moveTo(150,0);g.lineTo(150,H);g.stroke();
+  const lines=drafts[draftNo%drafts.length];
+  g.fillStyle='#2b3a67';g.font='700 64px Caveat, cursive';g.fillText('Draft #'+draftNo,180,150);
+  g.font='500 54px Caveat, cursive';
+  lines.forEach((t,i)=>{
+    const y=242+i*104;if(!t)return;g.fillText(t,180+(i%2)*10,y);
+    if(i>0&&i<lines.length-1&&Math.random()<.75){ // scribble it out
+      const w=g.measureText(t).width;g.strokeStyle='rgba(43,58,103,.85)';g.lineWidth=4;g.beginPath();
+      let x=176;g.moveTo(x,y-18);while(x<180+w+10){x+=18+Math.random()*10;g.lineTo(x,y-18+(Math.random()-.5)*26);}g.stroke();}
+  });
+  g.save();g.translate(W-230,H-250);g.rotate(-.12);g.strokeStyle='rgba(43,58,103,.8)';g.lineWidth=4;
+  g.beginPath();for(let a=0;a<Math.PI*6;a+=.2){const r=8+a*9;g.lineTo(Math.cos(a)*r,Math.sin(a)*r);}g.stroke();g.restore();
+  paperTex.needsUpdate=true;
+}
+
+// ---------- state & baking ----------
+let bake=null,ballR=.4,seed=(Math.random()*1e9)|0;
+function groundOffset(pr){const f=Math.min(1,Math.max(0,pr))*(FRAMES-1),f0=Math.floor(f),f1=Math.min(f0+1,FRAMES-1);
+  return -(bake.minY[f0]+(bake.minY[f1]-bake.minY[f0])*(f-f0))+.006;}
+const pos=new THREE.Vector3(0,.006,.2),vel=new THREE.Vector3(),angVel=new THREE.Vector3(),quat=new THREE.Quaternion();
+let mode='loading',progress=0,holding=false,autoCrumple=false,dragging=false;
+const smooth={t:0,fromQ:new THREE.Quaternion(),fromP:new THREE.Vector3(),toP:new THREE.Vector3(),fromPr:0};
+
+function newSheet(first){
+  mode='loading';loadEl.classList.remove('hide');setButtons();
+  setTimeout(()=>{
+    seed=(seed*1664525+1013904223)>>>0;
+    bake=bakeCrumple(seed);vatTex.image.data=bake.frames;vatTex.needsUpdate=true;ballR=bake.radius;
+    if(!first)draftNo++;drawPaper();
+    progress=0;U.uProgress.value=0;pos.set(0,groundOffset(0),.2);vel.set(0,0,0);angVel.set(0,0,0);quat.identity();
+    mode='sheet';holding=autoCrumple=dragging=false;loadEl.classList.add('hide');setButtons();
+  },40);
+}
+function setButtons(){
+  const busy=mode==='loading'||mode==='smoothing';
+  crumpleBtn.disabled=busy;newBtn.disabled=mode==='loading';
+  crumpleBtn.textContent=mode==='ball'?'Smooth it out':'Crumple';
+  hintEl.textContent=mode==='ball'?'Drag and flick to throw it. Double-tap to smooth it out.':
+    mode==='smoothing'?'Smoothing it out…':'Press and hold the sheet to crumple it.';
+}
+function startSmooth(){
+  if(mode!=='ball')return;dragging=false;mode='smoothing';smooth.t=0;
+  smooth.fromQ.copy(quat);smooth.fromP.copy(pos);smooth.fromPr=progress;
+  smooth.toP.set(THREE.MathUtils.clamp(pos.x,-bounds.x+1.1,bounds.x-1.1),0,THREE.MathUtils.clamp(pos.z,bounds.zMin+1.5,bounds.zMax-1.5));
+  vel.set(0,0,0);angVel.set(0,0,0);setButtons();
+}
+crumpleBtn.onclick=()=>{ensureAudio();if(mode==='ball')startSmooth();else if(mode==='sheet')autoCrumple=true;};
+newBtn.onclick=()=>{ensureAudio();newSheet(false);};
+soundBtn.onclick=()=>{soundOn=!soundOn;soundBtn.textContent=soundOn?'Sound on':'Sound off';soundBtn.setAttribute('aria-pressed',soundOn);};
+
+// ---------- sound ----------
+let actx=null,noiseBuf=null,soundOn=true;
+function ensureAudio(){
+  if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;actx=new AC();
+    noiseBuf=actx.createBuffer(1,actx.sampleRate,actx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
+  if(actx.state==='suspended')actx.resume();
+}
+function noise(dur,type,freq,q,gain){
+  if(!actx||!soundOn)return;const t=actx.currentTime,src=actx.createBufferSource(),f=actx.createBiquadFilter(),g=actx.createGain();
+  src.buffer=noiseBuf;f.type=type;f.frequency.value=freq;f.Q.value=q;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(gain,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  src.connect(f).connect(g).connect(actx.destination);src.start(t,Math.random()*.8,dur+.05);
+}
+const crackle=v=>noise(.02+Math.random()*.07,'bandpass',1400+Math.random()*4200,.7+Math.random()*1.5,(.15+Math.random()*.35)*v);
+const thud=v=>{noise(.12,'lowpass',380,.8,.6*v);noise(.05,'bandpass',2600,1,.25*v);};
+
+// ---------- layout / bounds ----------
+const bounds={x:3,zMin:-4.5,zMax:2.2};
+function resize(){
+  const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
+  const t=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));
+  const d=Math.max(9.5,2.6/(t*camera.aspect));
+  camera.position.copy(CAM_TARGET).addScaledVector(CAM_DIR,d);camera.lookAt(CAM_TARGET);camera.updateProjectionMatrix();
+  bounds.x=Math.max(1.6,t*camera.aspect*d*.92-.2);bounds.zMin=-4.5;bounds.zMax=Math.min(2.6,d*.22);
+}
+addEventListener('resize',resize);resize();
+
+// ---------- pointer ----------
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),dragPlane=new THREE.Plane(),hitP=new THREE.Vector3(),grabOff=new THREE.Vector3();
+const dragTarget=new THREE.Vector3(),hist=[];let downInfo=null,lastTap=0;
+function setRay(e){const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);}
+function hitPaper(){
+  if(mode==='ball')return !!ray.ray.intersectSphere(new THREE.Sphere(pos,ballR*1.5),hitP);
+  if(mode!=='sheet')return false;
+  if(progress<.5){if(!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),hitP))return false;
+    const k=1-progress*.8;return Math.abs(hitP.x-pos.x)<PW/2*k+.15&&Math.abs(hitP.z-pos.z)<PH/2*k+.15;}
+  return !!ray.ray.intersectSphere(new THREE.Sphere(pos,ballR*1.8),hitP);
+}
+function beginDrag(){
+  dragging=true;const n=new THREE.Vector3();camera.getWorldDirection(n).negate();dragPlane.setFromNormalAndCoplanarPoint(n,pos);
+  if(ray.ray.intersectPlane(dragPlane,hitP))grabOff.copy(pos).sub(hitP);else grabOff.set(0,0,0);
+  dragTarget.copy(pos);hist.length=0;
+}
+canvas.addEventListener('pointerdown',e=>{
+  ensureAudio();setRay(e);if(!hitPaper())return;
+  canvas.setPointerCapture(e.pointerId);downInfo={x:e.clientX,y:e.clientY,t:performance.now()};
+  if(mode==='sheet'){holding=true;}
+  else if(mode==='ball'){beginDrag();}
+});
+canvas.addEventListener('pointermove',e=>{
+  setRay(e);
+  if(dragging&&ray.ray.intersectPlane(dragPlane,hitP))dragTarget.copy(hitP).add(grabOff);
+  else if(!dragging&&!holding)canvas.style.cursor=hitPaper()?'grab':'default';
+  if(dragging)canvas.style.cursor='grabbing';
+});
+function endPointer(e){
+  holding=false;
+  if(dragging){
+    dragging=false;const now=performance.now();let old=hist[0];for(const h of hist)if(now-h.t>=70)old=h;
+    if(old&&now-old.t>5){vel.copy(pos).sub(old.p).multiplyScalar(1000/(now-old.t));
+      vel.z-=Math.max(0,vel.y)*.55;if(vel.length()>28)vel.setLength(28);
+      angVel.set((Math.random()-.5),(Math.random()-.5),(Math.random()-.5)).multiplyScalar(vel.length()*1.2);}
+  }
+  if(downInfo&&mode==='ball'){const moved=Math.hypot(e.clientX-downInfo.x,e.clientY-downInfo.y),now=performance.now();
+    if(moved<8&&now-downInfo.t<280){if(now-lastTap<340){lastTap=0;startSmooth();}else lastTap=now;}}
+  downInfo=null;canvas.style.cursor='default';
+}
+canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);
+
+// ---------- loop ----------
+const clock=new THREE.Clock(),tq=new THREE.Quaternion(),tv=new THREE.Vector3(),G=-34;
+function physics(dt){
+  if(dragging){
+    pos.lerp(dragTarget,1-Math.exp(-28*dt));
+    pos.x=THREE.MathUtils.clamp(pos.x,-bounds.x+ballR,bounds.x-ballR);pos.z=THREE.MathUtils.clamp(pos.z,bounds.zMin+ballR,bounds.zMax-ballR);
+    pos.y=THREE.MathUtils.clamp(pos.y,ballR,7);
+    hist.push({t:performance.now(),p:pos.clone()});while(hist.length>12)hist.shift();
+    tv.copy(pos).sub(hist.length>1?hist[hist.length-2].p:pos);angVel.lerp(tv.set(tv.z,0,-tv.x).multiplyScalar(1/(dt*ballR*1.5)),.2);
+  }else{
+    vel.y+=G*dt;pos.addScaledVector(vel,dt);
+    if(pos.y<ballR){pos.y=ballR;if(vel.y<0){const imp=-vel.y;vel.y=imp>1.2?imp*.38:0;if(imp>2){thud(Math.min(1,imp/14));if(imp>5)crackle(.6);}}}
+    const grounded=pos.y<=ballR+.002;
+    if(grounded){const fr=Math.exp(-2.6*dt);vel.x*=fr;vel.z*=fr;
+      angVel.lerp(tv.set(vel.z,0,-vel.x).multiplyScalar(1/ballR),1-Math.exp(-10*dt));
+      if(Math.hypot(vel.x,vel.z)<.06&&Math.abs(vel.y)<.3){vel.x=vel.z=0;angVel.multiplyScalar(.85);}}
+    else angVel.multiplyScalar(Math.exp(-.4*dt));
+    const bx=bounds.x-ballR;
+    if(pos.x<-bx){pos.x=-bx;vel.x=Math.abs(vel.x)*.5;if(vel.x>2)thud(.3);}
+    if(pos.x>bx){pos.x=bx;vel.x=-Math.abs(vel.x)*.5;if(vel.x<-2)thud(.3);}
+    if(pos.z<bounds.zMin+ballR){pos.z=bounds.zMin+ballR;vel.z=Math.abs(vel.z)*.5;}
+    if(pos.z>bounds.zMax-ballR){pos.z=bounds.zMax-ballR;vel.z=-Math.abs(vel.z)*.5;}
+  }
+  const w=angVel.length();if(w>1e-4){tq.setFromAxisAngle(tv.copy(angVel).divideScalar(w),w*dt);quat.premultiply(tq);quat.normalize();}
+}
+function tick(){
+  const dt=Math.min(clock.getDelta(),1/30);
+  if(mode==='sheet'){
+    if((holding||autoCrumple)&&progress<1){
+      progress=Math.min(1,progress+dt/(autoCrumple?1.1:1.5));
+      if(Math.random()<.55)crackle(1);if(Math.random()<.2)crackle(.6);
+      if(progress>=1){mode='ball';autoCrumple=false;pos.y=Math.max(ballR,groundOffset(1));
+        if(holding){holding=false;beginDrag();}else{vel.set(0,4.5,0);angVel.set(2,0,-1.5);}setButtons();}
+    }
+    if(mode==='sheet')pos.y=groundOffset(progress);
+  }else if(mode==='ball'){for(let i=0;i<2;i++)physics(dt/2);}
+  else if(mode==='smoothing'){
+    smooth.t=Math.min(1,smooth.t+dt/1.1);const e=smooth.t*smooth.t*(3-2*smooth.t);
+    progress=smooth.fromPr*(1-e);if(Math.random()<.35)crackle(.5);
+    quat.copy(smooth.fromQ).slerp(tq.identity(),Math.min(1,e*1.4));
+    pos.x=smooth.fromP.x+(smooth.toP.x-smooth.fromP.x)*e;pos.z=smooth.fromP.z+(smooth.toP.z-smooth.fromP.z)*e;
+    pos.y=smooth.fromP.y+(groundOffset(progress)-smooth.fromP.y)*e;
+    if(smooth.t>=1){mode='sheet';progress=0;quat.identity();setButtons();}
+  }
+  U.uProgress.value=progress;paper.position.copy(pos);paper.quaternion.copy(quat);
+  renderer.render(scene,camera);requestAnimationFrame(tick);
+}
+const fontsReady=document.fonts&&document.fonts.load?Promise.all([document.fonts.load('700 64px Caveat'),document.fonts.load('500 54px Caveat')]).catch(()=>{}):Promise.resolve();
+Promise.race([fontsReady,new Promise(r=>setTimeout(r,2500))]).then(()=>{newSheet(true);requestAnimationFrame(tick);});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Grunge Chevrons</title>
+<meta name="color-scheme" content="dark">
+<style>
+  :root{ --bg:#050606; }
+  :root:not([data-theme="light"]){ --bg:#050606; }
+  :root[data-theme="dark"]{ --bg:#050606; }
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block;}
+  #smoke{z-index:0;}
+  #shapes{z-index:1;touch-action:none;}
+</style>
+</head>
+<body>
+<canvas id="smoke" aria-hidden="true"></canvas>
+<canvas id="shapes" aria-hidden="true"></canvas>
+<script>
+(()=>{
+'use strict';
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rr=(a,b)=>a+(b-a)*Math.random();
+const pick=a=>a[(Math.random()*a.length)|0];
+const ptr={x:0,y:0,tx:0,ty:0};
+
+/* =========================================================
+   SMOKE HAZE (WebGL, low resolution — it is soft anyway)
+   ========================================================= */
+const sc=document.getElementById('smoke');
+const gl=sc.getContext('webgl',{antialias:false,alpha:false,depth:false,stencil:false});
+let smoke=null;
+if(gl){
+  const VS='attribute vec2 aP;void main(){gl_Position=vec4(aP,0.,1.);}';
+  const FS=[
+  'precision highp float;',
+  'uniform vec2 uRes,uPtr;uniform float uTime,uAspect;',
+  'float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}',
+  'float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);',
+  '  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);}',
+  'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p=p*2.02+13.7;a*=.5;}return v;}',
+  'void main(){',
+  '  vec2 uv=gl_FragCoord.xy/uRes;',
+  '  vec2 p=(uv*2.-1.)*vec2(uAspect,1.)*1.3-uPtr*.06;',
+  '  float t=uTime;',
+  '  vec2 q=vec2(fbm(p+vec2(t*.035,0.)),fbm(p+vec2(5.2,1.3)-vec2(0.,t*.028)));',
+  '  vec2 r=vec2(fbm(p+3.*q+vec2(1.7,9.2)+t*.05),fbm(p+3.*q+vec2(8.3,2.8)-t*.04));',
+  '  float f=fbm(p+2.6*r+vec2(t*.06,-t*.03));',
+  '  float s=smoothstep(.32,.95,f);',
+  '  vec3 col=vec3(.012,.014,.013);',
+  '  col+=vec3(.10,.12,.11)*s*s*2.4;',
+  '  col+=vec3(.04,.14,.06)*smoothstep(.4,1.,r.x)*s*1.5;',
+  // faint green light leaking from the lower-left, where the shapes stream in
+  '  vec2 lp=vec2(-uAspect*.9,-.7)*1.3;',
+  '  col+=vec3(.05,.22,.08)*exp(-length(p-lp)*.9)*(.5+.8*s);',
+  '  col*=1.-.5*smoothstep(.6,1.7,length((uv*2.-1.)*vec2(uAspect,1.)/vec2(uAspect,1.)));',
+  '  col+=(hash(gl_FragCoord.xy+fract(t)*50.)-.5)*.012;',
+  '  gl_FragColor=vec4(col,1.);',
+  '}'].join('\n');
+  const mk=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o;};
+  const pr=gl.createProgram();gl.attachShader(pr,mk(gl.VERTEX_SHADER,VS));gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
+  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(pr,'aP');gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
+  const U=n=>gl.getUniformLocation(pr,n);
+  smoke={res:U('uRes'),ptr:U('uPtr'),time:U('uTime'),aspect:U('uAspect')};
+}
+
+/* =========================================================
+   GRUNGE SPRITES (2D, rendered once, recycled over time)
+   ========================================================= */
+const GRADS=[
+  ['#0c9a4a','#22d066','#8cf52a','#e9ff3c'],
+  ['#08884a','#1fc46f','#5fe84a','#c6ff2a'],
+  ['#0f7a3a','#2bd65e','#b4ff2e','#f4ff6a'],
+];
+
+function makeGrad(g,x0,y0,x1,y1){
+  const cols=pick(GRADS),gr=g.createLinearGradient(x0,y0,x1,y1);
+  const flip=Math.random()<.3;
+  cols.forEach((c,i)=>gr.addColorStop(flip?1-i/(cols.length-1):i/(cols.length-1),c));
+  return gr;
+}
+
+// dashed, ragged stroke along a line
+function streak(g,x0,y0,x1,y1){
+  const len=Math.hypot(x1-x0,y1-y0);if(len<2)return;
+  const dx=(x1-x0)/len,dy=(y1-y0)/len;
+  let s=0;
+  g.lineWidth=rr(1.2,4);g.globalAlpha=rr(.45,1);
+  g.beginPath();
+  while(s<len){
+    const seg=Math.min(len-s,rr(25,160));
+    g.moveTo(x0+dx*s,y0+dy*s);g.lineTo(x0+dx*(s+seg),y0+dy*(s+seg));
+    s+=seg+(Math.random()<.28?rr(3,34):0);
+  }
+  g.stroke();g.globalAlpha=1;
+}
+
+// chevron geometry: outer corner at (cx,cy); arm A runs left, arm B runs down.
+function makeSprite(kind){
+  const L1=rr(240,560),L2=kind==='slash'?0:rr(240,600);
+  const w=kind==='outline'?rr(26,44):kind==='hatch'?rr(46,96):rr(40,120);
+  const pad=34;
+  const Wd=Math.ceil(L1+pad*2),Ht=Math.ceil(Math.max(L2,w)+pad*2);
+  const A=document.createElement('canvas');A.width=Wd;A.height=Ht;
+  const g=A.getContext('2d');
+  const cx=L1+pad,cy=pad;
+  g.strokeStyle=makeGrad(g,cx-L1,cy+Math.max(L2,w),cx,cy);
+  g.lineCap='butt';
+
+  if(kind==='band'||kind==='slash'){
+    const n=(w/1.05)|0;
+    for(let i=0;i<n;i++){
+      const off=Math.random()<.18?rr(-7,w+7):rr(0,w);
+      const edge=off<0||off>w;
+      // arm A (horizontal), ends at the mitre diagonal
+      const xa0=cx-L1*rr(edge?.3:.62,1),xa1=kind==='slash'?cx-rr(0,30):cx-Math.max(0,Math.min(w,off))+rr(-3,3);
+      streak(g,xa0,cy+off,edge?xa0+rr(40,200):xa1,cy+off);
+      if(kind!=='slash'){
+        const yb0=cy+Math.max(0,Math.min(w,off))+rr(-3,3),yb1=cy+L2*rr(edge?.3:.62,1);
+        streak(g,cx-off,edge?yb1-rr(40,200):yb0,cx-off,yb1);
+      }
+    }
+  }else if(kind==='hatch'){
+    const sp=rr(6,9),sl=w*rr(.25,.5);g.lineWidth=sp*.48;
+    g.beginPath();
+    for(let x=cx-L1;x<cx-w;x+=sp){if(Math.random()<.05)continue;
+      g.moveTo(x+sl,cy+rr(0,w*.12));g.lineTo(x,cy+w-rr(0,w*.12));}
+    for(let y=cy+w;y<cy+L2;y+=sp){if(Math.random()<.05)continue;
+      g.moveTo(cx-rr(0,w*.12),y);g.lineTo(cx-w+rr(0,w*.12),y+sl);}
+    g.stroke();
+  }else if(kind==='outline'){
+    for(let k=0;k<3;k++){
+      const o=k===1?w*.5:k*w/2;
+      g.lineWidth=k===1?rr(6,10):rr(1.5,3.5);
+      const cut=rr(.55,1);
+      g.beginPath();g.moveTo(cx-L1*cut,cy+o);g.lineTo(cx-o,cy+o);g.lineTo(cx-o,cy+L2*cut);
+      g.setLineDash(Math.random()<.5?[]:[rr(40,140),rr(6,20)]);g.stroke();
+    }
+    g.setLineDash([]);
+  }else if(kind==='dots'){
+    g.fillStyle=g.strokeStyle;g.beginPath();
+    const sp=rr(7,10);
+    const dot=(x,y,f)=>{const r=sp*.48*f;if(r>.4){g.moveTo(x+r,y);g.arc(x,y,r,0,6.283);}};
+    for(let y=cy;y<cy+w;y+=sp)for(let x=cx-L1;x<cx-(y-cy);x+=sp)dot(x,y,(x-(cx-L1))/L1);
+    for(let x=cx-w;x<cx;x+=sp)for(let y=cy+(cx-x);y<cy+L2;y+=sp)dot(x,y,1-(y-cy)/L2);
+    g.fill();
+  }
+
+  // texture only where paint exists
+  g.globalCompositeOperation='source-atop';
+  if(kind==='band'||kind==='slash'){
+    // light halftone sheen
+    g.fillStyle='rgba(240,255,150,.55)';g.beginPath();
+    const sp=rr(7,11),ox=Math.random()<.5;
+    for(let y=0;y<Ht;y+=sp)for(let x=0;x<Wd;x+=sp){
+      const f=ox?1-x/Wd:y/Ht;const r=sp*.42*Math.max(0,f*1.3-.3);
+      if(r>.4){g.moveTo(x+r,y);g.arc(x,y,r,0,6.283);}
+    }
+    g.fill();
+    // dark dotted cuts
+    g.fillStyle='rgba(5,20,10,.85)';
+    for(let k=0;k<3;k++){const y0=rr(0,Ht),x0=rr(0,Wd),ang=rr(0,6.28);
+      for(let s=0;s<rr(60,200);s+=rr(6,12)){g.beginPath();g.arc(x0+Math.cos(ang)*s,y0+Math.sin(ang)*s,rr(1,3),0,6.283);g.fill();}}
+  }
+  // thin light scratch lines
+  g.strokeStyle='rgba(230,255,160,.6)';g.lineWidth=1;
+  for(let k=0;k<3;k++){g.beginPath();const x=rr(0,Wd),y=rr(0,Ht),a=rr(0,6.28),l=rr(80,300);g.moveTo(x,y);g.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);g.stroke();}
+  // grit: knock out specks
+  g.globalCompositeOperation='destination-out';
+  g.fillStyle='#000';g.strokeStyle='#000';
+  if(kind==='band'){ // dry-brush gaps running along the arms
+    for(let k=0;k<w/10;k++){const o=rr(0,w);
+      streak(g,cx-L1,cy+o,cx-o,cy+o);if(L2)streak(g,cx-o,cy+o,cx-o,cy+L2);}
+  }
+  for(let k=0;k<(Wd*Ht)/900;k++){g.beginPath();g.arc(rr(0,Wd),rr(0,Ht),Math.random()<.9?rr(.5,1.6):rr(2,5),0,6.283);g.fill();}
+  g.globalCompositeOperation='source-over';
+
+  // glow copy
+  const B=document.createElement('canvas');B.width=Wd;B.height=Ht;
+  const b=B.getContext('2d');
+  b.shadowColor='rgba(90,255,120,.45)';b.shadowBlur=kind==='dots'?8:20;
+  b.drawImage(A,0,0);b.shadowBlur=0;b.drawImage(A,0,0);
+  return{c:B,w:Wd,h:Ht,cx,cy,kind};
+}
+
+const KINDS=['band','band','band','hatch','hatch','outline','dots','slash'];
+const pool=[];
+for(let i=0;i<14;i++)pool.push(makeSprite(KINDS[i%KINDS.length]));
+
+// background halftone field (the faint dot grid in the reference)
+const field=(()=>{
+  const s=900,c=document.createElement('canvas');c.width=c.height=s;const g=c.getContext('2d');
+  g.fillStyle='rgba(120,160,130,.07)';g.beginPath();
+  for(let y=0;y<s;y+=11)for(let x=(y/11&1)*5.5;x<s;x+=11){
+    const d=Math.hypot(x-s*.35,y-s*.45)/(s*.55);const r=4.2*Math.max(0,1-d);
+    if(r>.4){g.moveTo(x+r,y);g.arc(x,y,r,0,6.283);}
+  }
+  g.fill();return c;
+})();
+
+/* =========================================================
+   LAYERS & MOTION
+   ========================================================= */
+const cv=document.getElementById('shapes');const ctx=cv.getContext('2d');
+let W=1,H=1,dpr=Math.min(devicePixelRatio||1,2);
+function resize(){
+  W=innerWidth;H=innerHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  if(gl){const s=.45*Math.min(devicePixelRatio||1,2);sc.width=Math.max(1,Math.round(W*s));sc.height=Math.max(1,Math.round(H*s));gl.viewport(0,0,sc.width,sc.height);}
+}
+addEventListener('resize',resize);resize();
+
+const small=Math.min(innerWidth,innerHeight)<700;
+const LAYERS=[
+  {n:small?7:10,scale:[.5,.8],alpha:.3,speed:36,par:10},
+  {n:small?5:8,scale:[.8,1.15],alpha:.7,speed:85,par:24},
+  {n:small?3:5,scale:[1.2,1.75],alpha:1,speed:165,par:48},
+];
+let heading=rr(.5,.75); // radians above horizontal: streams up-right
+const shapes=[];
+
+function dir(){return[Math.cos(heading),-Math.sin(heading)];}
+function place(s,initial){
+  const [dx,dy]=dir(),px=-dy,py=dx;
+  const diag=Math.hypot(W,H),size=Math.max(s.sp.w,s.sp.h)*s.scale;
+  const along=initial?rr(-diag/2-size,diag/2):-(diag/2+size*.7);
+  const across=rr(-diag*.42,diag*.42);
+  s.x=W/2+dx*along+px*across;s.y=H/2+dy*along+py*across;
+}
+function spawn(li,initial){
+  const L=LAYERS[li];
+  const s={li,sp:pick(pool),scale:rr(...L.scale)*(small?.7:1),rot:rr(-.14,.14),vr:rr(-.02,.02),
+    speed:L.speed*rr(.8,1.25),nest:Math.random()<(li?0.45:.2)?(1+(Math.random()*2|0)):0,nestGap:rr(.12,.22),pop:1};
+  place(s,initial);return s;
+}
+LAYERS.forEach((L,li)=>{for(let i=0;i<L.n;i++)shapes.push(spawn(li,true));});
+
+// the pool keeps changing: rebuild one sprite every few seconds while idle
+const idle=window.requestIdleCallback||(f=>setTimeout(f,50));
+setInterval(()=>idle(()=>{pool[(Math.random()*pool.length)|0]=makeSprite(pick(KINDS));}),3500);
+
+// interaction
+let surge=0;
+addEventListener('pointermove',e=>{ptr.tx=e.clientX/W*2-1;ptr.ty=e.clientY/H*2-1;},{passive:true});
+addEventListener('pointerdown',e=>{
+  surge=Math.min(3,surge+1.6);
+  const s=spawn(2,false);s.x=e.clientX;s.y=e.clientY;s.pop=0;s.nest=2;s.sp=pick(pool.filter(p=>p.kind!=='slash'));
+  shapes.push(s);
+  if(shapes.length>40)shapes.splice(shapes.findIndex(q=>q.li===2),1);
+},{passive:true});
+
+function drawShape(s,ox,oy){
+  const sp=s.sp,L=LAYERS[s.li];
+  const e=s.pop<1?1+2.7*Math.pow(s.pop-1,3)+1.7*Math.pow(s.pop-1,2):1; // ease-out-back
+  const sc=s.scale*e;
+  const copies=1+s.nest;
+  for(let k=copies-1;k>=0;k--){
+    // nested copies step inward toward the chevron's inside corner, a little smaller
+    const f=1-k*s.nestGap;
+    ctx.save();
+    ctx.globalAlpha=L.alpha*(k?0.8:1)*Math.min(1,s.pop*3);
+    ctx.translate(s.x+ox,s.y+oy);
+    ctx.rotate(-heading+.785+s.rot); // corner points along the heading
+    ctx.scale(sc*f,sc*f);
+    const inset=k*sp.w*.09;
+    ctx.drawImage(sp.c,-sp.cx-inset*2.2,-sp.cy+inset*2.2);
+    ctx.restore();
+  }
+}
+
+let last=performance.now(),time=0;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  const rate=reduce?.25:1;time+=dt*rate;
+  surge*=Math.exp(-dt*1.5);
+  ptr.x+=(ptr.tx-ptr.x)*Math.min(1,dt*2.5);ptr.y+=(ptr.ty-ptr.y)*Math.min(1,dt*2.5);
+  heading+=Math.sin(time*.07)*.004*rate; // slow drift of the stream angle
+
+  if(gl&&smoke){
+    gl.uniform2f(smoke.res,sc.width,sc.height);gl.uniform2f(smoke.ptr,ptr.x,-ptr.y);
+    gl.uniform1f(smoke.time,time);gl.uniform1f(smoke.aspect,sc.width/sc.height);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+  }
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  // faint dot field drifts slowly
+  ctx.globalAlpha=1;
+  const fx=-ptr.x*6+Math.sin(time*.1)*20-120,fy=-ptr.y*6+Math.cos(time*.08)*20-80;
+  const fs=Math.max(W,H)*1.1;
+  ctx.drawImage(field,fx,fy,fs,fs);
+
+  const [dx,dy]=dir(),diag=Math.hypot(W,H);
+  for(let li=0;li<3;li++){
+    for(let i=0;i<shapes.length;i++){
+      const s=shapes[i];if(s.li!==li)continue;
+      const v=s.speed*(1+surge*(.5+li*.4))*rate;
+      s.x+=dx*v*dt;s.y+=dy*v*dt;s.rot+=s.vr*dt*rate;
+      if(s.pop<1)s.pop=Math.min(1,s.pop+dt*2.4);
+      const size=Math.max(s.sp.w,s.sp.h)*s.scale;
+      if((s.x-W/2)*dx+(s.y-H/2)*dy>diag/2+size){ // passed out the far side
+        const n=spawn(li,false);Object.assign(s,n);
+      }
+      const L=LAYERS[li];
+      drawShape(s,-ptr.x*L.par,-ptr.y*L.par);
+    }
+  }
+  ctx.globalAlpha=1;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
