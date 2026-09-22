@@ -11,10 +11,13 @@ locker-room-3d-assets/           ← its folder (keep the name, paths are relati
                 soccer-ball.glb, cricket-ball.glb, cricket-bat.glb
     textures/   wall.webp, floor.webp
     fonts/      7 × .woff2
+testimonies/                     ← the two pages a locker opens into
+    baba.html
+    sean.html
 ```
 
-That's it — 19 files, 1.3 MB. Nothing else changes, and nothing existing is
-overwritten. `UPLOAD-NOTES.md` (this file) doesn't need to go up.
+21 files, 3.3 MB. Nothing existing is overwritten.
+`UPLOAD-NOTES.md` (this file) doesn't need to go up.
 
 ## Linking it from the menu
 
@@ -34,12 +37,18 @@ Either add a second card pointing at `locker-room-3d.html`, or change that
 
 ## The testimony pages
 
-The two "open the locker" destinations now point at the pages already in the
-repo — `baba-page.html` and `sean-frisbee.html`. No copies are shipped here, so
-there's one version of each to maintain.
+`testimonies/baba.html` and `testimonies/sean.html` are your Locker room folder
+versions — the ones carrying the fixed "‹ Locker room" chip top-left — with two
+changes:
 
-They have no "back to the locker room" link, so the browser back button is the
-way out. Say the word and I'll add one.
+- the chip now points at `../locker-room-3d.html`
+- the remote `<script src="https://cdn.discordapp.com/…">` that was sitting at
+  the top of `sean.html` is gone
+
+Both are otherwise byte-identical to your copies. They're separate from the
+repo's own `baba-page.html` and `sean-frisbee.html`, which `menu-layout.html`
+links to and which stay as they are — so if you edit a testimony page, it needs
+doing in both places.
 
 ## Serving
 
