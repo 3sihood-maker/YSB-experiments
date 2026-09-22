@@ -13,7 +13,7 @@ locker-room-3d-assets/           ← its folder (keep the name, paths are relati
     fonts/      7 × .woff2
 ```
 
-That's it — 19 files, 1.2 MB. Nothing else changes, and nothing existing is
+That's it — 19 files, 1.3 MB. Nothing else changes, and nothing existing is
 overwritten. `UPLOAD-NOTES.md` (this file) doesn't need to go up.
 
 ## Linking it from the menu
